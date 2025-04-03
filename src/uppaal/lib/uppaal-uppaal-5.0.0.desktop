@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=uppaal-5.0.0
+Comment=Timed Automata Model Checking Suite
+Exec=/opt/uppaal/bin/uppaal-5.0.0
+Icon=/opt/uppaal/lib/uppaal-5.0.0.png
+Terminal=false
+Type=Application
+Categories=Development;IDE;Education
+MimeType=

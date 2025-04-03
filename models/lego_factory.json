@@ -1,0 +1,48 @@
+{
+    "inter_arrival_time": {
+      "mean": 10,
+      "std": 2
+    },
+    "stations": {
+      "Station1": {
+        "capacity": 1,
+        "processing_time": {"mean": 9.345, "std": 5.423},
+        "next_stations": {
+          "Station2": {"probability": 1.0}
+        }
+      },
+      "Station2": {
+        "capacity": 1,
+        "processing_time": {"mean": 11.158, "std": 0.139},
+        "next_stations": {
+          "Station3": {"probability": 0.485},
+          "Station4": {"probability": 0.515}
+        }
+      },
+      "Station3": {
+        "capacity": 1,
+        "processing_time": {"mean": 15.970, "std": 1.442},
+        "next_stations": {
+          "Station5": {"probability": 1.0}
+        }
+      },
+      "Station4": {
+        "capacity": 1,
+        "processing_time": {"mean": 17.468, "std": 2.678},
+        "next_stations": {
+          "Station5": {"probability": 1.0}
+        }
+      },
+      "Station5": {
+        "capacity": 1,
+        "processing_time": {"mean": 9.435, "std": 5.427},
+        "next_stations": {}
+      }
+    },
+    "transfer_times": {
+      "Station1": {"Station2": {"mean": 6.204, "std": 0.088}},
+      "Station2": {"Station3": {"mean": 14.008, "std": 0.115}, "Station4": {"mean": 13.883, "std": 0.077}},
+      "Station3": {"Station4": {"mean": 5.006, "std": 0.06}},
+      "Station4": {"Station5": {"mean": 4.762, "std": 0.057}}
+    }
+  }
