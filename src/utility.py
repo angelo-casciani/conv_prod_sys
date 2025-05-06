@@ -44,7 +44,10 @@ def load_csv_questions(filename):
 
 
 def log_to_file(conversation, curr_datetime, info_run):
-    filepath = os.path.join(os.path.dirname(__file__), "..", "tests", "outputs", f"output_{curr_datetime}.txt")
+    script_dir = os.path.dirname(__file__)
+    output_dir = os.path.join(script_dir, "..", "tests", 'outputs')
+    os.makedirs(output_dir, exist_ok=True)
+    filepath = os.path.join(output_dir, f"output_{curr_datetime}.txt")
     with open(filepath, 'a') as file:
         file.write('INFORMATION ON THE RUN\n\n')
         for key in info_run.keys():
