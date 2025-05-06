@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 
+from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFacePipeline
 from langchain_core.prompts import PromptTemplate
 from openai import OpenAI
@@ -145,9 +146,7 @@ class LLMPipeline:
             prompt = self.generate_prompt_template()
             chain = prompt | hf_pipeline
         else:
-            chain = OpenAI(
-                api_key=self.openai_auth,
-            )
+            chain = init_chat_model("gpt-4o-mini", model_provider="openai")
 
         return chain
 
@@ -184,26 +183,20 @@ class LLMPipeline:
                 sys_mess = self.prompts.get('system_message_routing', '')
                 context = self.prompts.get('context_routing', '')
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.chat.completions.create(
-                    model = self.model_id_gateway,
-                    messages = [
+                completion = self.chain_gateway.invoke([
                         {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
                         {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                    ]
-                )
-                answer = completion.choices[0].message.content.strip()
+                    ])
+                answer = completion.content
             elif answer_phase == 'negative_response':
                 sys_mess = self.prompts.get('system_message_negative', '')
                 context = ''
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.chat.completions.create(
-                    model = self.model_id_gateway,
-                    messages = [
+                completion = self.chain_gateway.invoke([
                         {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
                         {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                    ]
-                )
-                answer = completion.choices[0].message.content.strip()
+                    ])
+                answer = completion.content
 
         return prompt, answer
 
@@ -232,14 +225,11 @@ class LLMPipeline:
             sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
             context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
             prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-            completion = self.chain_simulation.chat.completions.create(
-                model = self.model_id_simulation,
-                messages = [
+            completion = self.chain_simulation.invoke([
                     {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
                     {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                ]
-            )
-            answer = completion.choices[0].message.content.strip()
+                ])
+            answer = completion.content
             print(prompt + '\n' + answer)
 
             if 'evaluation' not in modality:
@@ -247,14 +237,11 @@ class LLMPipeline:
                 sys_mess = self.prompts.get('system_message_results_sim', '')
                 context = f"The labels for the stations are: {station_names}\nResults from the simulation: {results}"
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\n'
-                completion = self.chain_gateway.chat.completions.create(
-                    model = self.model_id_gateway,
-                    messages = [
-                        {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
-                        {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                    ]
-                )
-                answer = completion.choices[0].message.content.strip()
+                completion = self.chain_gateway.invoke([
+                    {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
+                    {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
+                ])
+                answer = completion.content
 
         return prompt, answer
 
@@ -282,14 +269,11 @@ class LLMPipeline:
             sys_mess = self.prompts.get('system_message_verification', '') + self.prompts.get('shots_verification', '')
             context = self.prompts.get('context_verification', '').replace('STATES', str(list(automata_data['transitions'].keys())))
             prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-            completion = self.chain_verification.chat.completions.create(
-                model = self.model_id_verification,
-                messages = [
+            completion = self.chain_verification.invoke([
                     {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
                     {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                ]
-            )
-            answer = completion.choices[0].message.content.strip()
+                ])
+            answer = completion.content
             print(prompt + '\n' + answer)
 
             if 'evaluation' not in modality:
@@ -297,14 +281,11 @@ class LLMPipeline:
                 sys_mess = self.prompts.get('system_message_results', '')
                 context = f'Results from Uppaal: {results}'
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.chat.completions.create(
-                    model = self.model_id_gateway,
-                    messages = [
+                completion = self.chain_gateway.invoke([
                         {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
                         {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                    ]
-                )
-                answer = completion.choices[0].message.content.strip()
+                    ])
+                answer = completion.content
         return prompt, answer
     
 

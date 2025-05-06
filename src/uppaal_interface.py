@@ -4,7 +4,7 @@ import tempfile
 from utility import extract_json
 
 
-UPPAAL_PATH = os.path.join(os.path.dirname(__file__), 'uppaal', 'lib', 'app', 'bin', 'verifyta')
+UPPAAL_PATH = os.path.join(os.path.dirname(__file__), 'uppaal', 'bin', 'verifyta')
 MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'lego_SKG_item-10_no_doubles.xml')
 
 
