@@ -69,9 +69,9 @@ class LLMPipeline:
             self.prompts = json.load(prompt_file)
         with open(self.factory_model, 'r') as factory_file:
             self.factory_model = json.load(factory_file)
-        self.chain_simulation = self.initialize_chain(model_id_simulation)
-        self.chain_verification = self.initialize_chain(model_id_verification)
-        self.chain_gateway = self.initialize_chain(model_id_gateway)
+        self.chain_simulation = self._initialize_chain(model_id_simulation, self.model_family_simulation, self.model_type_simulation)
+        self.chain_verification = self._initialize_chain(model_id_verification,self.model_family_simulation, self.model_type_simulation)
+        self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_simulation, self.model_type_simulation)
 
 
     def _initialize_local_model(self, model_id):
@@ -214,10 +214,10 @@ class LLMPipeline:
                 sys_mess = self.prompts.get('system_message_info', '') + self.prompts.get('shots_info', '')
                 context = self.factory_model
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.invoke([
-                        {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
-                        {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                    ])
+                completion = self.chain_gateway.invoke({"question": question,
+                                                "context": context,
+                                                "system_message": sys_mess}
+                    )
                 answer = completion.content
                 return prompt, answer
             
@@ -316,9 +316,9 @@ class LLMPipeline:
         if 'uppaal_verification' in answer.lower():
             complete_prompt, answer = self._produce_answer_verification(question, 'live')
         elif 'factory_simulation' in answer.lower():
-            complete_prompt, answer = self.produce_answer_simulation(question, 'live')
+            complete_prompt, answer = self._produce_answer_simulation(question, 'live')
         elif 'factory_info' in answer.lower():
-            complete_prompt, answer = self.produce_answer_gateway(question, 'factory_info')
+            complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info')
         else:
             complete_prompt, answer = self._produce_answer_gateway(question, 'negative_response')
 
