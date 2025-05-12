@@ -1,0 +1,121 @@
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: Act as a conversational interface towards the LEGO factory. Report the answer of the LLM about information related to the factory (times are expressed in 'units of time', do not talk about seconds, minutes, etc.units). 
+If you are not able to derive the answer from the context, just say that you don't know, don't try to make up an answer.
+Here is the context: Results from the LLM: {"task": "factory_info", "query_nl": "How long it takes to route from station 4 to 5?", "response": "The mean transfer time from Station4 to Station5 is 4.762 with a standard deviation of 0.057."}
+Here is the user question: How long it takes to route from station 4 to 5?
+Answer: 
+
+The mean transfer time from Station 4 to Station 5 is 4.762 with a standard deviation of 0.057.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: Act as a conversational interface towards the LEGO factory. Report the answer of the LLM about information related to the factory (times are expressed in 'units of time', do not talk about seconds, minutes, etc.units). 
+If you are not able to derive the answer from the context, just say that you don't know, don't try to make up an answer.
+Here is the context: Results from the LLM: {"task": "factory_info", "query_nl": "How long it takes to go from station 1 to stattion 2?", "response": "The mean transfer time from Station1 to Station2 is 6.204 with a standard deviation of 0.088."}
+Here is the user question: How long it takes to go from station 1 to stattion 2?
+Answer: 
+
+The mean transfer time from Station 1 to Station 2 is 6.204 units of time, with a standard deviation of 0.088.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: Act as a conversational interface towards the LEGO factory.
+Report the results given by the factory's digital twin provided in the context to the user (times are expressed in 'units of time', do not talk about seconds, minutes, etc.units).
+If you are not able to derive the answer from the context, just say that you don't know, don't try to make up an answer.
+Here is the context: The labels for the stations are: Station1, Station2, Station3, Station4, Station5
+Results from the simulation: {'task': 'sim_with_number_products', 'simulation_time': '', 'target_pieces': 13.5, 'stations_sequence': [], 'query_nl': 'How long it takes to produce 13.5 pieces?', 'results': {'total_pieces_produced': 14, 'mean_waiting_times': {'Station1': np.float64(4.4437844929001065), 'Station2': np.float64(13.253016149568454), 'Station3': np.float64(1.9392300063270917), 'Station4': np.float64(2.6211427829668734), 'Station5': np.float64(7.288941516298613)}, 'mean_processing_times': {'Station1': np.float64(7.961983265907194), 'Station2': np.float64(11.193430112253978), 'Station3': np.float64(15.568856511988642), 'Station4': np.float64(18.911256929284384), 'Station5': np.float64(10.008990537220715)}, 'total_mean_waiting_time': np.float64(6.7991150107694684), 'total_mean_processing_time': np.float64(11.30993757720451), 'total_mean_transfer_time': np.float64(8.674221295297437), 'total_execution_time': 254}}
+Here is the user question: How long it takes to produce 13.5 pieces?
+
+
+The total execution time to produce 13.5 pieces is 254 units of time.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: 
+Here is the context: Results from Uppaal: {'task': 'verification', 'query_nl': 'There is a deadlock?', 'uppaal_query': 'A[] not deadlock', 'results': 'Result: Verifying formula 1 at /var/folders/l7/9fhp5dyx43nfpns2fqqbszrh0000gn/T/tmpa9fcrt9z:1\n\x1b[2K -- Formula is satisfied.\n\nErrors: '}
+Here is the user question: There is a deadlock?
+Answer: 
+
+No, there is no deadlock. The verification results indicate that the formula "A[] not deadlock" is satisfied, meaning that the system does not encounter a deadlock condition.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: Act as a conversational interface towards the LEGO factory. Report the answer of the LLM about information related to the factory (times are expressed in 'units of time', do not talk about seconds, minutes, etc.units). 
+If you are not able to derive the answer from the context, just say that you don't know, don't try to make up an answer.
+Here is the context: Results from the LLM: {"task": "factory_info", "query_nl": "What is the probability to route from Station3 to Station5?", "response": "The probability to route from Station3 to Station5 is 1.0."}
+Here is the user question: What is the probability to route from Station3 to Station5?
+Answer: 
+
+The probability to route from Station3 to Station5 is 1.0.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: Act as a conversational interface towards the LEGO factory. Report the answer of the LLM about information related to the factory (times are expressed in 'units of time', do not talk about seconds, minutes, etc.units). 
+If you are not able to derive the answer from the context, just say that you don't know, don't try to make up an answer.
+Here is the context: Results from the LLM: {"task": "factory_info", "query_nl": "How many stations with route probability 1 there are in the factory?", "response": "There are 3 stations with route probability 1: Station1 to Station2, Station3 to Station5, and Station4 to Station5."}
+Here is the user question: How many stations with route probability 1 there are in the factorty?
+Answer: 
+
+There are 3 stations with route probability 1: Station1 to Station2, Station3 to Station5, and Station4 to Station5.
+
+##########################
+

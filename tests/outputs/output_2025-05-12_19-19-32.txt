@@ -1,0 +1,82 @@
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the stations involved (e.g Station1, Station2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between stations;
+- the inter-arrival time of products;
+- the transfer times between stations.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at Station3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at Station3?", "response": "The mean processing time at Station3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next stations after Station2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next stations after Station2?", "response": "From Station2, the next stations can be Station3 with probability ... and Station4 with probability ...."}
+3. Input (Natural Language Query): How many stations are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many stations are there in the production line?", "response": "There are ... stations in the production line: <list of stations>."}
+4. Input (Natural Language Query): What is the capacity of Station4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of Station4?", "response": "The capacity of Station4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from Station2 to Station3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from Station2 to Station3?", "response": "The mean transfer time from Station2 to Station3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+Here is the context: {'inter_arrival_time': {'mean': 10, 'std': 2}, 'stations': {'Station1': {'capacity': 1, 'processing_time': {'mean': 9.345, 'std': 5.423}, 'next_stations': {'Station2': {'probability': 1.0}}}, 'Station2': {'capacity': 1, 'processing_time': {'mean': 11.158, 'std': 0.139}, 'next_stations': {'Station3': {'probability': 0.485}, 'Station4': {'probability': 0.515}}}, 'Station3': {'capacity': 1, 'processing_time': {'mean': 15.97, 'std': 1.442}, 'next_stations': {'Station5': {'probability': 1.0}}}, 'Station4': {'capacity': 1, 'processing_time': {'mean': 17.468, 'std': 2.678}, 'next_stations': {'Station5': {'probability': 1.0}}}, 'Station5': {'capacity': 1, 'processing_time': {'mean': 9.435, 'std': 5.427}, 'next_stations': {}}}, 'transfer_times': {'Station1': {'Station2': {'mean': 6.204, 'std': 0.088}}, 'Station2': {'Station3': {'mean': 14.008, 'std': 0.115}, 'Station4': {'mean': 13.883, 'std': 0.077}}, 'Station3': {'Station4': {'mean': 5.006, 'std': 0.06}}, 'Station4': {'Station5': {'mean': 4.762, 'std': 0.057}}}}
+Here is the user question: What are the stations with mean processing time greater than 10?
+Answer: 
+
+The stations with mean processing time greater than 10 are Station2, Station3, and Station4.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: Act as a conversational interface towards the LEGO factory.
+Report the results given by the factory's digital twin provided in the context to the user (times are expressed in 'units of time', do not talk about seconds, minutes, etc.units).
+If you are not able to derive the answer from the context, just say that you don't know, don't try to make up an answer.
+Here is the context: The labels for the stations are: Station1, Station2, Station3, Station4, Station5
+Results from the simulation: {'task': 'sim_with_time', 'simulation_time': 100, 'target_pieces': '', 'stations_sequence': [], 'query_nl': 'How many pieces are produced in 100 units?', 'results': {'total_pieces_produced': 2, 'mean_waiting_times': {'Station1': np.float64(5.540194028516976), 'Station2': np.float64(0.8995385495396514), 'Station3': np.float64(0.0), 'Station4': np.float64(0.0), 'Station5': np.float64(0.0)}, 'mean_processing_times': {'Station1': np.float64(11.59004314861423), 'Station2': np.float64(11.185786762032562), 'Station3': np.float64(14.914499978114259), 'Station4': np.float64(19.293858543472822), 'Station5': np.float64(6.499600611572751)}, 'total_mean_waiting_time': np.float64(2.208929474842837), 'total_mean_processing_time': np.float64(11.998163186878351), 'total_mean_transfer_time': np.float64(8.541323753894488), 'total_execution_time': 100}}
+Here is the user question: How many pieces are produced in 100 units?
+
+
+A total of 2 pieces are produced in 100 units.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: 
+Here is the context: Results from Uppaal: {'task': 'verification', 'query_nl': 'The state q8 is eventually reached?', 'uppaal_query': 'E<> s.q_8', 'results': 'Result: Verifying formula 1 at /var/folders/l7/9fhp5dyx43nfpns2fqqbszrh0000gn/T/tmpym04cfni:1\n\x1b[2K -- Formula is satisfied.\n\nErrors: '}
+Here is the user question: The state q8 is eventually reached?
+Answer: 
+
+Yes, the state q8 is eventually reached. The verification results confirm that the formula is satisfied.
+
+##########################
+

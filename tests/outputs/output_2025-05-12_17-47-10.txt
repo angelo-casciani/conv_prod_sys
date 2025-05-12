@@ -1,0 +1,76 @@
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: 
+Here is the context: Results from the LLM: {"task": "factory_info", "query_nl": "What is the capacity of Station5?", "response": "The capacity of Station5 is 1."}
+Here is the user question: What is the capacity of Station5?
+Answer: 
+
+The capacity of Station5 is 1.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: 
+Here is the context: Results from the LLM: {"task": "factory_info", "query_nl": "What is the mean time to send a piece from station 3 to 4?", "response": "There is no direct transfer time from Station3 to Station4, as the routing goes from Station3 to Station5."}
+Here is the user question: What is the mean time to send a piece from station 3 to 4?
+Answer: 
+
+There is no direct transfer time from Station 3 to Station 4, as the routing goes from Station 3 to Station 5 instead.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: 
+Here is the context: Results from the LLM: {"task": "factory_info", "query_nl": "How long it takes to route from station 4 to 5?", "response": "The mean transfer time from Station4 to Station5 is 4.762 with a standard deviation of 0.057."}
+Here is the user question: How long it takes to route from station 4 to 5?
+Answer: 
+
+The mean transfer time from Station 4 to Station 5 is approximately 4.76 minutes, with a standard deviation of 0.06 minutes.
+
+##########################
+
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: live
+
+-----------------------------------
+
+Query: 
+Here is the context: Results from the LLM: {"task": "factory_info", "query_nl": "How long it takes to route from station 4 to 5?", "response": "The mean transfer time from Station4 to Station5 is 4.762 with a standard deviation of 0.057."}
+Here is the user question: How long it takes to route from station 4 to 5?
+Answer: 
+
+The mean transfer time from Station 4 to Station 5 is approximately 4.76 minutes, with a standard deviation of 0.06 minutes.
+
+##########################
+
