@@ -10,10 +10,10 @@
   "context_verification": "The automaton states are: STATES",
   "system_message_results_sim": "Act as a conversational interface towards the LEGO factory.\nReport the results given by the factory's digital twin provided in the context to the user (times are expressed in 'units of time', do not talk about seconds, minutes, etc.units).\nIf you are not able to derive the answer from the context, just say that you don't know, don't try to make up an answer.",
   "system_message_results_ver": "Act as a conversational interface towards the LEGO factory.\nReport the results given by Uppaal with factory automata provided in the context to the user.\nIf you are not able to derive the answer from the context, just say that you don't know, don't try to make up an answer.",
-  "template-llama_instruct": "<|system|>\n{system_message}\n</|system|>\n\n<|user|>\n{question}\n</|user|>\n\n<|assistant|>",
-  "template-mistral": "<s>[INST] {system_message}\n\nUser: {question} [/INST]",
-  "template-qwen": "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant\n",
-  "template-generic": "System: {system_message}\n\nUser: {question}\nAssistant:",
-  "template-phi": "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{question}<|im_end|>\n<|im_start|>assistant<|im_sep|>",
-  "template-deepseek": "<｜begin▁of▁sentence｜>\nSystem: {system_message}\n\nUser: {question}\nAssistant: "
+    "template-mistral": "<s>[INST]\n<<SYS>>\n{system_message}\n<</SYS>>\n<<CONTEXT>>\n{context}\n<</CONTEXT>>\n<<QUESTION>>\n{question}\n<</QUESTION>>\n<<ANSWER>> [/INST]",
+  "template-llama_instruct": "<|begin_of_text|><|start_header_id|>system<|end_header_id|> {system_message}\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nHere is the context: {context}\nHere is the user question: {question}\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
+  "template-qwen": "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\nHere is the context: {context}\nHere is the user question: {question}<|im_end|>\n<|im_start|>assistant\n",
+  "template-generic": "{system_message}\nHere is the context: {context}\nHere is the user question: {question}\nAnswer: ",
+  "template-phi": "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\nHere is the context: {context}\n{question}<|im_end|>\n<|im_start|>assistant<|im_sep|>",
+  "template-deepseek": "<｜begin▁of▁sentence｜>\nSystem: {system_message}\n\nUser: Here is the context: {context}\n{question}\nAssistant: "
 }

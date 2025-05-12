@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from typing import Dict, Tuple
 
 from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFacePipeline
@@ -15,15 +16,21 @@ from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_q
 
 class LLMPipeline:
     MODELS = {
-        'metaai': ['meta-llama/Meta-Llama-3-8B-Instruct', 'meta-llama/Meta-Llama-3.1-8B-Instruct',
-                   'meta-llama/Llama-3.2-1B-Instruct', 'meta-llama/Llama-3.2-3B-Instruct'],
-        'mistral': ['mistralai/Mistral-7B-Instruct-v0.2', 'mistralai/Mistral-7B-Instruct-v0.3',
-                    'mistralai/Mistral-Nemo-Instruct-2407', 'mistralai/Ministral-8B-Instruct-2410'],
-        'qwen': ['Qwen/Qwen2.5-7B-Instruct'],
-        'google': ['google/gemma-2-9b-it'],
-        'microsoft': ['microsoft/phi-4'],
-        'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B'],
-        'openai': ['gpt-4o-mini']
+        'api': {
+            'openai': ['gpt-4o-mini'],
+            'google_genai': ['gemini-2.0-flash'],
+            'anthropic': [],
+        },
+        'local': {
+            'metaai': ['meta-llama/Meta-Llama-3-8B-Instruct', 'meta-llama/Meta-Llama-3.1-8B-Instruct',
+                       'meta-llama/Llama-3.2-1B-Instruct', 'meta-llama/Llama-3.2-3B-Instruct'],
+            'mistral': ['mistralai/Mistral-7B-Instruct-v0.2', 'mistralai/Mistral-7B-Instruct-v0.3',
+                        'mistralai/Mistral-Nemo-Instruct-2407', 'mistralai/Ministral-8B-Instruct-2410'],
+            'qwen': ['Qwen/Qwen2.5-7B-Instruct'],
+            'google_genai': ['google/gemma-2-9b-it'],
+            'microsoft': ['microsoft/phi-4'],
+            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B'],
+        }
     }
     TERMINATOR_TOKENS = {
         'metaai': "<|eot_id|>",
@@ -50,18 +57,21 @@ class LLMPipeline:
         self.model_id_gateway = model_id_gateway
         self.model_id_simulation = model_id_simulation
         self.model_id_verification = model_id_verification
+        self.model_family_gateway, self.model_type_gateway = self._get_model_family_type(self.model_id_gateway)
+        self.model_family_simulation, self.model_type_simulation = self._get_model_family_type(model_id_simulation)
+        self.model_family_verification, self.model_type_verification = self._get_model_family_type(model_id_verification)
         self.hf_token = hf_token
         self.openai_auth = openai_auth
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
         with open(self.path_prompts, 'r') as prompt_file:
             self.prompts = json.load(prompt_file)
-        self.chain_simulation = self.initialize_chain(model_id_simulation)
-        self.chain_verification = self.initialize_chain(model_id_verification)
-        self.chain_gateway = self.initialize_chain(model_id_gateway)
+        self.chain_simulation = self._initialize_chain(model_id_simulation, self.model_family_simulation, self.model_type_simulation)
+        self.chain_verification = self._initialize_chain(model_id_verification, self.model_family_verification, self.model_type_verification)
+        self.chain_gateway = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
 
 
-    def initialize_model(self):
+    def _initialize_local_model(self, model_id):
         """
         Initializes a transformer pipeline for text generation using the specified language model.
         
@@ -75,13 +85,12 @@ class LLMPipeline:
             bnb_4bit_compute_dtype=bfloat16
         )
         model_config = AutoConfig.from_pretrained(
-            self.model_id,
+            model_id,
             token=self.hf_token
         )
         model = AutoModelForCausalLM.from_pretrained(
-            self.model_id,
+            model_id,
             trust_remote_code=True,
-            attn_implementation='flash_attention_2',
             config=model_config,
             quantization_config=bnb_config,
             device_map='auto',
@@ -90,11 +99,11 @@ class LLMPipeline:
         model.eval()
 
         tokenizer = AutoTokenizer.from_pretrained(
-            self.model_id,
+            model_id,
             token=self.hf_token
         )
 
-        model_family = self.get_model_family()
+        model_family = self._get_model_family_type()
         pipeline_params = {
             "model": model,
             "tokenizer": tokenizer,
@@ -120,53 +129,54 @@ class LLMPipeline:
         return generate_text
 
 
-    def get_model_family(self):
-        for family, models in LLMPipeline.MODELS.items():
-            if self.model_id in models:
-                return family
-        return None
+    def _get_model_family_type(self, model_id):
+        for model_type, families in LLMPipeline.MODELS.items():
+            for family, models_in_family in families.items():
+                if model_id in models_in_family:
+                    return family, model_type
+        return None, None
 
 
-    def generate_prompt_template(self):
-        model_family = self.get_model_family()
+    def _generate_prompt_template(self, model_family):
         template_key = LLMPipeline.TEMPLATE_MAPPING.get(model_family, 'template-generic')
         template = self.prompts.get(template_key, '')
 
-        if "{conversation_history}" in template:
-            return PromptTemplate.from_template(template, partial_variables={"conversation_history": ""})
-        else:
-            return PromptTemplate.from_template(template)
+        return PromptTemplate.from_template(template)
+    
 
-
-    def initialize_chain(self, model_id):
-        if model_id not in LLMPipeline.MODELS['openai']:
-            generate_text = self.initialize_model()
-            hf_pipeline = HuggingFacePipeline(pipeline=generate_text)
-            prompt = self.generate_prompt_template()
-            chain = prompt | hf_pipeline
+    def _initialize_chain(self, model_id, model_family, model_type):
+        if model_type == 'local':
+            generate_text = self._initialize_local_model(model_id)
+            model = HuggingFacePipeline(pipeline=generate_text)
         else:
-            chain = init_chat_model("gpt-4o-mini", model_provider="openai")
+            model = init_chat_model(model_id, model_provider=model_family)
+
+        prompt = self._generate_prompt_template(model_family)
+        chain = prompt | model
 
         return chain
 
 
-    def parse_llm_answer(self, compl_answer):
-        model_family = self.get_model_family()
-        delimiter = LLMPipeline.RESPONSE_DELIMITERS.get(model_family, 'Answer:')
+    def _parse_llm_answer(self, complete_answer: str, model_type: str) -> Tuple[str, str]:
+        if model_type == 'local':
+            delimiter = LLMPipeline.RESPONSE_DELIMITERS.get(self.model_family, 'Answer:')
 
-        index = compl_answer.find(delimiter)
-        if index == -1:  # Delimiter not found
-            return "", compl_answer
+            index = complete_answer.find(delimiter)
+            if index == -1:  # Delimiter not found
+                return "", complete_answer
 
-        prompt = compl_answer[:index + len(delimiter)]
-        answer = compl_answer[index + len(delimiter):]
+            prompt = complete_answer[:index + len(delimiter)]
+            answer = complete_answer[index + len(delimiter):]
+        else:
+            answer = complete_answer
+            prompt = ''
 
         return prompt, answer
 
 
-    def produce_answer_gateway(self, question, answer_phase):
+    def _produce_answer_gateway(self, question, answer_phase):
         prompt, answer = ('', '')
-        if self.model_id_gateway not in LLMPipeline.MODELS['openai']:
+        if self.model_type_gateway == 'local':
             if answer_phase == 'routing':
                 sys_mess = self.prompts.get('system_message_routing', '')
                 context = self.prompts.get('context_routing', '')
@@ -176,41 +186,38 @@ class LLMPipeline:
             complete_answer = self.chain_gateway.invoke({"question": question,
                                                 "context": context,
                                                 "system_message": sys_mess})
-            prompt, answer = self.parse_llm_answer(complete_answer)
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_gateway)
         else:
             if answer_phase == 'routing':
                 sys_mess = self.prompts.get('system_message_routing', '')
                 context = self.prompts.get('context_routing', '')
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.invoke([
-                        {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
-                        {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                    ])
+                completion = self.chain_gateway.invoke({"question": question,
+                                                "context": context,
+                                                "system_message": sys_mess})
                 answer = completion.content
             elif answer_phase == 'negative_response':
                 sys_mess = self.prompts.get('system_message_negative', '')
                 context = ''
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.invoke([
-                        {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
-                        {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                    ])
+                completion = self.chain_gateway.invoke({"question": question,
+                                                "context": context,
+                                                "system_message": sys_mess})
                 answer = completion.content
 
         return prompt, answer
 
 
-    def produce_answer_simulation(self, question, modality):
+    def _produce_answer_simulation(self, question, modality):
         factory_data = retrieve_factory()
         station_names = ', '.join([station for station in factory_data['stations']])
-        if self.model_id_simulation not in LLMPipeline.MODELS['openai']:
+        if self.model_id_simulation == 'local':
             sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
             context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
             complete_answer = self.chain_simulation.invoke({"question": question,
                                                 "context": context,
                                                 "system_message": sys_mess})
-            prompt, answer = self.parse_llm_answer(complete_answer)
-            #print(complete_answer)
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_simulation)
 
             if 'evaluation' not in modality:
                 results = factory_interface.interface_with_llm(answer)
@@ -219,15 +226,14 @@ class LLMPipeline:
                 complete_answer = self.chain_gateway.invoke({"question": question,
                                                     "context": context,
                                                     "system_message": sys_mess})
-                prompt, answer = self.parse_llm_answer(complete_answer)
+                prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_gateway)
         else:
             sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
             context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
             prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-            completion = self.chain_simulation.invoke([
-                    {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
-                    {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                ])
+            completion = self.chain_simulation.invoke({"question": question,
+                                                "context": context,
+                                                "system_message": sys_mess})
             answer = completion.content
             print(prompt + '\n' + answer)
 
@@ -236,25 +242,23 @@ class LLMPipeline:
                 sys_mess = self.prompts.get('system_message_results_sim', '')
                 context = f"The labels for the stations are: {station_names}\nResults from the simulation: {results}"
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\n'
-                completion = self.chain_gateway.invoke([
-                    {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
-                    {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                ])
+                completion = self.chain_gateway.invoke({"question": question,
+                                                "context": context,
+                                                "system_message": sys_mess})
                 answer = completion.content
 
         return prompt, answer
 
 
-    def produce_answer_verification(self, question, modality):
+    def _produce_answer_verification(self, question, modality):
         automata_data = retrieve_automata()
-        if self.model_id_verification not in LLMPipeline.MODELS['openai']:
+        if self.model_id_verification == 'local':
             sys_mess = self.prompts.get('system_message_verification', '') + self.prompts.get('shots_verification', '')
             context = self.prompts.get('context_verification', '').replace('STATES', str(list(automata_data['transitions'].keys())))
             complete_answer = self.chain_verification.invoke({"question": question,
                                                 "context": context,
                                                 "system_message": sys_mess})
-            prompt, answer = self.parse_llm_answer(complete_answer)
-            #print(complete_answer)
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_verification)
 
             if 'evaluation' not in modality:
                 results = uppaal_interface.interface_with_llm(answer)
@@ -263,15 +267,14 @@ class LLMPipeline:
                 complete_answer = self.chain_gateway.invoke({"question": question,
                                                     "context": context,
                                                     "system_message": sys_mess})
-                prompt, answer = self.parse_llm_answer(complete_answer)
+                prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_gateway)
         else:
             sys_mess = self.prompts.get('system_message_verification', '') + self.prompts.get('shots_verification', '')
             context = self.prompts.get('context_verification', '').replace('STATES', str(list(automata_data['transitions'].keys())))
             prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-            completion = self.chain_verification.invoke([
-                    {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
-                    {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                ])
+            completion = self.chain_verification.invoke({"question": question,
+                                                "context": context,
+                                                "system_message": sys_mess})
             answer = completion.content
             print(prompt + '\n' + answer)
 
@@ -280,26 +283,25 @@ class LLMPipeline:
                 sys_mess = self.prompts.get('system_message_results', '')
                 context = f'Results from Uppaal: {results}'
                 prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.invoke([
-                        {"role": "system", "content": f'{sys_mess}\nHere is the context: {context}\n'},
-                        {"role": "user", "content": f'Here is the user question: {question}\nAnswer: '},
-                    ])
+                completion = self.chain_gateway.invoke({"question": question,
+                                                "context": context,
+                                                "system_message": sys_mess})
                 answer = completion.content
         return prompt, answer
     
 
-    def generate_response(self, question, curr_datetime, info_run):
-        complete_prompt, answer = self.produce_answer_gateway(question, 'routing')
+    def _generate_response(self, question, curr_datetime, info_run):
+        complete_prompt, answer = self._produce_answer_gateway(question, 'routing')
         print(f'Prompt: {complete_prompt}\n')
         print(f'{answer}\n')
         print('--------------------------------------------------')
 
         if 'uppaal_verification' in answer.lower():
-            complete_prompt, answer = self.produce_answer_verification(question, 'live')
+            complete_prompt, answer = self._produce_answer_verification(question, 'live')
         elif 'factory_simulation' in answer.lower():
-            complete_prompt, answer = self.produce_answer_simulation(question, 'live')
+            complete_prompt, answer = self._produce_answer_simulation(question, 'live')
         else:
-            complete_prompt, answer = self.produce_answer_gateway(question, 'negative_response')
+            complete_prompt, answer = self._produce_answer_gateway(question, 'negative_response')
 
         print(f'Prompt: {complete_prompt}\n')
         print(f'{answer}\n')
@@ -318,7 +320,7 @@ class LLMPipeline:
                 print("Exiting the chat.")
                 break
             
-            self.generate_response(query, current_datetime, info_run)
+            self._generate_response(query, current_datetime, info_run)
             print()
 
 
@@ -332,11 +334,11 @@ class LLMPipeline:
             expected_answer = el[1]
             oracle.add_question_expected_answer_pair(question, expected_answer)
             if test_filename == 'simulation.csv':
-                prompt, answer = self.produce_answer_simulation(question, 'evaluation-simulation')
+                prompt, answer = self._produce_answer_simulation(question, 'evaluation-simulation')
             elif test_filename == 'verification.csv':
-                prompt, answer = self.produce_answer_verification(question, 'evaluation-verification')
+                prompt, answer = self._produce_answer_verification(question, 'evaluation-verification')
             elif test_filename == 'routing.csv':
-                prompt, answer = self.produce_answer_gateway(question, 'routing')
+                prompt, answer = self._produce_answer_gateway(question, 'routing')
             oracle.verify_answer(prompt, question, answer)
             count += 1
             print(f'Processing answer for question {count} of {len(questions)}...')

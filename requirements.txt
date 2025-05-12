@@ -1,3 +1,5 @@
+accelerate>=1.6.0
+bitsandbytes>=0.45.5
 langchain==0.3.25
 langchain_core==0.3.58
 langchain_huggingface==0.1.2
