@@ -57,7 +57,7 @@ Visit the [official Uppaal downloads page](https://uppaal.org/downloads/#downloa
 Run the installer and follow the instructions on the website.  
 Upon first launch, request and register a valid license key when prompted.  
 
-Set up a [HuggingFace token](https://huggingface.co/) and/or an [OpenAI API key](https://platform.openai.com/overview) in the `.env` file in the root directory:
+Set up a [HuggingFace token](https://huggingface.co/) and/or an [OpenAI API key](https://platform.openai.com/overview) in a `.env` file in the root directory:
     ```env
     HF_TOKEN=<your token, should start with hf_>
     OPENAI_API_KEY=<your key, should start with sk->
