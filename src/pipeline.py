@@ -152,7 +152,7 @@ class LLMPipeline:
             generate_text = self._initialize_local_model(model_id)
             model = HuggingFacePipeline(pipeline=generate_text)
         else:
-            model = init_chat_model(model_id, model_provider=model_family)
+            model = init_chat_model(model_id, model_provider=model_family, max_tokens = self.max_new_tokens)
 
         prompt = self._generate_prompt_template(model_family)
         chain = prompt | model
