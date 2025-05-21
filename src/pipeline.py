@@ -306,6 +306,20 @@ class LLMPipeline:
                 answer = completion.content
         return prompt, answer
     
+    def _produce_answer_hybrid(self, question, modality):
+        question_json = json.loads(question)
+        uppaal_question = question_json.get("uppaal_question", question)
+        simulation_question = question_json.get("simulation_question", question)
+        #print(uppaal_question, simulation_question)
+    
+        prompt_verification, answer_verification = self._produce_answer_verification(uppaal_question, modality)
+        prompt_simulation, answer_simulation = self._produce_answer_simulation(simulation_question, modality)
+        prompt = f"Prompt verification: {prompt_verification}\n\nPrompt simulation: {prompt_simulation}"
+        answer = f"Answer verification: {answer_verification}\n\nAnswer simulation: {answer_simulation}"
+        return prompt, answer
+            
+
+
 
     def _generate_response(self, question, curr_datetime, info_run):
         complete_prompt, answer = self._produce_answer_gateway(question, 'routing')
@@ -319,6 +333,8 @@ class LLMPipeline:
             complete_prompt, answer = self._produce_answer_simulation(question, 'live')
         elif 'factory_info' in answer.lower():
             complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info')
+        elif 'uppaal_and_simulation' in answer.lower():
+            complete_prompt, answer = self._produce_answer_hybrid(answer, 'live')
         else:
             complete_prompt, answer = self._produce_answer_gateway(question, 'negative_response')
 
