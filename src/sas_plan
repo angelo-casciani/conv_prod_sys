@@ -1,0 +1,3 @@
+(call_simulator t2)
+(call_validator t1)
+; cost = 2 (unit cost)
