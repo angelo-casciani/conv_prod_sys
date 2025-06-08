@@ -9,15 +9,12 @@ PROBLEM_PATH = os.path.join(os.path.dirname(__file__), 'pddl', 'problem.pddl')
 if DOMAIN_PATH and PLANNER_PATH and PROBLEM_PATH:
     print("Domain, planner and problem paths are set.\n")
     print(f"Domain path: {DOMAIN_PATH},\nPlanner path: {PLANNER_PATH}, \nProblem path: {PROBLEM_PATH}\n")
-def run_planner():
-    '''json_request = extract_json(llm_answer)
-    task = json_request.get("")
-    problem = json_request.get("problem")'''
+def run_planner(problem):
     
     cmd = ['python3',
            PLANNER_PATH, 
            DOMAIN_PATH,
-           PROBLEM_PATH,
+           problem,
            '--search',
            'lazy_greedy([ff()], preferred=[ff()])'
            ]

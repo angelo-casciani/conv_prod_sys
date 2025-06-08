@@ -19,14 +19,16 @@
                 (not          
                     (and 
                         (priority ?y) 
-                        (simulation ?y)
+                        (not (= ?y ?x))
                     )       
                 )
             )
         )
         )
-        :effect
+        :effect (and 
         (validation_called ?x)
+        (not (priority ?x))
+        )
     )
 
     (:action call_simulator
@@ -39,14 +41,15 @@
                 (not          
                     (and
                         (priority ?y) 
-                        (validation ?y)
                         (not (= ?x ?y))
                     )       
                 )
             )
         )
     )
-    :effect
+    :effect(and 
         (simulation_called ?x)
+        (not (priority ?x))
+        )
 )
 )

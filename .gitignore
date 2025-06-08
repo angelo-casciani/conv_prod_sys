@@ -166,3 +166,4 @@ cython_debug/
 tests/outputs/
 
 .DS_Store
+src/.DS_Store

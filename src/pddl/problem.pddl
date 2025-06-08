@@ -6,7 +6,6 @@
     (:init
         (validation T1)
         (simulation T2)
-        (priority T2)
         (priority T1)
     )
     

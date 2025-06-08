@@ -13,6 +13,7 @@ import llm_factory_interface as factory_interface
 from oracle import AnswerVerificationOracle
 import uppaal_interface
 from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions
+import pddl_interface
 
 class LLMPipeline:
     MODELS = {
@@ -317,9 +318,36 @@ class LLMPipeline:
         prompt = f"Prompt verification: {prompt_verification}\n\nPrompt simulation: {prompt_simulation}"
         answer = f"Answer verification: {answer_verification}\n\nAnswer simulation: {answer_simulation}"
         return prompt, answer
-            
 
+    #################### DA SISTEMARE ######################
+    def _produce_answer_hybrid(self, question, modality):
+        question_json = json.loads(question)
 
+        questions = []
+        for question in question_json.get("questions", question):
+            questions.append(question)
+        
+        problem = question_json.get("problem", question)
+        plan = pddl_interface.run_planner(problem)
+
+        prompts = ""
+        answers = ""
+        for action in plan:
+            if "simulation" in action:
+                prompt_simulation, answer_simulation = self._produce_answer_simulation(simulation_question, modality)
+                prompts += f"Prompt simulation: {prompt_simulation}\n\n"
+                answers += f"Answer simulation: {answer_simulation}\n\n"
+            elif "verification" in action:
+                prompt_verification, answer_verification = self._produce_answer_verification(uppaal_question, modality)
+                prompts += f"Prompt verification: {prompt_verification}\n\n"
+                answers += f"Answer verification: {answer_verification}\n\n"
+            else:
+                raise RuntimeError("An error occurred during execution due to a problem in reasoner plan.")
+        
+        return prompts, answers
+    
+    #######################################################
+    
 
     def _generate_response(self, question, curr_datetime, info_run):
         complete_prompt, answer = self._produce_answer_gateway(question, 'routing')
