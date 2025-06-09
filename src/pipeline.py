@@ -14,6 +14,7 @@ from oracle import AnswerVerificationOracle
 import uppaal_interface
 from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions
 import pddl_interface
+import tempfile
 
 class LLMPipeline:
     MODELS = {
@@ -66,6 +67,7 @@ class LLMPipeline:
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
         self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory.json')
+        self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
         with open(self.path_prompts, 'r') as prompt_file:
             self.prompts = json.load(prompt_file)
         with open(self.factory_model, 'r') as factory_file:
@@ -221,8 +223,6 @@ class LLMPipeline:
                     )
                 answer = completion.content
                 return prompt, answer
-            
-
         return prompt, answer
 
 
@@ -306,52 +306,61 @@ class LLMPipeline:
                                                 "system_message": sys_mess})
                 answer = completion.content
         return prompt, answer
-    
-    def _produce_answer_hybrid(self, question, modality):
-        question_json = json.loads(question)
-        uppaal_question = question_json.get("uppaal_question", question)
-        simulation_question = question_json.get("simulation_question", question)
-        #print(uppaal_question, simulation_question)
-    
-        prompt_verification, answer_verification = self._produce_answer_verification(uppaal_question, modality)
-        prompt_simulation, answer_simulation = self._produce_answer_simulation(simulation_question, modality)
-        prompt = f"Prompt verification: {prompt_verification}\n\nPrompt simulation: {prompt_simulation}"
-        answer = f"Answer verification: {answer_verification}\n\nAnswer simulation: {answer_simulation}"
-        return prompt, answer
 
-    #################### DA SISTEMARE ######################
     def _produce_answer_hybrid(self, question, modality):
-        question_json = json.loads(question)
+        if self.model_type_gateway == 'local':
+            sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
+            context = self.pddl_domain
+            complete_answer = self.chain_gateway.invoke({"question": question,
+                                                "context": context,
+                                                "system_message": sys_mess})
+            prompt_gateway, answer_gateway = self._parse_llm_answer(complete_answer, self.model_type_gateway)
+        else: 
+            sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
+            context = self.pddl_domain
+            prompt_gateway = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
+            completion = self.chain_gateway.invoke({"question": question,
+                                            "context": context,
+                                            "system_message": sys_mess}
+                )
+            answer_gateway = completion.content
+        question_json = json.loads(answer_gateway)
 
-        questions = []
-        for question in question_json.get("questions", question):
-            questions.append(question)
+        questions = question_json.get("questions", answer_gateway)
         
-        problem = question_json.get("problem", question)
-        plan = pddl_interface.run_planner(problem)
-
+        problem_string = question_json.get("pddl_problem", answer_gateway)
+        #print(problem_string)
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".pddl") as temp_file:
+            temp_file.write(problem_string)
+            problem_path = temp_file.name
+        plan = pddl_interface.run_planner(problem_path)
+        
+        if len(plan) != len(questions):
+            raise ValueError("Mismatch between number of plan steps and provided questions.")
+        
         prompts = ""
         answers = ""
-        for action in plan:
-            if "simulation" in action:
-                prompt_simulation, answer_simulation = self._produce_answer_simulation(simulation_question, modality)
-                prompts += f"Prompt simulation: {prompt_simulation}\n\n"
-                answers += f"Answer simulation: {answer_simulation}\n\n"
-            elif "verification" in action:
-                prompt_verification, answer_verification = self._produce_answer_verification(uppaal_question, modality)
-                prompts += f"Prompt verification: {prompt_verification}\n\n"
-                answers += f"Answer verification: {answer_verification}\n\n"
+        i = 0
+        for (action, question) in zip(plan, questions):
+            print(f"\n\nAction: {action},\nQuestion: {question}")
+            if "simulator" in action:
+                prompt_simulation, answer_simulation = self._produce_answer_simulation(question, modality)
+                prompts += f"\n{i+1}. Prompt simulation: \n{prompt_simulation}\n\n"
+                answers += f"{i+1}. Answer simulation: \n{answer_simulation}\n\n"
+            elif "validator" in action:
+                prompt_verification, answer_verification = self._produce_answer_verification(question, modality)
+                prompts += f"\n{i+1}. Prompt verification: \n{prompt_verification}\n\n"
+                answers += f"{i+1}. Answer verification: \n{answer_verification}\n\n"
             else:
                 raise RuntimeError("An error occurred during execution due to a problem in reasoner plan.")
+            i += 1
         
         return prompts, answers
-    
-    #######################################################
     
 
     def _generate_response(self, question, curr_datetime, info_run):
         complete_prompt, answer = self._produce_answer_gateway(question, 'routing')
-        print(f'Prompt: {complete_prompt}\n')
+        print(f'\n\nPrompt: {complete_prompt}\n')
         print(f'{answer}\n')
         print('--------------------------------------------------')
 
@@ -361,7 +370,7 @@ class LLMPipeline:
             complete_prompt, answer = self._produce_answer_simulation(question, 'live')
         elif 'factory_info' in answer.lower():
             complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info')
-        elif 'uppaal_and_simulation' in answer.lower():
+        elif 'hybrid' in answer.lower():
             complete_prompt, answer = self._produce_answer_hybrid(answer, 'live')
         else:
             complete_prompt, answer = self._produce_answer_gateway(question, 'negative_response')
