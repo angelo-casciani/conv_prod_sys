@@ -10,6 +10,8 @@ from utility import *
 DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 load_dotenv()
 HF_AUTH = os.getenv('HF_TOKEN')
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 SEED = 10
 warnings.filterwarnings('ignore')
@@ -42,7 +44,7 @@ def main():
     model_id_verification = args.llm_id_verification
     modality = args.modality
     max_new_tokens = args.max_new_tokens
-    chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, OPENAI_API_KEY, max_new_tokens)
+    chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens)
 
     run_data = {
         'LLM ID Gateway': model_id_gateway,

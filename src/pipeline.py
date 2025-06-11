@@ -19,19 +19,20 @@ import tempfile
 class LLMPipeline:
     MODELS = {
         'api': {
-            'openai': ['gpt-4o-mini'],
-            'google_genai': ['gemini-2.0-flash'],
+            'openai': ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o'],
+            'google_genai': ['gemini-2.0-flash', 'gemini-2.5-flash-preview-05-20'],
+            'deepseek': ['deepseek-chat', 'deepseek-reasoner'],
             'anthropic': [],
         },
         'local': {
             'metaai': ['meta-llama/Meta-Llama-3-8B-Instruct', 'meta-llama/Meta-Llama-3.1-8B-Instruct',
                        'meta-llama/Llama-3.2-1B-Instruct', 'meta-llama/Llama-3.2-3B-Instruct'],
-            'mistral': ['mistralai/Mistral-7B-Instruct-v0.2', 'mistralai/Mistral-7B-Instruct-v0.3',
+            'mistral': ['mistralai/Mistral-7B-Instruct-v0.2','mistralai/Mistral-7B-Instruct-v0.3', 
                         'mistralai/Mistral-Nemo-Instruct-2407', 'mistralai/Ministral-8B-Instruct-2410'],
             'qwen': ['Qwen/Qwen2.5-7B-Instruct'],
             'google_genai': ['google/gemma-2-9b-it'],
             'microsoft': ['microsoft/phi-4'],
-            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B'],
+            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B']
         }
     }
     TERMINATOR_TOKENS = {
@@ -55,7 +56,7 @@ class LLMPipeline:
         'deepseek': 'Assistant: '
     }
 
-    def __init__(self, model_id_gateway, model_id_simulation, model_id_verification, hf_token, openai_auth, max_new_tokens):
+    def __init__(self, model_id_gateway, model_id_simulation, model_id_verification, hf_token, max_new_tokens):
         self.model_id_gateway = model_id_gateway
         self.model_id_simulation = model_id_simulation
         self.model_id_verification = model_id_verification
@@ -63,7 +64,6 @@ class LLMPipeline:
         self.model_family_simulation, self.model_type_simulation = self._get_model_family_type(model_id_simulation)
         self.model_family_verification, self.model_type_verification = self._get_model_family_type(model_id_verification)
         self.hf_token = hf_token
-        self.openai_auth = openai_auth
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
         self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory.json')
@@ -73,17 +73,11 @@ class LLMPipeline:
         with open(self.factory_model, 'r') as factory_file:
             self.factory_model = json.load(factory_file)
         self.chain_simulation = self._initialize_chain(model_id_simulation, self.model_family_simulation, self.model_type_simulation)
-        self.chain_verification = self._initialize_chain(model_id_verification,self.model_family_simulation, self.model_type_simulation)
-        self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_simulation, self.model_type_simulation)
+        self.chain_verification = self._initialize_chain(model_id_verification,self.model_family_verification, self.model_type_verification)
+        self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_gateway, self.model_type_gateway)
 
 
-    def _initialize_local_model(self, model_id):
-        """
-        Initializes a transformer pipeline for text generation using the specified language model.
-        
-        Returns:
-            generate_text: The configured text generation pipeline.
-        """
+    def _initialize_local_model(self):
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type='nf4',
@@ -91,11 +85,11 @@ class LLMPipeline:
             bnb_4bit_compute_dtype=bfloat16
         )
         model_config = AutoConfig.from_pretrained(
-            model_id,
+            self.model_id,
             token=self.hf_token
         )
         model = AutoModelForCausalLM.from_pretrained(
-            model_id,
+            self.model_id,
             trust_remote_code=True,
             config=model_config,
             quantization_config=bnb_config,
@@ -105,30 +99,35 @@ class LLMPipeline:
         model.eval()
 
         tokenizer = AutoTokenizer.from_pretrained(
-            model_id,
+            self.model_id,
             token=self.hf_token
         )
 
-        model_family = self._get_model_family_type()
         pipeline_params = {
             "model": model,
             "tokenizer": tokenizer,
             "return_full_text": True,
             "task": "text-generation",
-            "do_sample": True,
+            "do_sample": True, 
+            "temperature": 0.1,
             "max_new_tokens": self.max_new_tokens,
             "repetition_penalty": 1.1
         }
-
-        if model_family in LLMPipeline.TERMINATOR_TOKENS:
-            special_token = LLMPipeline.TERMINATOR_TOKENS[model_family]
-            terminators = [
-                tokenizer.eos_token_id,
-                tokenizer.convert_tokens_to_ids(special_token)
-            ]
+    
+        model_family_key = self.model_family.lower() if self.model_family else None
+        if model_family_key and model_family_key in LLMPipeline.TERMINATOR_TOKENS:
+            special_token_str = LLMPipeline.TERMINATOR_TOKENS[model_family_key] 
+            terminators_ids = [tokenizer.eos_token_id]
+            if isinstance(special_token_str, str):
+                if special_token_str in tokenizer.get_vocab():
+                    terminators_ids.append(tokenizer.convert_tokens_to_ids(special_token_str))
+            elif isinstance(special_token_str, list):
+                 for tok_str in special_token_str:
+                      if tok_str in tokenizer.get_vocab():
+                           terminators_ids.append(tokenizer.convert_tokens_to_ids(tok_str))
             pipeline_params.update({
-                "eos_token_id": terminators,
-                "pad_token_id": tokenizer.eos_token_id
+                "eos_token_id": terminators_ids, # A list of token IDs
+                "pad_token_id": tokenizer.eos_token_id 
             })
 
         generate_text = pipeline(**pipeline_params)
@@ -136,9 +135,10 @@ class LLMPipeline:
 
 
     def _get_model_family_type(self, model_id):
+        model_id_lower = model_id.lower()
         for model_type, families in LLMPipeline.MODELS.items():
             for family, models_in_family in families.items():
-                if model_id in models_in_family:
+                if any(m.lower() == model_id_lower for m in models_in_family): 
                     return family, model_type
         return None, None
 
@@ -151,185 +151,105 @@ class LLMPipeline:
     
 
     def _initialize_chain(self, model_id, model_family, model_type):
+        prompt_template_structure = self._generate_prompt_template(model_family)
         if model_type == 'local':
-            generate_text = self._initialize_local_model(model_id)
+            generate_text = self._initialize_local_model() 
             model = HuggingFacePipeline(pipeline=generate_text)
+        elif model_type == 'api':
+            model_family_for_provider = model_family
+            model = init_chat_model(
+                model_id, 
+                model_provider=model_family_for_provider, 
+                temperature=0.1,
+                max_tokens=self.max_new_tokens
+            )
         else:
-            model = init_chat_model(model_id, model_provider=model_family, max_tokens = self.max_new_tokens)
-
-        prompt = self._generate_prompt_template(model_family)
-        chain = prompt | model
-
+            raise ValueError(f"Unsupported model_type: {model_type}. Must be 'local' or 'api'.") 
+        
+        chain = prompt_template_structure | model
         return chain
-
-
-    def _parse_llm_answer(self, complete_answer: str, model_type: str) -> Tuple[str, str]:
-        if model_type == 'local':
-            delimiter = LLMPipeline.RESPONSE_DELIMITERS.get(self.model_family, 'Answer:')
-
-            index = complete_answer.find(delimiter)
-            if index == -1:  # Delimiter not found
-                return "", complete_answer
-
-            prompt = complete_answer[:index + len(delimiter)]
-            answer = complete_answer[index + len(delimiter):]
-        else:
-            answer = complete_answer
-            prompt = ''
-
-        return prompt, answer
 
 
     def _produce_answer_gateway(self, question, answer_phase):
         prompt, answer = ('', '')
-        if self.model_type_gateway == 'local':
-            if answer_phase == 'routing':
-                sys_mess = self.prompts.get('system_message_routing', '')
-                context = self.prompts.get('context_routing', '')
-            elif answer_phase == 'negative_response':
-                sys_mess = self.prompts.get('system_message_negative', '')
-                context = ''
-            elif answer_phase == 'factory_info':
-                sys_mess = self.prompts.get('system_message_info', '') + self.prompts.get('shots_info', '')
-                context = self.factory_model
-            complete_answer = self.chain_gateway.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_gateway)
-        else:
-            if answer_phase == 'routing':
-                sys_mess = self.prompts.get('system_message_routing', '')
-                context = self.prompts.get('context_routing', '')
-                prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-                answer = completion.content
-            elif answer_phase == 'negative_response':
-                sys_mess = self.prompts.get('system_message_negative', '')
-                context = ''
-                prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-                answer = completion.content
-            elif answer_phase == 'factory_info':
-                sys_mess = self.prompts.get('system_message_info', '') + self.prompts.get('shots_info', '')
-                context = self.factory_model
-                prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess}
-                    )
-                answer = completion.content
-                return prompt, answer
+        if answer_phase == 'routing':
+            sys_mess = self.prompts.get('system_message_routing', '')
+            context = self.prompts.get('context_routing', '')            
+        elif answer_phase == 'negative_response':
+            sys_mess = self.prompts.get('system_message_negative', '')
+            context = ''
+        elif answer_phase == 'factory_info':
+            sys_mess = self.prompts.get('system_message_info', '') + self.prompts.get('shots_info', '')
+            context = self.factory_model
+        invoke_payload = {"question": question,
+                        "context": context,
+                        "system_message": sys_mess}
+        prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
+        complete_answer = self.chain_gateway.invoke(invoke_payload)
+        answer = complete_answer.content
         return prompt, answer
 
 
     def _produce_answer_simulation(self, question, modality):
         factory_data = retrieve_factory()
         station_names = ', '.join([station for station in factory_data['stations']])
-        if self.model_id_simulation == 'local':
-            sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
-            context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
-            complete_answer = self.chain_simulation.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_simulation)
+        sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
+        context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
+        invoke_payload = {"question": question,
+                        "context": context,
+                        "system_message": sys_mess}
+        prompt = self.chain_simulation.first.format_prompt(**invoke_payload).to_string()
+        complete_answer = self.chain_simulation.invoke(invoke_payload)
+        answer = complete_answer.content
 
-            if 'evaluation' not in modality:
-                results = factory_interface.interface_with_llm(answer)
-                sys_mess = self.prompts.get('system_message_results_sim', '')
-                context = f"The labels for the stations are: {station_names}\nResults from the simulation: {results}"
-                complete_answer = self.chain_gateway.invoke({"question": question,
-                                                    "context": context,
-                                                    "system_message": sys_mess})
-                prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_gateway)
-        else:
-            sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
-            context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
-            prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-            completion = self.chain_simulation.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-            answer = completion.content
-            print(prompt + '\n' + answer)
-
-            if 'evaluation' not in modality:
-                results = factory_interface.interface_with_llm(answer)
-                sys_mess = self.prompts.get('system_message_results_sim', '')
-                context = f"The labels for the stations are: {station_names}\nResults from the simulation: {results}"
-                prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\n'
-                completion = self.chain_gateway.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-                answer = completion.content
-
+        if 'evaluation' not in modality:
+            results = factory_interface.interface_with_llm(answer)
+            sys_mess = self.prompts.get('system_message_results_sim', '')
+            context = f"The labels for the stations are: {station_names}\nResults from the simulation: {results}"
+            invoke_payload = {"question": question,
+                            "context": context,
+                            "system_message": sys_mess}
+            prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
+            complete_answer = self.chain_gateway.invoke(invoke_payload)
+            answer = complete_answer.content
         return prompt, answer
 
 
     def _produce_answer_verification(self, question, modality):
         automata_data = retrieve_automata()
-        if self.model_id_verification == 'local':
-            sys_mess = self.prompts.get('system_message_verification', '') + self.prompts.get('shots_verification', '')
-            context = self.prompts.get('context_verification', '').replace('STATES', str(list(automata_data['transitions'].keys())))
-            complete_answer = self.chain_verification.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_verification)
+        sys_mess = self.prompts.get('system_message_verification', '') + self.prompts.get('shots_verification', '')
+        context = self.prompts.get('context_verification', '').replace('STATES', str(list(automata_data['transitions'].keys())))
+        invoke_payload = {"question": question,
+                        "context": context,
+                        "system_message": sys_mess}
+        prompt = self.chain_verification.first.format_prompt(**invoke_payload).to_string()
+        complete_answer = self.chain_verification.invoke(invoke_payload)
+        answer = complete_answer.content
 
-            if 'evaluation' not in modality:
-                results = uppaal_interface.interface_with_llm(answer)
-                sys_mess = self.prompts.get('system_message_results', '')
-                context = f'Results from Uppaal: {results}'
-                complete_answer = self.chain_gateway.invoke({"question": question,
-                                                    "context": context,
-                                                    "system_message": sys_mess})
-                prompt, answer = self._parse_llm_answer(complete_answer, self.model_type_gateway)
-        else:
-            sys_mess = self.prompts.get('system_message_verification', '') + self.prompts.get('shots_verification', '')
-            context = self.prompts.get('context_verification', '').replace('STATES', str(list(automata_data['transitions'].keys())))
-            prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-            completion = self.chain_verification.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-            answer = completion.content
-            print(prompt + '\n' + answer)
-
-            if 'evaluation' not in modality:
-                results = uppaal_interface.interface_with_llm(answer)
-                sys_mess = self.prompts.get('system_message_results', '')
-                context = f'Results from Uppaal: {results}'
-                prompt = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-                completion = self.chain_gateway.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-                answer = completion.content
+        if 'evaluation' not in modality:
+            results = uppaal_interface.interface_with_llm(answer)
+            sys_mess = self.prompts.get('system_message_results', '')
+            context = f'Results from Uppaal: {results}'
+            invoke_payload = {"question": question,
+                        "context": context,
+                        "system_message": sys_mess}
+            prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
+            complete_answer = self.chain_gateway.invoke(invoke_payload)
+            answer = complete_answer.content
         return prompt, answer
 
     def _produce_answer_hybrid(self, question, modality):
-        if self.model_type_gateway == 'local':
-            sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
-            context = self.pddl_domain
-            complete_answer = self.chain_gateway.invoke({"question": question,
-                                                "context": context,
-                                                "system_message": sys_mess})
-            prompt_gateway, answer_gateway = self._parse_llm_answer(complete_answer, self.model_type_gateway)
-        else: 
-            sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
-            context = self.pddl_domain
-            prompt_gateway = f'{sys_mess}\nHere is the context: {context}\n' + f'Here is the user question: {question}\nAnswer: '
-            completion = self.chain_gateway.invoke({"question": question,
-                                            "context": context,
-                                            "system_message": sys_mess}
-                )
-            answer_gateway = completion.content
+        sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
+        context = self.pddl_domain
+        invoke_payload = {"question": question,
+                    "context": context,
+                    "system_message": sys_mess}
+        prompt_gateway = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
+        answer_gateway = self.chain_gateway.invoke(invoke_payload).content
         question_json = json.loads(answer_gateway)
 
         questions = question_json.get("questions", answer_gateway)
-        
         problem_string = question_json.get("pddl_problem", answer_gateway)
-        #print(problem_string)
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".pddl") as temp_file:
             temp_file.write(problem_string)
             problem_path = temp_file.name
