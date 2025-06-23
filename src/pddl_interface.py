@@ -3,17 +3,17 @@ import os
 
 DOMAIN_PATH = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
 PLANNER_PATH = os.path.join(os.path.dirname(__file__), 'pddl', 'downward', "fast-downward.py")
-#PROBLEM_PATH = os.path.join(os.path.dirname(__file__), 'pddl', 'problem.pddl')
+PROBLEM_PATH = os.path.join(os.path.dirname(__file__), 'pddl', 'problem.pddl')
 if DOMAIN_PATH and PLANNER_PATH:
     print("Domain and planner are set.\n")
     print(f"Domain path: {DOMAIN_PATH},\nPlanner path: {PLANNER_PATH}")
     
-def run_planner(problem):
+def run_planner():
     
     cmd = ['python3',
            PLANNER_PATH, 
            DOMAIN_PATH,
-           problem,
+           PROBLEM_PATH,
            '--search',
            'lazy_greedy([ff()], preferred=[ff()])'
            ]
@@ -21,7 +21,7 @@ def run_planner(problem):
     process = subprocess.run(cmd, capture_output=True, text=True)
 
     if process.returncode != 0:
-        #print(process.stdout)
+        print(process.stdout)
         raise RuntimeError(f"Planner failed with error {process.stderr}")
 
     output = process.stdout
