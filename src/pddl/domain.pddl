@@ -5,11 +5,14 @@
         input process output station - object
     )
     (:predicates
+        ;; Simulation
         (deadlock_free ?x - process) 
         (has_pieces ?x)
         (has_time ?x)
         (produced_from ?x ?y)
         (next_station ?x ?y)
+        (target_station ?s - station)
+        ;; Verification
         (state ?x)
         (reachable ?x)
         (reachable_from ?x ?y)
@@ -17,29 +20,37 @@
         (trace ?x)
         (stay ?x)
         (forever ?x)
+        ;; Maintenance
+        (requires_maintenance ?s - station)
+        (is_maintained ?s - station)
+        (maintenance_in_progress ?s - station)
+        (failure_simulation_done)
     )
 
-    (:action simulate_time
-        :parameters (?x - input ?y - process ?z - output)
-        :precondition (and (deadlock_free ?y) (has_pieces ?x))
-        :effect (and (has_time ?z) (produced_from ?x ?z))
-    )
+    ;;(:action simulate_time
+    ;;    :parameters (?x - input ?y - process ?z - output)
+    ;;    :precondition (and (deadlock_free ?y) (has_pieces ?x) (failure_simulation_done))
+    ;;    :effect (and (has_time ?z) (produced_from ?x ?z))
+    ;;)
 
     (:action simulate_time_with_station
         :parameters (?x - input ?s - station ?y - process ?z - output)
-        :precondition (and (deadlock_free ?y) (has_pieces ?x) )
-        :effect (and (has_time ?z) (produced_from ?x ?z))
+        :precondition (and (deadlock_free ?y) (has_pieces ?x) (failure_simulation_done) (target_station ?s))
+        :effect (and
+                    (when (and (is_maintained ?s) (not (requires_maintenance ?s)))
+                        (and (has_time ?z) (produced_from ?x ?z)))
+ )
     )
 
     (:action simulate_pieces
         :parameters (?x - input ?y - process ?z - output)
-        :precondition (and (deadlock_free ?y) (has_time ?x))
+        :precondition (and (deadlock_free ?y) (has_time ?x) (failure_simulation_done))
         :effect (and (has_pieces ?z) (produced_from ?z ?x))
     )
 
     (:action simulate_next_station
         :parameters (?x - station  ?z - station ?y - process)
-        :precondition (and (deadlock_free ?y))
+        :precondition (and (deadlock_free ?y) (failure_simulation_done))
         :effect (and (next_station ?x ?z))
     )
     
@@ -90,4 +101,26 @@
         :precondition (and (state ?x) (state ?y))
         :effect (and (reachable_from ?x ?y))
     )
+
+    (:action simulate_failure_and_maintenance
+        :parameters ()
+        :precondition (and )
+        :effect (and (failure_simulation_done))
+    )
+    
+    (:action perform_maintenance
+        :parameters (?s - station)
+        :precondition (and (requires_maintenance ?s) (not (maintenance_in_progress ?s)))
+        :effect (and (maintenance_in_progress ?s))
+    )
+
+    (:action complete_maintenance
+        :parameters (?s - station)
+        :precondition (and (maintenance_in_progress ?s))
+        :effect (and (not (maintenance_in_progress ?s))
+                    (not (requires_maintenance ?s))
+                    (is_maintained ?s)
+    )
+    )
+    
 )
