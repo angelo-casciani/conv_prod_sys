@@ -15,7 +15,30 @@ import uppaal_interface
 from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions
 import pddl_interface
 import tempfile
+import failure_maintenance
+import ast
+import re
 
+def clean_json_block(text: str) -> str:
+    if text.startswith("```"):
+        lines = text.strip().splitlines()
+        if len(lines) >= 3 and lines[0].startswith("```") and lines[-1].startswith("```"):
+            return "\n".join(lines[1:-1]).strip()
+    return text.strip()
+
+def explicit_deadlock_free(qjson, plan):
+    questions = qjson.get("questions", [])
+
+    has_validation = any(q["type"] == "validation" for q in questions)
+    
+    if any("validate_deadlock" in a for a in plan) and not has_validation:
+        questions.append({
+            "question": "Is the system deadlock free during production?",
+            "type": "validation"
+        })
+
+    qjson["questions"] = questions
+    return qjson
 class LLMPipeline:
     MODELS = {
         'api': {
@@ -67,14 +90,19 @@ class LLMPipeline:
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
         self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory.json')
+        self.factory_model_with_failure = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory_with_failure.json')
         self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
         with open(self.path_prompts, 'r') as prompt_file:
             self.prompts = json.load(prompt_file)
         with open(self.factory_model, 'r') as factory_file:
             self.factory_model = json.load(factory_file)
+        with open(self.factory_model_with_failure, 'r') as factory_file:
+            self.factory_model_with_failure = json.load(factory_file)
         self.chain_simulation = self._initialize_chain(model_id_simulation, self.model_family_simulation, self.model_type_simulation)
         self.chain_verification = self._initialize_chain(model_id_verification,self.model_family_verification, self.model_type_verification)
         self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_gateway, self.model_type_gateway)
+        self.chain_failure = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
+        self.failure_module = failure_maintenance.FailureMaintenanceModule(factory_model_path="lego_factory_with_failure.json")
 
 
     def _initialize_local_model(self):
@@ -237,6 +265,39 @@ class LLMPipeline:
             complete_answer = self.chain_gateway.invoke(invoke_payload)
             answer = complete_answer.content
         return prompt, answer
+    
+    def _produce_answer_failure(self, question, sim_time):
+        sys_mess = self.prompts.get('system_message_failure', '') + self.prompts.get('shots_failure', '')
+        context = self.factory_model_with_failure
+        invoke_payload = {"question": question,
+                        "context": context,
+                        "system_message": sys_mess}
+        prompt = self.chain_failure.first.format_prompt(**invoke_payload).to_string()
+        complete_answer = self.chain_failure.invoke(invoke_payload)
+        answer = complete_answer.content
+
+        parsed_json = json.loads(answer)
+        action = parsed_json.get("task")
+
+        if action == "predict_failure":
+            station = parsed_json.get("station_id")
+            print(parsed_json.get("time_horizon"))
+            horizon = parsed_json.get("time_horizon") if parsed_json.get("time_horizon") != "" else sim_time
+            result = self.failure_module.predict_station_failures(station, horizon)
+        elif action == "analyze_strategy":
+            sim_time = parsed_json.get("sim_time") if parsed_json.get("sim_time") else 2000
+            result = self.failure_module.analyze_maintenance_strategies(sim_time)
+        elif action == "optimize_schedule":
+            constraints = parsed_json.get("constraints")
+            result = self.failure_module.optimize_maintenance_schedule(constraints)
+        elif action == "generate_report":
+            result = self.failure_module.generate_comprehensive_report()
+        else:
+            raise ValueError(f"Unsupported failure action: {action}")
+
+        #prompt = f"Failure task:\n Action: {action}\nFull query: {question}"
+        clean_result = json.dumps(result, indent=2, default=str)
+        return prompt, clean_result
 
     def _produce_answer_hybrid(self, question, modality):
         sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
@@ -246,35 +307,91 @@ class LLMPipeline:
                     "system_message": sys_mess}
         prompt_gateway = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
         answer_gateway = self.chain_gateway.invoke(invoke_payload).content
-        question_json = json.loads(answer_gateway)
+        
+        answer_gateway = clean_json_block(answer_gateway)
 
-        questions = question_json.get("questions", answer_gateway)
+        #question_json = json.loads(answer_gateway)
+        try:
+            question_json = json.loads(answer_gateway)
+        except json.JSONDecodeError:
+            try:
+                question_json = ast.literal_eval(answer_gateway)
+            except Exception as e:
+                raise ValueError(f"Hybrid response could not be parsed as JSON or Python dict. Got:\n{answer_gateway}") from e
+
+
         problem_string = question_json.get("pddl_problem", answer_gateway)
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".pddl") as temp_file:
             temp_file.write(problem_string)
             problem_path = temp_file.name
         plan = pddl_interface.run_planner(problem_path)
+        print(plan)
         
-        if len(plan) != len(questions):
-            raise ValueError("Mismatch between number of plan steps and provided questions.")
+        question_json = explicit_deadlock_free(question_json, plan)
+        questions = question_json.get("questions", answer_gateway)
+        
+        typed_questions = {
+            "failure": [q["question"] for q in questions if q["type"] == "failure"],
+            "simulation": [q["question"] for q in questions if q["type"] == "simulation"],
+            "validation": [q["question"] for q in questions if q["type"] == "validation"]
+        }
         
         prompts = ""
         answers = ""
-        i = 0
-        for (action, question) in zip(plan, questions):
-            print(f"\n\nAction: {action},\nQuestion: {question}")
-            if "simulator" in action:
-                prompt_simulation, answer_simulation = self._produce_answer_simulation(question, modality)
-                prompts += f"\n{i+1}. Prompt simulation: \n{prompt_simulation}\n\n"
-                answers += f"{i+1}. Answer simulation: \n{answer_simulation}\n\n"
-            elif "validator" in action:
-                prompt_verification, answer_verification = self._produce_answer_verification(question, modality)
-                prompts += f"\n{i+1}. Prompt verification: \n{prompt_verification}\n\n"
-                answers += f"{i+1}. Answer verification: \n{answer_verification}\n\n"
+        failure_delay = 0
+        type_counters = {"failure": 0, "simulation": 0, "validation": 0}
+        last_sim_time = None 
+        for i, action in enumerate(plan):
+            if "simulate" in action:
+                qtype = "simulation"
+            elif "validate" in action:
+                qtype = "validation"
+            elif "failure" in action or "maintenance" in action:
+                qtype = "failure"
             else:
-                raise RuntimeError("An error occurred during execution due to a problem in reasoner plan.")
-            i += 1
-        
+                raise RuntimeError(f"Unknown plan action: {action}")
+
+            idx = type_counters[qtype]
+            if idx >= len(typed_questions[qtype]):
+                raise ValueError(f"No remaining questions of type {qtype} for plan step {action}")
+
+            q_text = typed_questions[qtype][idx]
+            type_counters[qtype] += 1
+
+            if qtype == "simulation":
+                prompt, answer = self._produce_answer_simulation(q_text, modality)
+                prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
+                answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
+
+                try:
+                    match = re.search(r"(\d+(?:\.\d+)?) units of time", answer, re.IGNORECASE)
+                    if match:
+                        last_sim_time = float(match.group(1))
+                        last_sim_time = int(last_sim_time)
+                        print(f"Here is the simulation time: {last_sim_time}")
+                except Exception as e:
+                    print(f"Warning: Failed to extract simulation time. Reason: {e}")
+
+            elif qtype == "failure":
+                prompt, answer = self._produce_answer_failure(q_text, last_sim_time)
+                try:
+                    delay = json.loads(answer).get("estimated_maintenance_delay", 0)
+                    if isinstance(delay, (int, float)):
+                        failure_delay += delay
+                    else:
+                        print(f"Warning: Delay value is not numeric: {delay}. Ignoring.")
+                except (json.JSONDecodeError, TypeError) as e:
+                    print(f"Warning: Failed to parse failure delay from answer. Using 0. Reason: {e}")
+
+            elif qtype == "validation":
+                prompt, answer = self._produce_answer_verification(q_text, modality)
+
+            prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
+            answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
+        if last_sim_time and failure_delay:
+            total_time = last_sim_time + failure_delay
+            answers += f"\nFinal Summary:\nThe simulated production time is {last_sim_time} units.\n" \
+                    f"Adding {failure_delay} units of maintenance delay, the total estimated time is {total_time} units.\n"
         return prompts, answers
     
 
@@ -291,7 +408,7 @@ class LLMPipeline:
         elif 'factory_info' in answer.lower():
             complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info')
         elif 'hybrid' in answer.lower():
-            complete_prompt, answer = self._produce_answer_hybrid(answer, 'live')
+            complete_prompt, answer = self._produce_answer_hybrid(question, 'live')
         else:
             complete_prompt, answer = self._produce_answer_gateway(question, 'negative_response')
 

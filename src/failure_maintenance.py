@@ -20,11 +20,28 @@ class FailureMaintenanceModule:
         predictions = []
 
         for i in range(10):
-            result = self.failure_interface.simulate(duration=time_horizon, strategy='preventive', station_id=station_id)
+            result = self.failure_interface.simulate(duration=time_horizon, strategy='preventive', station_id=station_id, seed=42 + i)
 
 
             total_failures = result.get('total_failures', 0)
-            avg_ttf = time_horizon / total_failures if total_failures > 0 else time_horizon
+            if total_failures > 0:
+                failure_times = self.failure_interface.station_results[station_id]['failure_times']
+                if failure_times:
+                    # Time to first failure
+                    first_failure_time = failure_times[0]
+                    # Average time between failures
+                    if len(failure_times) > 1:
+                        inter_failure_times = [failure_times[j] - failure_times[j-1] 
+                                             for j in range(1, len(failure_times))]
+                        avg_inter_failure = np.mean(inter_failure_times)
+                    else:
+                        avg_inter_failure = time_horizon - first_failure_time
+                    
+                    avg_ttf = first_failure_time
+                else:
+                    avg_ttf = time_horizon / total_failures
+            else:
+                avg_ttf = time_horizon
 
             predictions.append({
                 'sim_id': i,
@@ -32,8 +49,16 @@ class FailureMaintenanceModule:
                 'average_time_to_failure': round(avg_ttf, 2)
             })
 
-        avg_ttf_all = np.mean([p['average_time_to_failure'] for p in predictions])
-        reliability = np.exp(-time_horizon / avg_ttf_all)
+        ttf_values = [p['average_time_to_failure'] for p in predictions]
+        avg_ttf_all = np.mean(ttf_values)
+        std_ttf = np.std(ttf_values)
+    
+        failure_rate = params['failure_rate']
+        reliability = np.exp(-failure_rate * time_horizon)
+
+        repair_time_mean = params['repair_time']['mean']
+        expected_failures = max(1, int(time_horizon * failure_rate))
+        estimated_delay = expected_failures * repair_time_mean
 
         return {
             'station_id': station_id,
@@ -44,7 +69,8 @@ class FailureMaintenanceModule:
                 'expected_failures_in_horizon': int(time_horizon / avg_ttf_all),
                 'reliability_at_horizon': round(reliability, 3)
             },
-            'station_parameters': params
+            'station_parameters': params,
+            'estimated_maintenance_delay': round(estimated_delay, 2),
         }
 
     def analyze_maintenance_strategies(self, sim_time: float = 2000) -> Dict[str, Any]:

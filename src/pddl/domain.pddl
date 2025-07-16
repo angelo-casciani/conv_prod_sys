@@ -23,8 +23,8 @@
         ;; Maintenance
         (requires_maintenance ?s - station)
         (is_maintained ?s - station)
-        (maintenance_in_progress ?s - station)
         (failure_simulation_done)
+        (simulation_done)
     )
 
     ;;(:action simulate_time
@@ -36,11 +36,8 @@
     (:action simulate_time_with_station
         :parameters (?x - input ?s - station ?y - process ?z - output)
         :precondition (and (deadlock_free ?y) (has_pieces ?x) (failure_simulation_done) (target_station ?s))
-        :effect (and
-                    (when (and (is_maintained ?s) (not (requires_maintenance ?s)))
-                        (and (has_time ?z) (produced_from ?x ?z)))
- )
-    )
+        :effect (and (has_time ?z) (produced_from ?x ?z) (simulation_done))
+        )
 
     (:action simulate_pieces
         :parameters (?x - input ?y - process ?z - output)
@@ -102,7 +99,7 @@
         :effect (and (reachable_from ?x ?y))
     )
 
-    (:action simulate_failure_and_maintenance
+    (:action failure_and_maintenance
         :parameters ()
         :precondition (and )
         :effect (and (failure_simulation_done))
@@ -110,17 +107,9 @@
     
     (:action perform_maintenance
         :parameters (?s - station)
-        :precondition (and (requires_maintenance ?s) (not (maintenance_in_progress ?s)))
-        :effect (and (maintenance_in_progress ?s))
-    )
-
-    (:action complete_maintenance
-        :parameters (?s - station)
-        :precondition (and (maintenance_in_progress ?s))
-        :effect (and (not (maintenance_in_progress ?s))
-                    (not (requires_maintenance ?s))
-                    (is_maintained ?s)
-    )
+        :precondition (and (requires_maintenance ?s) (simulation_done))
+        :effect (and (not (requires_maintenance ?s))
+                    (is_maintained ?s))
     )
     
 )

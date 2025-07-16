@@ -15,11 +15,18 @@ class FailureInterface:
         with open(path, 'r') as f:
             return json.load(f)
 
-    def simulate(self, duration=2000, strategy='preventive', station_id=None):
-        np.random.seed(42)
-        random.seed(42)
+    def simulate(self, duration=2000, strategy='preventive', station_id=None, seed=None):
+        if seed is not None:
+            np.random.seed(seed)
+            random.seed(seed)
+        else:
+            # Use current time-based seed for true randomness
+            import time
+            current_seed = int(time.time() * 1000000) % 2**32
+            np.random.seed(current_seed)
+            random.seed(current_seed)
         self.time = 0
-        self.station_results = {sid: {'failures': 0, 'downtime': 0.0, 'maintenance_cost': 0.0} 
+        self.station_results = {sid: {'failures': 0, 'downtime': 0.0, 'maintenance_cost': 0.0, 'failure_times': []} 
                                 for sid in self.model['stations']}
         time_step = 1
 
@@ -40,6 +47,7 @@ class FailureInterface:
                     s['downtime'] += repair_time
                     self.station_results[sid]['failures'] += 1
                     self.station_results[sid]['downtime'] += repair_time
+                    self.station_results[sid]['failure_times'].append(self.time)
                     self.time += repair_time
                     continue
 
