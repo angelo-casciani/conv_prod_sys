@@ -276,13 +276,13 @@ class LLMPipeline:
         complete_answer = self.chain_failure.invoke(invoke_payload)
         answer = complete_answer.content
 
+        answer = clean_json_block(answer)
         parsed_json = json.loads(answer)
         action = parsed_json.get("task")
 
         if action == "predict_failure":
             station = parsed_json.get("station_id")
-            print(parsed_json.get("time_horizon"))
-            horizon = parsed_json.get("time_horizon") if parsed_json.get("time_horizon") != "" else sim_time
+            horizon = parsed_json.get("time_horizon") if parsed_json.get("time_horizon") is not None else sim_time
             result = self.failure_module.predict_station_failures(station, horizon)
         elif action == "analyze_strategy":
             sim_time = parsed_json.get("sim_time") if parsed_json.get("sim_time") else 2000
@@ -360,8 +360,6 @@ class LLMPipeline:
 
             if qtype == "simulation":
                 prompt, answer = self._produce_answer_simulation(q_text, modality)
-                prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
-                answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
 
                 try:
                     match = re.search(r"(\d+(?:\.\d+)?) units of time", answer, re.IGNORECASE)
