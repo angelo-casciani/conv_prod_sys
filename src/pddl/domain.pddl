@@ -105,7 +105,7 @@
         :effect (and (failure_simulation_done))
     )
     
-    (:action perform_maintenance
+    (:action maintenance
         :parameters (?s - station)
         :precondition (and (requires_maintenance ?s) (simulation_done))
         :effect (and (not (requires_maintenance ?s))

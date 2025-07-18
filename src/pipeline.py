@@ -279,7 +279,9 @@ class LLMPipeline:
         answer = clean_json_block(answer)
         parsed_json = json.loads(answer)
         action = parsed_json.get("task")
-
+        if action is None:
+            print("Failure JSON missing 'task' field, returning empty result.")
+            return prompt, "{}"
         if action == "predict_failure":
             station = parsed_json.get("station_id")
             horizon = parsed_json.get("time_horizon") if parsed_json.get("time_horizon") is not None else sim_time
@@ -314,10 +316,12 @@ class LLMPipeline:
         try:
             question_json = json.loads(answer_gateway)
         except json.JSONDecodeError:
+            print("Failed to parse hybrid answer as JSON, trying ast.literal_eval...")
             try:
                 question_json = ast.literal_eval(answer_gateway)
             except Exception as e:
-                raise ValueError(f"Hybrid response could not be parsed as JSON or Python dict. Got:\n{answer_gateway}") from e
+                print(f"Hybrid response could not be parsed as JSON or Python dict. Got:\n{answer_gateway}")
+                raise ValueError(f"Hybrid response could not be parsed.") from e
 
 
         problem_string = question_json.get("pddl_problem", answer_gateway)
@@ -342,18 +346,24 @@ class LLMPipeline:
         type_counters = {"failure": 0, "simulation": 0, "validation": 0}
         last_sim_time = None 
         for i, action in enumerate(plan):
-            if "simulate" in action:
+            action_lower = action.lower()
+            # Split first token by underscore or space
+            first_token = re.split(r"[ _]", action_lower)[0]
+
+            if first_token == "simulate":
                 qtype = "simulation"
-            elif "validate" in action:
+            elif first_token == "validate":
                 qtype = "validation"
-            elif "failure" in action or "maintenance" in action:
+            elif first_token in ("failure", "maintenance"):
                 qtype = "failure"
             else:
-                raise RuntimeError(f"Unknown plan action: {action}")
+                print(f"Unknown plan action '{action}', skipping.")
+                continue
 
             idx = type_counters[qtype]
             if idx >= len(typed_questions[qtype]):
-                raise ValueError(f"No remaining questions of type {qtype} for plan step {action}")
+                print(f"No remaining questions of type {qtype} for plan step {action}, skipping this step.")
+                continue
 
             q_text = typed_questions[qtype][idx]
             type_counters[qtype] += 1
