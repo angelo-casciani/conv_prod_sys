@@ -13,8 +13,6 @@
       "failure_parameters": {
         "failure_rate": 0.005,
         "repair_time": {"mean": 20, "std": 4},
-        "maintenance_interval": 1000,
-        "maintenance_duration": {"mean": 10, "std": 2},
         "degradation_factor": 0.0005,
         "criticality_level": "medium"
       }
@@ -29,8 +27,6 @@
       "failure_parameters": {
         "failure_rate": 0.007,
         "repair_time": {"mean": 25, "std": 5},
-        "maintenance_interval": 900,
-        "maintenance_duration": {"mean": 12, "std": 3},
         "degradation_factor": 0.0007,
         "criticality_level": "high"
       }
@@ -44,8 +40,6 @@
       "failure_parameters": {
         "failure_rate": 0.006,
         "repair_time": {"mean": 28, "std": 6},
-        "maintenance_interval": 800,
-        "maintenance_duration": {"mean": 14, "std": 3},
         "degradation_factor": 0.0008,
         "criticality_level": "high"
       }
@@ -59,8 +53,6 @@
       "failure_parameters": {
         "failure_rate": 0.008,
         "repair_time": {"mean": 30, "std": 6},
-        "maintenance_interval": 850,
-        "maintenance_duration": {"mean": 15, "std": 3},
         "degradation_factor": 0.001,
         "criticality_level": "critical"
       }
@@ -72,8 +64,6 @@
       "failure_parameters": {
         "failure_rate": 0.004,
         "repair_time": {"mean": 18, "std": 3},
-        "maintenance_interval": 1100,
-        "maintenance_duration": {"mean": 9, "std": 2},
         "degradation_factor": 0.0004,
         "criticality_level": "low"
       }
@@ -84,15 +74,5 @@
     "Station2": {"Station3": {"mean": 14.008, "std": 0.115}, "Station4": {"mean": 13.883, "std": 0.077}},
     "Station3": {"Station4": {"mean": 5.006, "std": 0.06}},
     "Station4": {"Station5": {"mean": 4.762, "std": 0.057}}
-  },
-  "failure_simulation_parameters": {
-    "enable_failures": true,
-    "enable_maintenance": true,
-    "prediction_horizon": 2000,
-    "maintenance_strategies": ["preventive", "predictive", "reactive"],
-    "failure_correlation": {
-      "Station2": {"Station3": 0.3, "Station4": 0.25},
-      "Station3": {"Station4": 0.2}
-    }
   }
 }

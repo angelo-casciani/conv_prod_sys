@@ -39,10 +39,10 @@
         :effect (and (has_time ?z) (produced_from ?x ?z) (simulation_done))
         )
 
-    (:action simulate_pieces
-        :parameters (?x - input ?y - process ?z - output)
-        :precondition (and (deadlock_free ?y) (has_time ?x) (failure_simulation_done))
-        :effect (and (has_pieces ?z) (produced_from ?z ?x))
+    (:action simulate_pieces_with_station
+        :parameters (?x - input ?s - station?y - process ?z - output)
+        :precondition (and (deadlock_free ?y) (has_time ?x) (failure_simulation_done) (target_station ?s))
+        :effect (and (has_pieces ?z) (produced_from ?z ?x) (simulation_done))
     )
 
     (:action simulate_next_station

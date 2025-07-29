@@ -20,7 +20,7 @@ class FailureMaintenanceModule:
         predictions = []
 
         for i in range(10):
-            result = self.failure_interface.simulate(duration=time_horizon, strategy='preventive', station_id=station_id, seed=42 + i)
+            result = self.failure_interface.simulate(duration=time_horizon, station_id=station_id, seed=42 + i)
 
 
             total_failures = result.get('total_failures', 0)
@@ -29,14 +29,6 @@ class FailureMaintenanceModule:
                 if failure_times:
                     # Time to first failure
                     first_failure_time = failure_times[0]
-                    # Average time between failures
-                    if len(failure_times) > 1:
-                        inter_failure_times = [failure_times[j] - failure_times[j-1] 
-                                             for j in range(1, len(failure_times))]
-                        avg_inter_failure = np.mean(inter_failure_times)
-                    else:
-                        avg_inter_failure = time_horizon - first_failure_time
-                    
                     avg_ttf = first_failure_time
                 else:
                     avg_ttf = time_horizon / total_failures
@@ -51,7 +43,6 @@ class FailureMaintenanceModule:
 
         ttf_values = [p['average_time_to_failure'] for p in predictions]
         avg_ttf_all = np.mean(ttf_values)
-        std_ttf = np.std(ttf_values)
     
         failure_rate = params['failure_rate']
         reliability = np.exp(-failure_rate * time_horizon)
@@ -73,66 +64,12 @@ class FailureMaintenanceModule:
             'estimated_maintenance_delay': round(estimated_delay, 2),
         }
 
-    def analyze_maintenance_strategies(self, sim_time: float = 2000) -> Dict[str, Any]:
-        results = self.failure_interface.compare_strategies(sim_time)
-        report = {
-            'strategy_analysis': results,
-            'recommendations': self._strategy_recommendations(results),
-            'costs': {k: v['total_cost'] for k, v in results.items()},
-            'availability': {k: v['availability'] for k, v in results.items()}
-        }
-        return report
-
-    def optimize_maintenance_schedule(self, constraints: Dict[str, Any]) -> Dict[str, Any]:
-        freqs = [0.5, 0.75, 1.0, 1.25, 1.5]
-        schedules = [self._simulate_schedule(f, constraints) for f in freqs]
-        best = max(schedules, key=lambda s: s['score'])
-        return best
-
     def generate_comprehensive_report(self) -> Dict[str, Any]:
-        report = {'stations': {}, 'strategies': {}, 'optimal_schedule': {}}
+        report = {'stations': {}}
         for sid in self.failure_interface.model['stations']:
             report['stations'][sid] = self.predict_station_failures(sid)
-
-        report['strategies'] = self.analyze_maintenance_strategies()
-        report['optimal_schedule'] = self.optimize_maintenance_schedule({
-            'budget': 10000,
-            'availability_target': 0.95
-        })
         return report
-
-    def _simulate_schedule(self, multiplier: float, constraints: Dict[str, Any]) -> Dict[str, Any]:
-        schedule, total_cost, availabilities = {}, 0, []
-        for sid, sdata in self.failure_interface.model['stations'].items():
-            p = sdata['failure_parameters']
-            interval = p['maintenance_interval'] / multiplier
-            cost = (2000 / interval) * p['maintenance_duration']['mean'] * 50
-            avail = interval / (interval + p['repair_time']['mean'])
-            total_cost += cost
-            availabilities.append(avail)
-            schedule[sid] = {'interval': interval, 'cost': cost, 'availability': avail}
-
-        avg_avail = np.mean(availabilities)
-        score = avg_avail * 100 - total_cost / 1000
-        return {
-            'multiplier': multiplier,
-            'schedule': schedule,
-            'total_cost': round(total_cost, 2),
-            'average_availability': round(avg_avail, 3),
-            'meets_constraints': total_cost <= constraints.get('budget', float('inf')) and avg_avail >= constraints.get('availability_target', 0.95),
-            'score': score
-        }
-
-    def _strategy_recommendations(self, results: Dict[str, Any]) -> List[str]:
-        if not results:
-            return ["No strategy data available."]
-        best = min(results.items(), key=lambda x: x[1]['total_cost'])
-        return [
-            f"Use '{best[0]}' strategy for lowest total cost: ${best[1]['total_cost']:.2f}",
-            f"Expected availability: {best[1]['availability']:.2f}%"  
-        ]
     
-
     def _timestamp(self) -> str:
         return datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -157,19 +94,4 @@ if __name__ == "__main__":
     prediction = failure_module.predict_station_failures("Station2", 1000)
     print("Predicting failures for Station2...")
     print(clean_output(prediction))
-
-    strategies = failure_module.analyze_maintenance_strategies(2000)
-    print("\nAnalyzing maintenance strategies...")
-    print(clean_output(strategies))
-
-    constraints = {'budget': 8000, 'availability_target': 0.95}
-    optimization = failure_module.optimize_maintenance_schedule(constraints)
-    print("\nOptimizing maintenance schedule...")
-    print(clean_output(optimization))
-
-    #print("\nGenerating comprehensive failure report...")
-    #report = failure_module.generate_comprehensive_report()
-    #print("Report generated successfully.")
-    # Stampa solo il sommario, o l’intero report pulito se vuoi
-    #print(clean_output(report))
 

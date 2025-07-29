@@ -286,18 +286,9 @@ class LLMPipeline:
             station = parsed_json.get("station_id")
             horizon = parsed_json.get("time_horizon") if parsed_json.get("time_horizon") is not None else sim_time
             result = self.failure_module.predict_station_failures(station, horizon)
-        elif action == "analyze_strategy":
-            sim_time = parsed_json.get("sim_time") if parsed_json.get("sim_time") else 2000
-            result = self.failure_module.analyze_maintenance_strategies(sim_time)
-        elif action == "optimize_schedule":
-            constraints = parsed_json.get("constraints")
-            result = self.failure_module.optimize_maintenance_schedule(constraints)
-        elif action == "generate_report":
-            result = self.failure_module.generate_comprehensive_report()
         else:
             raise ValueError(f"Unsupported failure action: {action}")
 
-        #prompt = f"Failure task:\n Action: {action}\nFull query: {question}"
         clean_result = json.dumps(result, indent=2, default=str)
         return prompt, clean_result
 
@@ -325,6 +316,7 @@ class LLMPipeline:
 
 
         problem_string = question_json.get("pddl_problem", answer_gateway)
+        #print(problem_string)
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".pddl") as temp_file:
             temp_file.write(problem_string)
             problem_path = temp_file.name
@@ -402,7 +394,6 @@ class LLMPipeline:
                     f"Adding {failure_delay} units of maintenance delay, the total estimated time is {total_time} units.\n"
         return prompts, answers
     
-
     def _generate_response(self, question, curr_datetime, info_run):
         complete_prompt, answer = self._produce_answer_gateway(question, 'routing')
         print(f'\n\nPrompt: {complete_prompt}\n')
