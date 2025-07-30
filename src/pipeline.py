@@ -102,6 +102,7 @@ class LLMPipeline:
         self.chain_verification = self._initialize_chain(model_id_verification,self.model_family_verification, self.model_type_verification)
         self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_gateway, self.model_type_gateway)
         self.chain_failure = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
+        self.chain_rewrite_answer = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.failure_module = failure_maintenance.FailureMaintenanceModule(factory_model_path="lego_factory_with_failure.json")
 
 
@@ -291,6 +292,18 @@ class LLMPipeline:
 
         clean_result = json.dumps(result, indent=2, default=str)
         return prompt, clean_result
+    
+    def _produce_rewritten_answer(self, answers, modality):
+        sys_mess = self.prompts.get('system_message_rewrite_answer', '')
+        question = "Rewrite the following answers in a clean way, without any extra information."
+        invoke_payload = {"question": question,
+                    "context": answers,
+                    "system_message": sys_mess}
+        prompt = self.chain_rewrite_answer.first.format_prompt(**invoke_payload).to_string()
+        answer = self.chain_rewrite_answer.invoke(invoke_payload).content
+
+        return prompt, answer
+
 
     def _produce_answer_hybrid(self, question, modality):
         sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
@@ -316,7 +329,7 @@ class LLMPipeline:
 
 
         problem_string = question_json.get("pddl_problem", answer_gateway)
-        #print(problem_string)
+        print(problem_string)
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".pddl") as temp_file:
             temp_file.write(problem_string)
             problem_path = temp_file.name
@@ -378,6 +391,7 @@ class LLMPipeline:
                     delay = json.loads(answer).get("estimated_maintenance_delay", 0)
                     if isinstance(delay, (int, float)):
                         failure_delay += delay
+                        answer = f"Estimated maintenance delay: {delay} units of time"
                     else:
                         print(f"Warning: Delay value is not numeric: {delay}. Ignoring.")
                 except (json.JSONDecodeError, TypeError) as e:
@@ -385,14 +399,27 @@ class LLMPipeline:
 
             elif qtype == "validation":
                 prompt, answer = self._produce_answer_verification(q_text, modality)
+                if "deadlock" in q_text.lower():
+                    is_deadlock_free = any(phrase in answer.lower() for phrase in [
+                        "deadlock free", "no deadlock", "deadlock-free", "free from deadlock"
+                    ]) and not any(phrase in answer.lower() for phrase in [
+                        "not deadlock free", "deadlock detected", "has deadlock"
+                    ])
+                    
+                    if not is_deadlock_free:
+                        print(f"Deadlock detected in validation step {i+1}. Stopping further simulations.")
+                        answers += f"\nCRITICAL: Deadlock detected. Further simulations may be unreliable.\n"
+                        break
 
             prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
             answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
         if last_sim_time and failure_delay:
             total_time = last_sim_time + failure_delay
-            answers += f"\nFinal Summary:\nThe simulated production time is {last_sim_time} units.\n" \
-                    f"Adding {failure_delay} units of maintenance delay, the total estimated time is {total_time} units.\n"
-        return prompts, answers
+            answers += f"Adding {failure_delay} units of maintenance delay, the total estimated time is {total_time} units.\n"
+            
+        #print(answers)
+        prompt, answer = self._produce_rewritten_answer(answers, modality) 
+        return prompts, answer
     
     def _generate_response(self, question, curr_datetime, info_run):
         complete_prompt, answer = self._produce_answer_gateway(question, 'routing')
