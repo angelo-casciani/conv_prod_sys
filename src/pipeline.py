@@ -218,7 +218,81 @@ class LLMPipeline:
         answer = complete_answer.content
         return prompt, answer
 
+    def _format_results_for_llm(self, results, follow_up_results=None):
+        original_pieces = results['results']['total_pieces_produced']
+        target_pieces = results['target_pieces']
+        original_time = results['simulation_time'] 
+        
+        if follow_up_results:
+            needed_time = follow_up_results['results']['total_execution_time']
+            
+            formatted = f"""
+                            SIMULATION RESULTS:
 
+                            ORIGINAL QUESTION ANALYSIS:
+                            - Target: {target_pieces} pieces in {original_time} time units
+                            - Actual result: Only {original_pieces} pieces were produced
+                            - Feasible: NO
+
+                            ADDITIONAL INFORMATION:
+                            - To produce {target_pieces} pieces, {needed_time} time units are needed
+                            - This is {needed_time - original_time} more time units than available
+
+                            ANSWER: No, {target_pieces} pieces cannot be produced in {original_time} time units. Only {original_pieces} pieces can be produced in that timeframe. To produce the full {target_pieces} pieces, you would need {needed_time} time units.
+                            """
+            self.sim_time = needed_time
+        else:
+            formatted = f"""
+                            SIMULATION RESULTS:
+                            - Pieces produced: {original_pieces}
+                            - Time used: {original_time} time units
+                            """
+            self.sim_time = original_time
+        
+         
+        return formatted
+    
+    def _check_negative_result(self, results):
+        simulation_time = int(results.get('simulation_time', 0) or 0)
+        total_execution_time = int(results['results'].get('total_execution_time', 0) or 0)
+
+        target_pieces = int(results.get('target_pieces', 0) or 0)
+        total_pieces_produced = int(results['results'].get('total_pieces_produced', 0) or 0)
+
+        if total_pieces_produced >= target_pieces and total_execution_time <= simulation_time:
+            return False
+
+        return total_execution_time > simulation_time or total_pieces_produced < target_pieces
+    
+    def _generate_new_sim_question(self, results):
+        target_pieces = results['target_pieces']
+        simulation_time = results['simulation_time']
+        task = results['task']
+
+        if task == 'sim_with_time':
+            new_question = f"How much time is needed to produce {target_pieces} pieces?"
+        elif task == 'sim_with_number_products':
+            new_question = f"How many pieces can be produced in {simulation_time} units of time?"
+        else:
+            raise ValueError(f"Unsupported task: {task}. Must be 'sim_with_time' or 'sim_with_number_products'")
+        
+        return new_question
+    
+    def _execute_follow_up_simulation(self, question, station_names):
+        sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
+        context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
+        
+        invoke_payload = {"question": question,
+                        "context": context,
+                        "system_message": sys_mess}
+        
+        complete_answer = self.chain_simulation.invoke(invoke_payload)
+        answer = complete_answer.content
+        
+        follow_up_results = factory_interface.interface_with_llm(answer)
+        
+        return follow_up_results
+        
     def _produce_answer_simulation(self, question, modality):
         factory_data = retrieve_factory()
         station_names = ', '.join([station for station in factory_data['stations']])
@@ -233,8 +307,24 @@ class LLMPipeline:
 
         if 'evaluation' not in modality:
             results = factory_interface.interface_with_llm(answer)
-            sys_mess = self.prompts.get('system_message_results_sim', '')
-            context = f"The labels for the stations are: {station_names}\nResults from the simulation: {results}"
+            is_negative_result = self._check_negative_result(results)
+            print(results)
+            print(is_negative_result)
+            if is_negative_result:
+                new_question = self._generate_new_sim_question(results)
+                new_results = self._execute_follow_up_simulation(new_question, station_names)
+
+                combined_results = self._format_results_for_llm(results, new_results)
+            else:
+                combined_results = self._format_results_for_llm(results)
+
+            print(combined_results)
+
+            sys_mess = self.prompts.get('system_message_results_sim', '') + """
+                    If the context contains both 'Original analysis' and 'Follow-up analysis', 
+                    make sure to provide information from both analyses in your response.
+                    """
+            context = f"The labels for the stations are: {station_names}\nResults from the simulation: {combined_results}.\nNote: If there are both original and follow-up analyses, provide a complete answer using both."
             invoke_payload = {"question": question,
                             "context": context,
                             "system_message": sys_mess}
@@ -293,7 +383,7 @@ class LLMPipeline:
         clean_result = json.dumps(result, indent=2, default=str)
         return prompt, clean_result
     
-    def _produce_rewritten_answer(self, answers, modality):
+    def _produce_rewritten_answer(self, answers):
         sys_mess = self.prompts.get('system_message_rewrite_answer', '')
         question = "Rewrite the following answers in a clean way, without any extra information."
         invoke_payload = {"question": question,
@@ -352,14 +442,11 @@ class LLMPipeline:
         last_sim_time = None 
         for i, action in enumerate(plan):
             action_lower = action.lower()
-            # Split first token by underscore or space
-            first_token = re.split(r"[ _]", action_lower)[0]
-
-            if first_token == "simulate":
+            if "simulate" in action_lower:
                 qtype = "simulation"
-            elif first_token == "validate":
+            elif "validate" in action_lower:
                 qtype = "validation"
-            elif first_token in ("failure", "maintenance"):
+            elif "maintenance" in action_lower:
                 qtype = "failure"
             else:
                 print(f"Unknown plan action '{action}', skipping.")
@@ -376,16 +463,8 @@ class LLMPipeline:
             if qtype == "simulation":
                 prompt, answer = self._produce_answer_simulation(q_text, modality)
 
-                try:
-                    match = re.search(r"(\d+(?:\.\d+)?) units of time", answer, re.IGNORECASE)
-                    if match:
-                        last_sim_time = float(match.group(1))
-                        last_sim_time = int(last_sim_time)
-                        print(f"Here is the simulation time: {last_sim_time}")
-                except Exception as e:
-                    print(f"Warning: Failed to extract simulation time. Reason: {e}")
-
             elif qtype == "failure":
+                last_sim_time = self.sim_time
                 prompt, answer = self._produce_answer_failure(q_text, last_sim_time)
                 try:
                     delay = json.loads(answer).get("estimated_maintenance_delay", 0)
@@ -418,7 +497,7 @@ class LLMPipeline:
             answers += f"Adding {failure_delay} units of maintenance delay, the total estimated time is {total_time} units.\n"
             
         #print(answers)
-        prompt, answer = self._produce_rewritten_answer(answers, modality) 
+        prompt, answer = self._produce_rewritten_answer(answers) 
         return prompts, answer
     
     def _generate_response(self, question, curr_datetime, info_run):
