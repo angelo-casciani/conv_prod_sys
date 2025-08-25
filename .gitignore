@@ -168,3 +168,5 @@ tests/outputs/
 .DS_Store
 src/.DS_Store
 src/sas_plan
+10-Minute Sample.csv
+env_backup.yml
