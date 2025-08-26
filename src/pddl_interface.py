@@ -40,10 +40,10 @@ def extract_plan(_plan):
     return plan
 
             
-try:
-    plan = run_planner()
-    print("Plan generated:")
-    for i, action in enumerate(plan):
-        print(f"{i}: {action}")
-except Exception as e:
-    print(e)
+# try:
+#     plan = run_planner()
+#     print("Plan generated:")
+#     for i, action in enumerate(plan):
+#         print(f"{i}: {action}")
+# except Exception as e:
+#     print(e)

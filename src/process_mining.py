@@ -3,6 +3,7 @@ import pandas as pd
 from pm4py.objects.conversion.log import converter as log_converter
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 import tempfile
+import os
 
 class ProcessMiningModule:
     def __init__(self, path_to_csv):
@@ -60,10 +61,32 @@ class ProcessMiningModule:
         trace_fitness = check[0]['trace_fitness']
         return trace_is_fit, trace_fitness
 
+    def get_avg_throughput_time(self, log):
+        case_durations = pm4py.stats.get_all_case_durations(log)
+        if len(case_durations) == 0:
+            return 0
+        return sum(case_durations) / len(case_durations)
 
+    def get_activity_frequencies(self, log):
+        return pm4py.stats.get_event_attribute_values(log, "concept:name")
+
+    def get_case_durations(self, log):
+        return pm4py.stats.get_all_case_durations(log)   
+
+    def performance_analysis(self, log, metric, net=None, initial_marking=None, final_marking=None):
+        if metric == "throughput_time":
+            return self.get_throughput_time(log)
+        elif metric == "activity_frequency":
+            return self.get_activity_frequency(log)
+        elif metric == "bottlenecks":
+            if net is None or initial_marking is None or final_marking is None:
+                raise ValueError("Bottleneck analysis requires a Petri net with markings.")
+            return self.get_bottlenecks(log, net, initial_marking, final_marking)
+        else:
+            raise ValueError(f"Unknown metric: {metric}") 
 
 if __name__ == "__main__":
-    pmm = ProcessMiningModule("/Users/fabrizioitalia/Documents/AI_Robotics/Tesi/conv_prod_sys/10-Minute Sample.csv")
+    pmm = ProcessMiningModule(os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv'))
     xes_path = pmm.conversion_from_csv_to_xes()
 
     print("\n**************************************")
@@ -80,3 +103,14 @@ if __name__ == "__main__":
         print("\n\n**************************************")
     else:
         print("\n\n\nThe model does not fit the trace :( ...")
+
+    avg_tt = pmm.get_avg_throughput_time(log)
+    print(f"\nAverage throughput time: {avg_tt}")
+
+    freqs = pmm.get_activity_frequencies(log)
+    print("\nActivity frequencies:")
+    for act, freq in freqs.items():
+        print(f"{act}: {freq}")
+
+    durations = pmm.get_case_durations(log)
+    print("\nCase durations:", durations)

@@ -18,6 +18,7 @@ import tempfile
 import failure_maintenance
 import ast
 import re
+import process_mining
 
 def clean_json_block(text: str) -> str:
     if text.startswith("```"):
@@ -92,6 +93,7 @@ class LLMPipeline:
         self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory.json')
         self.factory_model_with_failure = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory_with_failure.json')
         self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
+        self.digital_twin_csv_logs = os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv')
         with open(self.path_prompts, 'r') as prompt_file:
             self.prompts = json.load(prompt_file)
         with open(self.factory_model, 'r') as factory_file:
@@ -102,8 +104,9 @@ class LLMPipeline:
         self.chain_verification = self._initialize_chain(model_id_verification,self.model_family_verification, self.model_type_verification)
         self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_gateway, self.model_type_gateway)
         self.chain_failure = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
-        self.chain_rewrite_answer = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
+        self.chain_process_mining = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.failure_module = failure_maintenance.FailureMaintenanceModule(factory_model_path="lego_factory_with_failure.json")
+        self.process_mining_module = process_mining.ProcessMiningModule(self.digital_twin_csv_logs)
 
 
     def _initialize_local_model(self):
@@ -386,14 +389,54 @@ class LLMPipeline:
         clean_result = json.dumps(result, indent=2, default=str)
         return prompt, clean_result
     
+    def _produce_answer_process_mining(self, question):
+        sys_mess = self.prompts.get('system_message_process_mining', '') + self.prompts.get('shots_process_mining', '')
+        context = ''
+        invoke_payload = {"question": question,
+                        "context": context,
+                        "system_message": sys_mess}
+        prompt = self.chain_process_mining.first.format_prompt(**invoke_payload).to_string()
+        complete_answer = self.chain_process_mining.invoke(invoke_payload)
+        answer = complete_answer.content
+
+        answer = clean_json_block(answer)
+        parsed_json = json.loads(answer)
+
+        action = parsed_json.get("task")
+        if action is None:
+            print("Process mining JSON missing 'task' field, returning empty result.")
+            return prompt, "{}"
+        if action == 'process_discovery':
+            net, initial_marking, final_marking = self.process_mining_module.discovery_from_csv()
+            net_path = self.process_mining_module.save_net() #### TO DO 
+            result = f"The Petri net is saved inside the file {net_path}"
+        if action == 'conformance_checking':
+            log = self.process_mining_module.extract_log_from_csv()
+            trace_is_fit, trace_fitness = self.process_mining_module.conformal_checking(net, initial_marking, final_marking, log)
+            result = ""#### TO DO
+        if action == 'performance_analysis':
+            metric = parsed_json.get("metric")
+            log = self.process_mining_module.extract_log_from_csv()
+            if metric == 'bottlenecks':
+                net, initial_marking, final_marking = self.process_mining_module.discovery_from_csv()
+                result = self.process_mining_module.performance_analysis(log, metric, net, initial_marking, final_marking)
+            else:
+                result = self.process_mining_module.performance_analysis(log, metric) ####TO DO
+        else:
+            raise ValueError(f"Unsupported process mining action: {action}")
+
+        clean_result = json.dumps(result, indent=2, default=str)
+        ##### TO DO a way to obtain a clean NATURAL LANGUAGE output
+        return prompt, clean_result
+    
     def _produce_rewritten_answer(self, answers):
         sys_mess = self.prompts.get('system_message_rewrite_answer', '')
         question = "Rewrite the following answers in a clean way, without any extra information."
         invoke_payload = {"question": question,
                     "context": answers,
                     "system_message": sys_mess}
-        prompt = self.chain_rewrite_answer.first.format_prompt(**invoke_payload).to_string()
-        answer = self.chain_rewrite_answer.invoke(invoke_payload).content
+        prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
+        answer = self.chain_gateway.invoke(invoke_payload).content
 
         return prompt, answer
 
@@ -515,6 +558,8 @@ class LLMPipeline:
             complete_prompt, answer = self._produce_answer_simulation(question, 'live')
         elif 'factory_info' in answer.lower():
             complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info')
+        elif 'process_mining' in answer.lower():
+            complete_prompt, answer = self._produce_answer_process_mining(question)
         elif 'hybrid' in answer.lower():
             complete_prompt, answer = self._produce_answer_hybrid(question, 'live')
         else:
