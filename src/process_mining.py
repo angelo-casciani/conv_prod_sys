@@ -4,6 +4,7 @@ from pm4py.objects.conversion.log import converter as log_converter
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 import tempfile
 import os
+from datetime import datetime
 
 class ProcessMiningModule:
     def __init__(self, path_to_csv):
@@ -11,7 +12,7 @@ class ProcessMiningModule:
 
     def conversion_from_csv_to_xes(self):
         df = pd.read_csv(self.path_to_csv)
-        print(df.head())
+        #print(df.head())
         CASE_ID_COL = "part_id"
         ACTIVITY_COL = "activity"
         TIMESTAMP_COL = "time"
@@ -19,15 +20,15 @@ class ProcessMiningModule:
         df[TIMESTAMP_COL] = pd.to_datetime(df[TIMESTAMP_COL])
 
         df = df.rename(columns={
-            "part_id": "case:concept:name",
-            "activity": "concept:name",
-            "time": "time:timestamp"
+            CASE_ID_COL: "case:concept:name",
+            ACTIVITY_COL: "concept:name",
+            TIMESTAMP_COL: "time:timestamp"
         })
 
         parameters = {
-            "case_id_key": CASE_ID_COL,
-            "activity_key": ACTIVITY_COL,
-            "timestamp_key": TIMESTAMP_COL
+            "case_id_key": "case:concept:name",
+            "activity_key": "concept:name",
+            "timestamp_key": "time:timestamp"
         }
         event_log = log_converter.apply(df, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
 
@@ -42,9 +43,16 @@ class ProcessMiningModule:
         log = pm4py.read_xes(xes_path)
         return log
     
+    def save_net_image(self, net, initial_marking, final_marking, file_path="pmmOutputs/petri_net_"):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_path = f"{file_path}{timestamp}.png"
+        pm4py.save_vis_petri_net(net, initial_marking, final_marking, file_path=file_path)
+        return file_path
+
     def discovery_from_log(self, log):
         net, initial_marking, final_marking = pm4py.discover_petri_net_inductive(log)
-        return net, initial_marking, final_marking
+        file_path = self.save_net_image(net, initial_marking, final_marking)
+        return net, initial_marking, final_marking, file_path
     
     def discovery_from_csv(self):
         xes_path = self.conversion_from_csv_to_xes()
@@ -71,17 +79,13 @@ class ProcessMiningModule:
         return pm4py.stats.get_event_attribute_values(log, "concept:name")
 
     def get_case_durations(self, log):
-        return pm4py.stats.get_all_case_durations(log)   
+        return pm4py.stats.get_all_case_durations(log) 
 
     def performance_analysis(self, log, metric, net=None, initial_marking=None, final_marking=None):
         if metric == "throughput_time":
-            return self.get_throughput_time(log)
+            return self.get_avg_throughput_time(log)
         elif metric == "activity_frequency":
-            return self.get_activity_frequency(log)
-        elif metric == "bottlenecks":
-            if net is None or initial_marking is None or final_marking is None:
-                raise ValueError("Bottleneck analysis requires a Petri net with markings.")
-            return self.get_bottlenecks(log, net, initial_marking, final_marking)
+            return self.get_activity_frequencies(log)
         else:
             raise ValueError(f"Unknown metric: {metric}") 
 
@@ -93,7 +97,7 @@ if __name__ == "__main__":
     print("\n\nI'm converting the csv logs into xes format...")
 
     log = pmm.extract_log_from_csv()
-    net, initial_marking, final_marking = pmm.discovery_from_log(log)
+    net, initial_marking, final_marking, file_path = pmm.discovery_from_log(log)
     print("\n\nPreparing the view of the Petri net....")
     pmm.view_petri_net(net, initial_marking, final_marking)
     trace_is_fit, trace_fitness = pmm.conformal_checking(net, initial_marking, final_marking, log)

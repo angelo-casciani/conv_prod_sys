@@ -401,33 +401,28 @@ class LLMPipeline:
 
         answer = clean_json_block(answer)
         parsed_json = json.loads(answer)
-
+        #print(parsed_json)
         action = parsed_json.get("task")
         if action is None:
             print("Process mining JSON missing 'task' field, returning empty result.")
             return prompt, "{}"
-        if action == 'process_discovery':
-            net, initial_marking, final_marking = self.process_mining_module.discovery_from_csv()
-            net_path = self.process_mining_module.save_net() #### TO DO 
-            result = f"The Petri net is saved inside the file {net_path}"
-        if action == 'conformance_checking':
+        elif action == 'process_discovery':
+            net, initial_marking, final_marking, net_path = self.process_mining_module.discovery_from_csv()
+            nl_output = f"I discovered the process model. The Petri net has been saved at: {net_path}."
+        elif action == 'conformance_checking':
             log = self.process_mining_module.extract_log_from_csv()
             trace_is_fit, trace_fitness = self.process_mining_module.conformal_checking(net, initial_marking, final_marking, log)
-            result = ""#### TO DO
-        if action == 'performance_analysis':
+            fit_text = "fits" if trace_is_fit else "does not fit"
+            nl_output = f"The event log {fit_text} the discovered model, with a fitness score of {trace_fitness:.2f}."
+        elif action == 'performance_analysis':
             metric = parsed_json.get("metric")
-            log = self.process_mining_module.extract_log_from_csv()
-            if metric == 'bottlenecks':
-                net, initial_marking, final_marking = self.process_mining_module.discovery_from_csv()
-                result = self.process_mining_module.performance_analysis(log, metric, net, initial_marking, final_marking)
-            else:
-                result = self.process_mining_module.performance_analysis(log, metric) ####TO DO
+            log = self.process_mining_module.extract_log_from_csv()    
+            result = self.process_mining_module.performance_analysis(log, metric)
+            nl_output = f"I computed the {metric} metric. Result: {result}."
         else:
             raise ValueError(f"Unsupported process mining action: {action}")
-
-        clean_result = json.dumps(result, indent=2, default=str)
-        ##### TO DO a way to obtain a clean NATURAL LANGUAGE output
-        return prompt, clean_result
+        
+        return prompt, nl_output
     
     def _produce_rewritten_answer(self, answers):
         sys_mess = self.prompts.get('system_message_rewrite_answer', '')
