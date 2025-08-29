@@ -81,6 +81,42 @@ class ProcessMiningModule:
     def get_case_durations(self, log):
         return pm4py.stats.get_all_case_durations(log) 
 
+    def get_process_variants(self, log, k=5):
+        variants = pm4py.stats.get_variants(log)
+        total_cases = sum(variants.values())
+
+        print(f"\nTOP {k} VARIANTS:")
+        top_variants = sorted(variants.items(), key=lambda x: x[1], reverse=True)[:k]
+        for i, (variant_tuple, count) in enumerate(top_variants, 1):
+            path = " → ".join(variant_tuple)
+            percentage = round((count / total_cases) * 100, 2)
+            print(f"{i}. {path} ({count} cases, {percentage}%)")
+        
+        return top_variants
+    
+    def get_start_end_activities(self, log):
+        start_acts = pm4py.stats.get_start_activities(log)
+        end_acts = pm4py.stats.get_end_activities(log)
+        return start_acts, end_acts
+    
+    def filter_by_time_range(self, log, start_date, end_date):
+        if isinstance(start_date, str):
+            start_date = pd.to_datetime(start_date)
+        if isinstance(end_date, str):
+            end_date = pd.to_datetime(end_date)
+        
+        if hasattr(start_date, 'to_pydatetime'):
+            start_date = start_date.to_pydatetime()
+        if hasattr(end_date, 'to_pydatetime'):
+            end_date = end_date.to_pydatetime()
+        return pm4py.filtering.filter_time_range(log, start_date, end_date)
+
+    def get_resource_analysis(self, log):
+        return pm4py.stats.get_event_attribute_values(log, "station_id")
+
+    def filter_top_variants(self, log, k=5):
+        return pm4py.filtering.filter_variants_top_k(log, k)
+    
     def performance_analysis(self, log, metric, net=None, initial_marking=None, final_marking=None):
         if metric == "throughput_time":
             return self.get_avg_throughput_time(log)
@@ -88,6 +124,7 @@ class ProcessMiningModule:
             return self.get_activity_frequencies(log)
         else:
             raise ValueError(f"Unknown metric: {metric}") 
+        
 
 if __name__ == "__main__":
     pmm = ProcessMiningModule(os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv'))
@@ -118,3 +155,16 @@ if __name__ == "__main__":
 
     durations = pmm.get_case_durations(log)
     print("\nCase durations:", durations)
+
+    pmm.get_process_variants(log)
+
+    print("\nStart and end activities:", pmm.get_start_end_activities(log))
+
+    start_date = "2025-02-17T17:07:38.885199"
+    end_date = "2025-02-17T17:16:12.689944"
+    print(f"\nEvent log filtered between {start_date} and {end_date}:", pmm.filter_by_time_range(log, start_date, end_date))
+
+    print("\nResource analysis:", pmm.get_resource_analysis(log))
+
+    k = 3
+    print(f"\nEvent log filtered by top {k} variants:", pmm.filter_top_variants(log, k))

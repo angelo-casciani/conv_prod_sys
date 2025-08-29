@@ -418,7 +418,10 @@ class LLMPipeline:
             metric = parsed_json.get("metric")
             log = self.process_mining_module.extract_log_from_csv()    
             result = self.process_mining_module.performance_analysis(log, metric)
-            nl_output = f"I computed the {metric} metric. Result: {result}."
+            if metric == "throughput_time":
+                nl_output = f"I computed the {metric} metric. Result: {result} seconds."
+            else:
+                nl_output = f"I computed the {metric} metric. Result: {result}."
         else:
             raise ValueError(f"Unsupported process mining action: {action}")
         
