@@ -408,6 +408,7 @@ class LLMPipeline:
             return prompt, "{}"
         elif action == 'process_discovery':
             net, initial_marking, final_marking, net_path = self.process_mining_module.discovery_from_csv()
+            self.process_mining_module.view_petri_net(net, initial_marking, final_marking)
             nl_output = f"I discovered the process model. The Petri net has been saved at: {net_path}."
         elif action == 'conformance_checking':
             log = self.process_mining_module.extract_log_from_csv()
@@ -417,11 +418,16 @@ class LLMPipeline:
         elif action == 'performance_analysis':
             metric = parsed_json.get("metric")
             log = self.process_mining_module.extract_log_from_csv()    
-            result = self.process_mining_module.performance_analysis(log, metric)
+            result = self.process_mining_module.performance_analysis(log, metric, parsed_json)
             if metric == "throughput_time":
                 nl_output = f"I computed the {metric} metric. Result: {result} seconds."
             else:
                 nl_output = f"I computed the {metric} metric. Result: {result}."
+        elif action == "filter_by_time_range":
+            log = self.process_mining_module.extract_log_from_csv()
+            start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 
+            filtered_path = self.process_mining_module.filter_by_time_range(log, start_date, end_date)
+            nl_output = f"The filtered event log has been saved at: {filtered_path}."
         else:
             raise ValueError(f"Unsupported process mining action: {action}")
         

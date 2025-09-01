@@ -85,12 +85,12 @@ class ProcessMiningModule:
         variants = pm4py.stats.get_variants(log)
         total_cases = sum(variants.values())
 
-        print(f"\nTOP {k} VARIANTS:")
+        #print(f"\nTOP {k} VARIANTS:")
         top_variants = sorted(variants.items(), key=lambda x: x[1], reverse=True)[:k]
-        for i, (variant_tuple, count) in enumerate(top_variants, 1):
-            path = " → ".join(variant_tuple)
-            percentage = round((count / total_cases) * 100, 2)
-            print(f"{i}. {path} ({count} cases, {percentage}%)")
+        # for i, (variant_tuple, count) in enumerate(top_variants, 1):
+        #     path = " → ".join(variant_tuple)
+        #     percentage = round((count / total_cases) * 100, 2)
+        #     print(f"{i}. {path} ({count} cases, {percentage}%)")
         
         return top_variants
     
@@ -109,19 +109,35 @@ class ProcessMiningModule:
             start_date = start_date.to_pydatetime()
         if hasattr(end_date, 'to_pydatetime'):
             end_date = end_date.to_pydatetime()
-        return pm4py.filtering.filter_time_range(log, start_date, end_date)
+        
+        filtered_log = pm4py.filtering.filter_time_range(log, start_date, end_date)
 
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        start_str = start_date.strftime("%Y%m%d")
+        end_str = end_date.strftime("%Y%m%d")
+        output_path = f"pmmOutputs/filtered_log_{start_str}_to_{end_str}_{timestamp}.xes"
+        pm4py.write.write_xes(filtered_log, output_path)
+        return output_path
+    
     def get_resource_analysis(self, log):
         return pm4py.stats.get_event_attribute_values(log, "station_id")
 
     def filter_top_variants(self, log, k=5):
         return pm4py.filtering.filter_variants_top_k(log, k)
     
-    def performance_analysis(self, log, metric, net=None, initial_marking=None, final_marking=None):
+    def performance_analysis(self, log, metric, json_question=None):
         if metric == "throughput_time":
             return self.get_avg_throughput_time(log)
         elif metric == "activity_frequency":
             return self.get_activity_frequencies(log)
+        elif metric == "top_variants":
+            k = json_question.get("k")
+            return self.get_process_variants(log, k)
+        elif metric == "start_end_activities":
+            start_end = self.get_start_end_activities(log)
+            return f"\nStart activities with frequencies: {start_end[0]}. \nEnd activities with frequencies: {start_end[1]}"
+        elif metric == "resource_analysis":
+            return self.get_resource_analysis(log)
         else:
             raise ValueError(f"Unknown metric: {metric}") 
         
@@ -158,7 +174,8 @@ if __name__ == "__main__":
 
     pmm.get_process_variants(log)
 
-    print("\nStart and end activities:", pmm.get_start_end_activities(log))
+    start_end = pmm.get_start_end_activities(log)
+    print(f"\nStart activities with frequencies: {start_end[0]}. \nEnd activities with frequencies: {start_end[1]}")
 
     start_date = "2025-02-17T17:07:38.885199"
     end_date = "2025-02-17T17:16:12.689944"
