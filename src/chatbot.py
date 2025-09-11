@@ -1,6 +1,6 @@
 import time
 import gradio as gr
-from chatbot_pipeline import LLMPipeline
+from pipeline import LLMPipeline
 from argparse import ArgumentParser
 from dotenv import load_dotenv
 from torch import cuda
@@ -71,7 +71,7 @@ class GradioHandler:
             
             yield f"Processing: {message}"
             
-            for result in self.chain.live_prompting(message, self.run_data):
+            for result in self.chain.live_prompting(query=message, info_run=self.run_data, chatbot=True):
                 yield result
                 
         except Exception as e:

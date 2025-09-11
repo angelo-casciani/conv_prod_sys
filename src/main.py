@@ -64,7 +64,8 @@ def main():
     elif 'evaluation-answer' in modality:
         chain.evaluate_performance('answer.csv', run_data)
     else:
-        chain.live_prompting(run_data)
+        for _ in chain.live_prompting(info_run=run_data, chatbot=False):
+            pass
 
 
 if __name__ == "__main__":

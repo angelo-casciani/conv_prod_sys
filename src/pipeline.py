@@ -551,7 +551,7 @@ class LLMPipeline:
         prompt, answer = self._produce_rewritten_answer(answers) 
         return prompts, answer
     
-    def _generate_response(self, question, curr_datetime, info_run):
+    def _generate_response(self, question, curr_datetime, info_run, chatbot=False):
         complete_prompt, answer = self._produce_answer_gateway(question, 'routing')
         print(f'\n\nPrompt: {complete_prompt}\n')
         print(f'{answer}\n')
@@ -574,21 +574,34 @@ class LLMPipeline:
         print(f'{answer}\n')
         print('--------------------------------------------------')
 
+        if chatbot:
+            yield answer
         log_to_file(f'Query: {complete_prompt}\n\n{answer}\n\n##########################\n\n',
                     curr_datetime, info_run)
 
 
-    def live_prompting(self, info_run):
+    def live_prompting(self, info_run, chatbot, query=""):
         current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        while True:
-            query = input('Insert the query you want to ask (type "quit" to exit): ')
+        if chatbot:
+            if query.lower().strip() == "quit":
+                yield "Goodbye!"
+                return
 
-            if query.lower() == 'quit':
-                print("Exiting the chat.")
-                break
+            yield f"Processing your query: {query}"
             
-            self._generate_response(query, current_datetime, info_run)
-            print()
+            for response in self._generate_response(query, current_datetime, info_run, chatbot=True):
+                yield response
+        else:
+            while True:
+                query = input('Insert the query you want to ask (type "quit" to exit): ')
+
+                if query.lower() == 'quit':
+                    print("Exiting the chat.")
+                    break
+                
+                for response in self._generate_response(query, current_datetime, info_run, chatbot=False):
+                    print(response)
+                    print()
 
 
     def evaluate_performance(self, test_filename, info_run):
