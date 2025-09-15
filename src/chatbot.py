@@ -7,6 +7,7 @@ from torch import cuda
 import warnings
 from utility import *
 import os
+import re
 
 DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 load_dotenv()
@@ -56,26 +57,20 @@ class GradioHandler:
     def process_message(self, message, history):
         try:
             self.initialize()
-            # if len(history) == 0:
-            #     welcome_msg = """Welcome! The tasks that are possible on the LEGO Factory are:
-            #                 - Simulation:
-            #                 - Discrete simulation of the production in a specified time interval in units of time (SimPy);
-            #                 - Discrete simulation of the production of a specified number of pieces (SimPy);
-            #                 - Prediction of the next station in the production line (SimPy);
-            #                 - Verification of temporal properties on the automaton representing the factory (Uppaal).
-
-            #                 Please tell me what you'd like to do!
-            #                 """
-            #     yield welcome_msg
-            #     return
-            
-            yield f"Processing: {message}"
+            yield {"role": "assistant", "content": f"Processing: {message}"}
             
             for result in self.chain.live_prompting(query=message, info_run=self.run_data, chatbot=True):
-                yield result
-                
+                if "I discovered the process model. The Petri net has been saved at" in result:
+                    match = re.search(r"saved at:\s*(\S+)", result)
+                    if match:
+                        path = match.group(1).rstrip(".")
+                        yield [{"role": "assistant", "content": result}, {"role": "assistant", "content": (path,)}]
+                    else:
+                        yield {"role": "assistant", "content": result}
+                else:
+                    yield {"role": "assistant", "content": result}
         except Exception as e:
-            yield f"Error occurred: {str(e)}"
+            yield {"role": "assistant", "content": f"Error occurred: {str(e)}"}
 
 handler = GradioHandler()
 
@@ -99,8 +94,9 @@ demo = gr.ChatInterface(
     flagging_options=["Like", "Spam", "Inappropriate", "Other"],
     save_history=True,
     title="LEGO Factory Assistant",
-    description="Ask me about simulations and verifications for the LEGO Factory!"
+    description="Ask me about simulations, verifications and process mining for the LEGO Factory!",
+    theme="ocean"
 )
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(favicon_path="favicon.ico")
