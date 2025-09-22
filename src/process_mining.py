@@ -25,17 +25,28 @@ class ProcessMiningModule:
             TIMESTAMP_COL: "time:timestamp"
         })
 
+        # if "lifecycle:transition" not in df.columns:
+        #     df["lifecycle:transition"] = "complete"
+        
+        # if "org:resource" not in df.columns:
+        #     df["org:resource"] = "nan"
+
         parameters = {
             "case_id_key": "case:concept:name",
             "activity_key": "concept:name",
-            "timestamp_key": "time:timestamp"
+            "timestamp_key": "time:timestamp",
+            # "lifecycle:transition": "lifecycle:transition",
+            # "org:resource": "org:resource"
         }
+
+        
+
         event_log = log_converter.apply(df, parameters=parameters, variant=log_converter.Variants.TO_EVENT_LOG)
 
         with tempfile.NamedTemporaryFile(suffix=".xes", delete=False) as tmp:
             xes_exporter.apply(event_log, tmp.name)
             temp_path = tmp.name
-
+        #print(event_log)
         return temp_path
     
     def extract_log_from_csv(self):
