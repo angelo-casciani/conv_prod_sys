@@ -2,8 +2,8 @@ import requests
 import os 
 import process_mining
 
-pmm = process_mining.ProcessMiningModule(os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv'))
-xes_path = pmm.conversion_from_csv_to_xes()
+#pmm = process_mining.ProcessMiningModule(os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv'))
+xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test1.xes')
 url = "http://127.0.0.1:6662/"
 files = {"xes_file": open(xes_path, "rb")}
 data = {

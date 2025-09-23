@@ -173,3 +173,4 @@ env_backup.yml
 pmmOutputs
 .gradio
 favicon.ico
+src/extractor_outputs
