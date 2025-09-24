@@ -151,7 +151,6 @@ class ProcessMiningModule:
             return self.get_resource_analysis(log)
         else:
             raise ValueError(f"Unknown metric: {metric}") 
-        
 
 if __name__ == "__main__":
     pmm = ProcessMiningModule(os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv'))
