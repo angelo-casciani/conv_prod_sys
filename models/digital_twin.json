@@ -1,0 +1,121 @@
+{
+  "inter_arrival_time": {
+    "type": "fixed",
+    "mean": 0.0,
+    "arg1": 0,
+    "arg2": 0
+  },
+  "activities": {
+    "A1": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "LOGNORMAL",
+        "mean": "72.06",
+        "arg1": "3159.31",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "A3": {
+          "probability": 0.44
+        },
+        "A2": {
+          "probability": 0.25
+        },
+        "A5": {
+          "probability": 0.31
+        }
+      }
+    },
+    "A2": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "GAMMA",
+        "mean": "16.69",
+        "arg1": "265.52",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "A5": {
+          "probability": 0.62
+        },
+        "A4": {
+          "probability": 0.38
+        }
+      }
+    },
+    "A5": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "UNIFORM",
+        "mean": "47.88",
+        "arg1": "32.49",
+        "arg2": "63.53",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "A3": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "GAMMA",
+        "mean": "82.58",
+        "arg1": "279.06",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "A4": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "GAMMA",
+        "mean": "69.61",
+        "arg1": "220.26",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    }
+  },
+  "transfer_times": {
+    "A1": {
+      "A3": {
+        "type": "uniform",
+        "mean": 325.21,
+        "arg1": 29.0,
+        "arg2": 660.0
+      },
+      "A2": {
+        "type": "uniform",
+        "mean": 325.21,
+        "arg1": 29.0,
+        "arg2": 660.0
+      },
+      "A5": {
+        "type": "uniform",
+        "mean": 325.21,
+        "arg1": 29.0,
+        "arg2": 660.0
+      }
+    },
+    "A2": {
+      "A5": {
+        "type": "lognorm",
+        "mean": 559.71,
+        "arg1": 130240.49,
+        "arg2": 0
+      },
+      "A4": {
+        "type": "lognorm",
+        "mean": 559.71,
+        "arg1": 130240.49,
+        "arg2": 0
+      }
+    },
+    "A5": {},
+    "A3": {},
+    "A4": {}
+  }
+}
