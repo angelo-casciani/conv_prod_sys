@@ -63,6 +63,36 @@ class Extractor:
 
         return next_activities
     
+    def get_real_successors(self, t, visited=None):
+        if visited is None:
+            visited = set()
+
+        successors = set()
+        if t in visited:
+            return successors
+        visited.add(t)
+
+        for arc in t.out_arcs:
+            place = arc.target
+            for arc2 in place.out_arcs:
+                next_t = arc2.target
+                if next_t.label is None:
+                    #recursive call
+                    successors |= self.get_real_successors(next_t, visited)
+                else:
+                    successors.add(next_t.label)
+
+        return successors
+
+    def extract_successors_from_petri(self, net):
+        successors = {}
+        for t in net.transitions:
+            if t.label is None:
+                continue  # skip
+            act = t.label
+            successors[act] = self.get_real_successors(t)
+        return successors
+    
     def extract_transfer_times(self, transfer_times_path):
         with open(transfer_times_path, "r") as f:
             lines = f.readlines()
@@ -131,6 +161,7 @@ class Extractor:
         transfer_times_path = os.path.join(local_output_dir, transfer_times_file)
         bpmn_path = os.path.join(local_output_dir, bpmn_file)
         bpmn_model = bpmn_importer.apply(bpmn_path)
+        net, initial_marking, final_marking = pm4py.convert.convert_to_petri_net(bpmn_model)
 
         #ACTIVITIES IDs EXTRACTION
         activities = self.extract_parameters(params_path)
@@ -140,12 +171,19 @@ class Extractor:
         
         #BRANCH PROBABILITIES EXTRACTION
         branch_prob = self.extract_branch_prob(branch_prob_path)
+        successors = self.extract_successors_from_petri(net)
+        for act, succs in successors.items():
+            if act not in branch_prob:
+                branch_prob[act] = {}
+                if len(succs) == 1:
+                    only_succ = list(succs)[0]
+                    branch_prob[act][only_succ] = {"probability": 1.0}
         
         #TRANSFER TIMES EXTRACTION
         transfer_times = self.extract_transfer_times(transfer_times_path)
             
         model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times)
-        
+
         output_dir = "../models/digital_twin.json"
 
         with open(output_dir, "w") as f:
@@ -158,7 +196,7 @@ class Extractor:
 
 if __name__ == "__main__":
     extractor = Extractor()
-    xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test1.xes')
+    xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test5.xes')
     bpmn_model = extractor.extract_model(xes_path)
 
 

@@ -90,7 +90,7 @@ class LLMPipeline:
         self.hf_token = hf_token
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
-        self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory.json')
+        self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'digital_twin.json')
         self.factory_model_with_failure = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory_with_failure.json')
         self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
         self.digital_twin_csv_logs = os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv')
@@ -298,7 +298,7 @@ class LLMPipeline:
         
     def _produce_answer_simulation(self, question, modality):
         factory_data = retrieve_factory()
-        station_names = ', '.join([station for station in factory_data['stations']])
+        station_names = ', '.join([station for station in factory_data['activities']])
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
         context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
         invoke_payload = {"question": question,
