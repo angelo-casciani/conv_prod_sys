@@ -189,7 +189,7 @@ class Extractor:
         with open(output_dir, "w") as f:
             json.dump(model, f, indent=2)
 
-        return bpmn_model
+        return net, initial_marking, final_marking
         
     
 
@@ -197,8 +197,5 @@ class Extractor:
 if __name__ == "__main__":
     extractor = Extractor()
     xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test5.xes')
-    bpmn_model = extractor.extract_model(xes_path)
-
-
-    net, initial_marking, final_marking = pm4py.convert.convert_to_petri_net(bpmn_model)
+    net, initial_marking, final_marking = extractor.extract_model(xes_path)
     pm4py.view_petri_net(net, initial_marking, final_marking, format="png")

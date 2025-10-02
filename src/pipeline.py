@@ -90,23 +90,23 @@ class LLMPipeline:
         self.hf_token = hf_token
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
-        self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'digital_twin.json')
-        self.factory_model_with_failure = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory_with_failure.json')
+        #self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'digital_twin.json')
+        #self.factory_model_with_failure = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory_with_failure.json')
         self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
         self.digital_twin_csv_logs = os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv')
         with open(self.path_prompts, 'r') as prompt_file:
             self.prompts = json.load(prompt_file)
-        with open(self.factory_model, 'r') as factory_file:
-            self.factory_model = json.load(factory_file)
-        with open(self.factory_model_with_failure, 'r') as factory_file:
-            self.factory_model_with_failure = json.load(factory_file)
+        # with open(self.factory_model, 'r') as factory_file:
+        #     self.factory_model = json.load(factory_file)
+        # with open(self.factory_model_with_failure, 'r') as factory_file:
+        #     self.factory_model_with_failure = json.load(factory_file)
         self.chain_simulation = self._initialize_chain(model_id_simulation, self.model_family_simulation, self.model_type_simulation)
         self.chain_verification = self._initialize_chain(model_id_verification,self.model_family_verification, self.model_type_verification)
         self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_gateway, self.model_type_gateway)
         self.chain_failure = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.chain_process_mining = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.failure_module = failure_maintenance.FailureMaintenanceModule(factory_model_path="lego_factory_with_failure.json")
-        self.process_mining_module = process_mining.ProcessMiningModule(self.digital_twin_csv_logs)
+        self.process_mining_module = process_mining.ProcessMiningModule()
 
 
     def _initialize_local_model(self):
@@ -212,7 +212,11 @@ class LLMPipeline:
             context = ''
         elif answer_phase == 'factory_info':
             sys_mess = self.prompts.get('system_message_info', '') + self.prompts.get('shots_info', '')
-            context = self.factory_model
+            self.process_mining_module.extract()
+            factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'digital_twin.json')
+            with open(factory_model, 'r') as factory_file:
+                factory_model = json.load(factory_file)
+            context = factory_model
         invoke_payload = {"question": question,
                         "context": context,
                         "system_message": sys_mess}
@@ -297,6 +301,8 @@ class LLMPipeline:
         return follow_up_results
         
     def _produce_answer_simulation(self, question, modality):
+        if self.request_type == "factory_simulation":
+            self.process_mining_module.extract()
         factory_data = retrieve_factory()
         station_names = ', '.join([station for station in factory_data['activities']])
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
@@ -407,25 +413,25 @@ class LLMPipeline:
             print("Process mining JSON missing 'task' field, returning empty result.")
             return prompt, "{}"
         elif action == 'process_discovery':
-            net, initial_marking, final_marking, net_path = self.process_mining_module.discovery_from_csv()
+            net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
             self.process_mining_module.view_petri_net(net, initial_marking, final_marking)
             nl_output = f"I discovered the process model. The Petri net has been saved at: {net_path}."
         elif action == 'conformance_checking':
-            log = self.process_mining_module.extract_log_from_csv()
+            log = self.process_mining_module.load_log()
             net, initial_marking, final_marking, net_path = self.process_mining_module.discovery_from_csv()
             trace_is_fit, trace_fitness = self.process_mining_module.conformal_checking(net, initial_marking, final_marking, log)
             fit_text = "fits" if trace_is_fit else "does not fit"
             nl_output = f"The event log {fit_text} the discovered model, with a fitness score of {trace_fitness:.2f}."
         elif action == 'performance_analysis':
             metric = parsed_json.get("metric")
-            log = self.process_mining_module.extract_log_from_csv()    
+            log = self.process_mining_module.load_log()    
             result = self.process_mining_module.performance_analysis(log, metric, parsed_json)
             if metric == "throughput_time":
                 nl_output = f"I computed the {metric} metric. Result: {result} seconds."
             else:
                 nl_output = f"I computed the {metric} metric. Result: {result}."
         elif action == "filter_by_time_range":
-            log = self.process_mining_module.extract_log_from_csv()
+            log = self.process_mining_module.load_log()
             start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 
             filtered_path = self.process_mining_module.filter_by_time_range(log, start_date, end_date)
             nl_output = f"The filtered event log has been saved at: {filtered_path}."
@@ -557,12 +563,17 @@ class LLMPipeline:
         print(f'{answer}\n')
         print('--------------------------------------------------')
 
+        self.request_type = answer
+
         if 'uppaal_verification' in answer.lower():
             complete_prompt, answer = self._produce_answer_verification(question, 'live')
         elif 'factory_simulation' in answer.lower():
             complete_prompt, answer = self._produce_answer_simulation(question, 'live')
         elif 'factory_info' in answer.lower():
             complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info')
+            answer = clean_json_block(answer)
+            parsed_json = json.loads(answer)
+            answer = parsed_json["response"]
         elif 'process_mining' in answer.lower():
             complete_prompt, answer = self._produce_answer_process_mining(question)
         elif 'hybrid' in answer.lower():

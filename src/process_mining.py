@@ -5,13 +5,25 @@ from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 import tempfile
 import os
 from datetime import datetime
+from extractor import Extractor
 
 class ProcessMiningModule:
-    def __init__(self, path_to_csv):
-        self.path_to_csv = path_to_csv
+    def __init__(self):
+        directory_path = os.path.join(os.path.dirname(__file__), 'log')
+        files = os.listdir(directory_path)
+        files = [f for f in files if os.path.isfile(os.path.join(directory_path, f))]
+
+        if len(files) == 1:
+            self.path_to_log = os.path.join(directory_path, files[0])
+            self.extension = os.path.splitext(self.path_to_log)[1].lower()
+            if ".xes" not in self.path_to_log and ".csv" not in self.path_to_log:
+                raise ValueError(f"Unsupported file format: {self.extension}. Use '.csv' or '.xes'.")
+        else:
+            raise ValueError(f"There is more than one file in the {directory_path} directory.") 
+        
 
     def conversion_from_csv_to_xes(self):
-        df = pd.read_csv(self.path_to_csv)
+        df = pd.read_csv(self.path_to_log)
         #print(df.head())
         CASE_ID_COL = "part_id"
         ACTIVITY_COL = "activity"
@@ -49,11 +61,15 @@ class ProcessMiningModule:
         #print(event_log)
         return temp_path
     
-    def extract_log_from_csv(self):
-        xes_path = self.conversion_from_csv_to_xes()
-        log = pm4py.read_xes(xes_path)
+    def load_log(self):
+        if self.extension == ".csv":
+            xes_path = self.conversion_from_csv_to_xes()
+            log = pm4py.read_xes(xes_path)
+        elif self.extension == ".xes":
+            log = pm4py.read_xes(self.path_to_log)
+        
         return log
-    
+
     def save_net_image(self, net, initial_marking, final_marking, file_path="pmmOutputs/petri_net_"):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         file_path = f"{file_path}{timestamp}.png"
@@ -65,9 +81,8 @@ class ProcessMiningModule:
         file_path = self.save_net_image(net, initial_marking, final_marking)
         return net, initial_marking, final_marking, file_path
     
-    def discovery_from_csv(self):
-        xes_path = self.conversion_from_csv_to_xes()
-        log = pm4py.read_xes(xes_path)
+    def discovery(self):
+        log = self.load_log()
         return self.discovery_from_log(log)
     
     def view_petri_net(self, net, initial_marking, final_marking):
@@ -151,15 +166,19 @@ class ProcessMiningModule:
             return self.get_resource_analysis(log)
         else:
             raise ValueError(f"Unknown metric: {metric}") 
+        
+    def extract(self):
+        if self.extension != ".xes":
+            xes_path = self.conversion_from_csv_to_xes()
+        else:
+            xes_path = self.path_to_log
+        extractor = Extractor()
+        _, _, _ = extractor.extract_model(xes_path=xes_path)
 
 if __name__ == "__main__":
-    pmm = ProcessMiningModule(os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv'))
-    xes_path = pmm.conversion_from_csv_to_xes()
-
-    print("\n**************************************")
-    print("\n\nI'm converting the csv logs into xes format...")
-
-    log = pmm.extract_log_from_csv()
+    pmm = ProcessMiningModule()
+    pmm.extract()
+    log = pmm.load_log()
     net, initial_marking, final_marking, file_path = pmm.discovery_from_log(log)
     print("\n\nPreparing the view of the Petri net....")
     pmm.view_petri_net(net, initial_marking, final_marking)
@@ -191,7 +210,7 @@ if __name__ == "__main__":
     end_date = "2025-02-17T17:16:12.689944"
     print(f"\nEvent log filtered between {start_date} and {end_date}:", pmm.filter_by_time_range(log, start_date, end_date))
 
-    print("\nResource analysis:", pmm.get_resource_analysis(log))
+    #print("\nResource analysis:", pmm.get_resource_analysis(log))
 
     k = 3
     print(f"\nEvent log filtered by top {k} variants:", pmm.filter_top_variants(log, k))
