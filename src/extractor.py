@@ -5,6 +5,7 @@ import pm4py
 import ast
 import re
 from pm4py.objects.bpmn.importer import importer as bpmn_importer
+import random
 
 class Extractor:
     def __init__(self, url="http://127.0.0.1:6662/", data = None):
@@ -130,10 +131,32 @@ class Extractor:
             if source_activity in branch_prob:
                 for destination in branch_prob[source_activity].keys():
                     model["transfer_times"][source_activity][destination] = transfer_data
-    
         return model
     
-    def extract_model(self, xes_path=""):
+    def add_failure_params(self, model, seed=None):
+        if seed is not None:
+            random.seed(seed)
+
+        for activity_id in model['activities'].keys():
+            failure_rate = round(random.uniform(0.001, 0.010), 3)
+
+            repair_mean = round(random.uniform(15,35), 1)
+            repair_std = round(random.uniform(2,7), 1)
+
+            degradation_factor = round(random.uniform(0.0003, 0.0012), 4)
+
+            model['activities'][activity_id]['failure_parameters'] = {
+                "failure_rate": failure_rate,
+                "repair_time": {
+                    "mean": repair_mean,
+                    "std": repair_std
+                },
+                "degradation_factor": degradation_factor
+            }
+
+        return model
+    
+    def extract_model(self, xes_path="", failure=False):
         files = {"xes_file": open(xes_path, "rb")}
         response = requests.post(self.url, files=files, data=self.data)
         parsed_response = response.json()
@@ -184,18 +207,20 @@ class Extractor:
             
         model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times)
 
-        output_dir = "../models/digital_twin.json"
+        if failure:
+            output_dir = "../models/digital_twin_with_failure.json"
+            model = self.add_failure_params(model)
+        else:
+            output_dir = "../models/digital_twin.json"
 
         with open(output_dir, "w") as f:
             json.dump(model, f, indent=2)
 
         return net, initial_marking, final_marking
-        
-    
 
 
 if __name__ == "__main__":
     extractor = Extractor()
     xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test5.xes')
-    net, initial_marking, final_marking = extractor.extract_model(xes_path)
+    net, initial_marking, final_marking = extractor.extract_model(xes_path, failure=True)
     pm4py.view_petri_net(net, initial_marking, final_marking, format="png")

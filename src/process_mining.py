@@ -167,13 +167,13 @@ class ProcessMiningModule:
         else:
             raise ValueError(f"Unknown metric: {metric}") 
         
-    def extract(self):
+    def extract(self, failure=False):
         if self.extension != ".xes":
             xes_path = self.conversion_from_csv_to_xes()
         else:
             xes_path = self.path_to_log
         extractor = Extractor()
-        _, _, _ = extractor.extract_model(xes_path=xes_path)
+        _, _, _ = extractor.extract_model(xes_path=xes_path, failure=failure)
 
 if __name__ == "__main__":
     pmm = ProcessMiningModule()

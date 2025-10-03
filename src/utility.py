@@ -82,3 +82,10 @@ def retrieve_factory():
         data = json.load(file)
     
     return data
+
+def retrieve_factory_with_failure():
+    model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'digital_twin_with_failure.json')
+    with open(model_path, 'r') as file:
+        data = json.load(file)
+        
+    return data

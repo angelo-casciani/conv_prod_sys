@@ -2,7 +2,7 @@
     (:requirements :strips :typing :conditional-effects :action-costs) 
 
     (:types
-        input process output station - object
+        input process output activity - object
     )
     (:predicates
         ;; Simulation
@@ -10,8 +10,8 @@
         (has_pieces ?x)
         (has_time ?x)
         (produced_from ?x ?y)
-        (next_station ?x ?y)
-        (target_station ?s - station)
+        (next_activity ?x ?y)
+        (target_activity ?s - activity)
         ;; Verification
         (state ?x)
         (reachable ?x)
@@ -21,27 +21,29 @@
         (stay ?x)
         (forever ?x)
         ;; Maintenance
-        (requires_maintenance ?s - station)
-        (is_maintained ?s - station)
+        (requires_maintenance ?s - activity)
+        (is_maintained ?s - activity)
         (simulation_done)
+        ;;Process Mining
+        (digital_twin ?x - process)
     )
 
-    (:action simulate_time_with_station
-        :parameters (?x - input ?s - station ?y - process ?z - output)
-        :precondition (and (deadlock_free ?y) (has_pieces ?x) (target_station ?s))
+    (:action simulate_time_with_activity
+        :parameters (?x - input ?s - activity ?y - process ?z - output)
+        :precondition (and (deadlock_free ?y) (has_pieces ?x) (target_activity ?s) (digital_twin ?y))
         :effect (and (has_time ?z) (produced_from ?x ?z) (simulation_done))
         )
 
-    (:action simulate_pieces_with_station
-        :parameters (?x - input ?s - station ?y - process ?z - output)
-        :precondition (and (deadlock_free ?y) (has_time ?x)  (target_station ?s))
+    (:action simulate_pieces_with_activity
+        :parameters (?x - input ?s - activity ?y - process ?z - output)
+        :precondition (and (deadlock_free ?y) (has_time ?x)  (target_activity ?s) (digital_twin ?y))
         :effect (and (has_pieces ?z) (produced_from ?z ?x) (simulation_done))
     )
 
-    (:action simulate_next_station
-        :parameters (?x - station  ?z - station ?y - process)
-        :precondition (and (deadlock_free ?y) )
-        :effect (and (next_station ?x ?z))
+    (:action simulate_next_activity
+        :parameters (?x - activity  ?z - activity ?y - process)
+        :precondition (and (deadlock_free ?y) (digital_twin ?y))
+        :effect (and (next_activity ?x ?z))
     )
     
     (:action validate_deadlock
@@ -93,13 +95,17 @@
     )
     
     (:action maintenance
-        :parameters (?s - station)
+        :parameters (?s - activity)
         :precondition (and (requires_maintenance ?s) (simulation_done))
         :effect (and (not (requires_maintenance ?s))
                     (is_maintained ?s))
     )
 
-    ;TO DO
-    ;Process mining actions, understand the possible dependencies with other modules
+    (:action extract_digital_twin
+        :parameters (?x - process)
+        :precondition ()
+        :effect (and (digital_twin ?x))
+    )
+    
     
 )

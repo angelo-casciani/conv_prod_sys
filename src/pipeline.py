@@ -12,7 +12,7 @@ from torch import bfloat16
 import llm_factory_interface as factory_interface
 from oracle import AnswerVerificationOracle
 import uppaal_interface
-from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions
+from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions, retrieve_factory_with_failure
 import pddl_interface
 import tempfile
 import failure_maintenance
@@ -105,7 +105,7 @@ class LLMPipeline:
         self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_gateway, self.model_type_gateway)
         self.chain_failure = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.chain_process_mining = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
-        self.failure_module = failure_maintenance.FailureMaintenanceModule(factory_model_path="lego_factory_with_failure.json")
+        self.failure_module = failure_maintenance.FailureMaintenanceModule()
         self.process_mining_module = process_mining.ProcessMiningModule()
 
 
@@ -285,9 +285,9 @@ class LLMPipeline:
         
         return new_question
     
-    def _execute_follow_up_simulation(self, question, station_names):
+    def _execute_follow_up_simulation(self, question, activity_names):
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
-        context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
+        context = self.prompts.get('context_simulation', '').replace('LABELS', activity_names)
         
         invoke_payload = {"question": question,
                         "context": context,
@@ -304,9 +304,9 @@ class LLMPipeline:
         if self.request_type == "factory_simulation":
             self.process_mining_module.extract()
         factory_data = retrieve_factory()
-        station_names = ', '.join([station for station in factory_data['activities']])
+        activity_names = ', '.join([activity for activity in factory_data['activities']])
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
-        context = self.prompts.get('context_simulation', '').replace('LABELS', station_names)
+        context = self.prompts.get('context_simulation', '').replace('LABELS', activity_names)
         invoke_payload = {"question": question,
                         "context": context,
                         "system_message": sys_mess}
@@ -322,7 +322,7 @@ class LLMPipeline:
                 print(is_negative_result)
                 if is_negative_result:
                     new_question = self._generate_new_sim_question(results)
-                    new_results = self._execute_follow_up_simulation(new_question, station_names)
+                    new_results = self._execute_follow_up_simulation(new_question, activity_names)
 
                     combined_results = self._format_results_for_llm(results, new_results)
                 else:
@@ -336,7 +336,7 @@ class LLMPipeline:
                     If the context contains both 'Original analysis' and 'Follow-up analysis', 
                     make sure to provide information from both analyses in your response.
                     """
-            context = f"The labels for the stations are: {station_names}\nResults from the simulation: {combined_results}.\nNote: If there are both original and follow-up analyses, provide a complete answer using both."
+            context = f"The labels for the activities are: {activity_names}\nResults from the simulation: {combined_results}.\nNote: If there are both original and follow-up analyses, provide a complete answer using both."
             invoke_payload = {"question": question,
                             "context": context,
                             "system_message": sys_mess}
@@ -370,8 +370,10 @@ class LLMPipeline:
         return prompt, answer
     
     def _produce_answer_failure(self, question, sim_time):
+        self.process_mining_module.extract(failure=True)
+        factory_model_with_failure = retrieve_factory_with_failure()
         sys_mess = self.prompts.get('system_message_failure', '') + self.prompts.get('shots_failure', '')
-        context = self.factory_model_with_failure
+        context = factory_model_with_failure
         invoke_payload = {"question": question,
                         "context": context,
                         "system_message": sys_mess}
@@ -386,9 +388,9 @@ class LLMPipeline:
             print("Failure JSON missing 'task' field, returning empty result.")
             return prompt, "{}"
         if action == "predict_failure":
-            station = parsed_json.get("station_id")
+            activity = parsed_json.get("activity_id")
             horizon = parsed_json.get("time_horizon") if parsed_json.get("time_horizon") is not None else sim_time
-            result = self.failure_module.predict_station_failures(station, horizon)
+            result = self.failure_module.predict_activity_failures(factory_model_with_failure, activity, horizon)
         else:
             raise ValueError(f"Unsupported failure action: {action}")
 
@@ -453,8 +455,13 @@ class LLMPipeline:
 
 
     def _produce_answer_hybrid(self, question, modality):
+        self.process_mining_module.extract()
+        factory_model = retrieve_factory()
+        activities = [a for a in factory_model['activities'].keys()]
+        activities_str = ", ".join(activities)
+        activities_context = f"\n\nAvailable activities in the system: {activities_str}\n"
         sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
-        context = self.pddl_domain
+        context = self.pddl_domain + activities_context
         invoke_payload = {"question": question,
                     "context": context,
                     "system_message": sys_mess}
@@ -495,7 +502,7 @@ class LLMPipeline:
         prompts = ""
         answers = ""
         failure_delay = 0
-        type_counters = {"failure": 0, "simulation": 0, "validation": 0}
+        type_counters = {"failure": 0, "simulation": 0, "validation": 0, "extract_digital_twin": 0}
         last_sim_time = None 
         for i, action in enumerate(plan):
             action_lower = action.lower()
@@ -505,6 +512,8 @@ class LLMPipeline:
                 qtype = "validation"
             elif "maintenance" in action_lower:
                 qtype = "failure"
+            elif "extract_digital_twin" in action_lower:
+                continue
             else:
                 print(f"Unknown plan action '{action}', skipping.")
                 continue
@@ -545,7 +554,7 @@ class LLMPipeline:
                     if not is_deadlock_free:
                         print(f"Deadlock detected in validation step {i+1}. Stopping further simulations.")
                         answers += f"\nCRITICAL: Deadlock detected. Further simulations may be unreliable.\n"
-                        break
+                        break                
 
             prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
             answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"

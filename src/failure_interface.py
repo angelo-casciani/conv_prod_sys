@@ -2,20 +2,12 @@ import json, os, random
 import numpy as np
 
 class FailureInterface:
-    def __init__(self, model_path):
-        self.model = self.load_model(model_path)
-        self.state = {sid: {'degradation': 0.0, 'failures': 0, 'downtime': 0.0}
-                      for sid in self.model['stations']}
+    def __init__(self):
         #self.maintenance_cost = 0.0
         self.time = 0
-        self.station_results = {}
+        self.activity_results = {}
 
-    def load_model(self, path):
-        path = os.path.join(os.path.dirname(__file__), '..', 'models', path)
-        with open(path, 'r') as f:
-            return json.load(f)
-
-    def simulate(self, duration=2000, station_id=None, seed=None):
+    def simulate(self, model, duration=2000, activity_id=None, seed=None):
         if seed is not None:
             np.random.seed(seed)
             random.seed(seed)
@@ -25,16 +17,19 @@ class FailureInterface:
             current_seed = int(time.time() * 1000000) % 2**32
             np.random.seed(current_seed)
             random.seed(current_seed)
+        
+        self.state = {sid: {'degradation': 0.0, 'failures': 0, 'downtime': 0.0}
+                      for sid in model['activities']}
         self.time = 0
-        self.station_results = {sid: {'failures': 0, 'downtime': 0.0, 'failure_times': []} 
-                                for sid in self.model['stations']}
+        self.activity_results = {sid: {'failures': 0, 'downtime': 0.0, 'failure_times': []} 
+                                for sid in model['activities']}
         time_step = 1
 
-        stations_to_simulate = [station_id] if station_id else list(self.model['stations'].keys())
+        activities_to_simulate = [activity_id] if activity_id else list(model['activities'].keys())
 
         while self.time < duration:
-            for sid in stations_to_simulate:
-                params = self.model['stations'][sid]
+            for sid in activities_to_simulate:
+                params = model['activities'][sid]
                 s = self.state[sid]
                 s['degradation'] += params['failure_parameters']['degradation_factor'] * time_step
 
@@ -45,24 +40,24 @@ class FailureInterface:
                                                         params['failure_parameters']['repair_time']['std']))
                     s['failures'] += 1
                     s['downtime'] += repair_time
-                    self.station_results[sid]['failures'] += 1
-                    self.station_results[sid]['downtime'] += repair_time
-                    self.station_results[sid]['failure_times'].append(self.time)
+                    self.activity_results[sid]['failures'] += 1
+                    self.activity_results[sid]['downtime'] += repair_time
+                    self.activity_results[sid]['failure_times'].append(self.time)
                     self.time += repair_time
                     continue
 
             self.time += time_step
 
-        return self._summary(duration, station_id=station_id)
+        return self._summary(duration, activity_id=activity_id)
 
-    def _summary(self, total_time, station_id=None):
-        if station_id:
-            res = self.station_results[station_id]
+    def _summary(self, total_time, activity_id=None):
+        if activity_id:
+            res = self.activity_results[activity_id]
             total_failures = res['failures']
             total_downtime = res['downtime']
         else:
-            total_failures = sum(r['failures'] for r in self.station_results.values())
-            total_downtime = sum(r['downtime'] for r in self.station_results.values())
+            total_failures = sum(r['failures'] for r in self.activity_results.values())
+            total_downtime = sum(r['downtime'] for r in self.activity_results.values())
 
         availability = round((total_time - total_downtime) / total_time * 100, 2)
         return {

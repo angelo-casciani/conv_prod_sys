@@ -22,6 +22,14 @@
         "A2": {
           "probability": 0.7
         }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.006,
+        "repair_time": {
+          "mean": 23.6,
+          "std": 4.9
+        },
+        "degradation_factor": 0.0005
       }
     },
     "A2": {
@@ -37,6 +45,14 @@
         "A4": {
           "probability": 1.0
         }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.008,
+        "repair_time": {
+          "mean": 31.5,
+          "std": 5.3
+        },
+        "degradation_factor": 0.0004
       }
     },
     "A5": {
@@ -52,6 +68,14 @@
         "A6": {
           "probability": 1.0
         }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.006,
+        "repair_time": {
+          "mean": 21.6,
+          "std": 3.2
+        },
+        "degradation_factor": 0.0012
       }
     },
     "A4": {
@@ -67,6 +91,14 @@
         "A6": {
           "probability": 1.0
         }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.01,
+        "repair_time": {
+          "mean": 15.9,
+          "std": 6.3
+        },
+        "degradation_factor": 0.0008
       }
     },
     "A6": {
@@ -78,7 +110,15 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {}
+      "next_activities": {},
+      "failure_parameters": {
+        "failure_rate": 0.004,
+        "repair_time": {
+          "mean": 20.7,
+          "std": 5.4
+        },
+        "degradation_factor": 0.0007
+      }
     },
     "A3": {
       "capacity": 1,
@@ -93,6 +133,14 @@
         "A4": {
           "probability": 1.0
         }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.007,
+        "repair_time": {
+          "mean": 28.2,
+          "std": 2.7
+        },
+        "degradation_factor": 0.001
       }
     }
   },

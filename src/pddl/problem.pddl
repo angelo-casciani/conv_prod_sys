@@ -4,19 +4,19 @@
         I - input
         P - process
         O - output
-        S1 S2 S3 S4 S5 - station
+        A1 A2 A3 A4 A5 - activity
     )
     (:init
-        (has_pieces I)
-        (is_maintained S1)
-        (is_maintained S3)
-        (is_maintained S4)
-        (is_maintained S5)
-        (is_maintained S2)
-        (target_station S2)
+        (has_pieces I) 
+        (requires_maintenance A4) 
+        (is_maintained A1) 
+        (is_maintained A2) 
+        (is_maintained A3) 
+        (is_maintained A5) 
+        (target_activity A4)
     )
     
     (:goal
-        (has_time O)
+        (and (has_time O) (is_maintained A4))
     )
 )

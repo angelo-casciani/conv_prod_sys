@@ -5,27 +5,27 @@ from typing import Dict, Any, List
 import numpy as np
 import matplotlib.pyplot as plt
 from failure_interface import FailureInterface
+from utility import retrieve_factory_with_failure
 
 
 class FailureMaintenanceModule:
-    def __init__(self, factory_model_path: str = "lego_factory_with_failure.json"):
-        self.factory_model_path = factory_model_path
-        self.failure_interface = FailureInterface(factory_model_path)
+    def __init__(self):
+        self.failure_interface = FailureInterface()
 
-    def predict_station_failures(self, station_id: str, time_horizon: float = 1000) -> Dict[str, Any]:
-        if station_id not in self.failure_interface.model['stations']:
-            return {"error": f"Station {station_id} not found"}
+    def predict_activity_failures(self, model, activity_id: str, time_horizon: float = 1000) -> Dict[str, Any]:
+        if activity_id not in model['activities']:
+            return {"error": f"activity {activity_id} not found"}
 
-        params = self.failure_interface.model['stations'][station_id]['failure_parameters']
+        params = model['activities'][activity_id]['failure_parameters']
         predictions = []
 
         for i in range(10):
-            result = self.failure_interface.simulate(duration=time_horizon, station_id=station_id, seed=42 + i)
+            result = self.failure_interface.simulate(model, duration=time_horizon, activity_id=activity_id, seed=42 + i)
 
 
             total_failures = result.get('total_failures', 0)
             if total_failures > 0:
-                failure_times = self.failure_interface.station_results[station_id]['failure_times']
+                failure_times = self.failure_interface.activity_results[activity_id]['failure_times']
                 if failure_times:
                     # Time to first failure
                     first_failure_time = failure_times[0]
@@ -52,7 +52,7 @@ class FailureMaintenanceModule:
         estimated_delay = expected_failures * repair_time_mean
 
         return {
-            'station_id': station_id,
+            'activity_id': activity_id,
             'time_horizon': time_horizon,
             'predictions': predictions,
             'statistics': {
@@ -60,14 +60,14 @@ class FailureMaintenanceModule:
                 'expected_failures_in_horizon': int(time_horizon / avg_ttf_all),
                 'reliability_at_horizon': round(reliability, 3)
             },
-            'station_parameters': params,
+            'activity_parameters': params,
             'estimated_maintenance_delay': round(estimated_delay, 2),
         }
 
     def generate_comprehensive_report(self) -> Dict[str, Any]:
-        report = {'stations': {}}
-        for sid in self.failure_interface.model['stations']:
-            report['stations'][sid] = self.predict_station_failures(sid)
+        report = {'activities': {}}
+        for sid in self.failure_interface.model['activities']:
+            report['activities'][sid] = self.predict_activity_failures(sid)
         return report
     
     def _timestamp(self) -> str:
@@ -89,9 +89,10 @@ def clean_output(obj):
             return obj
         
 if __name__ == "__main__":
-    failure_module = FailureMaintenanceModule("lego_factory_with_failure.json")
+    failure_module = FailureMaintenanceModule()
+    model = retrieve_factory_with_failure()
 
-    prediction = failure_module.predict_station_failures("Station2", 1000)
-    print("Predicting failures for Station2...")
+    prediction = failure_module.predict_activity_failures(model, "A2", 1000)
+    print("Predicting failures for activity2...")
     print(clean_output(prediction))
 
