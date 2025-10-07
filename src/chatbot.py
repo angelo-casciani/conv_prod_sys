@@ -74,12 +74,18 @@ class GradioHandler:
 
 handler = GradioHandler()
 
-welcome_msg = """Welcome! The tasks that are possible on the LEGO Factory are:
+welcome_msg = """Welcome! Make sure you inserted the event log in the "log" folder. The tasks that are possible on the extracted Digital Twin are:
                             - Simulation:
-                            - Discrete simulation of the production in a specified time interval in units of time (SimPy);
-                            - Discrete simulation of the production of a specified number of pieces (SimPy);
-                            - Prediction of the next station in the production line (SimPy);
+                                - Discrete simulation of the production in a specified time interval in units of time (SimPy);
+                                - Discrete simulation of the production of a specified number of pieces (SimPy);
+                                - Prediction of the next activity in the production line (SimPy);
+                                - Discrete simulation considering the potential maintenanc time of an activity (SimPy);
                             - Verification of temporal properties on the automaton representing the factory (Uppaal).
+                            - Process Mining:
+                                - Extract a process model (e.g., Petri Net) from an event log;
+                                - Conformance_checking to verify if the observed executions in the log match a given process model;
+                                - Performance_analysis' to compute performance indicators such as throughput time or activity frequencies;
+                                - Filter the log between a specific time range.
 
                             Please tell me what you'd like to do!
                             """
@@ -93,8 +99,8 @@ demo = gr.ChatInterface(
     flagging_mode="manual",
     flagging_options=["Like", "Spam", "Inappropriate", "Other"],
     save_history=True,
-    title="LEGO Factory Assistant",
-    description="Ask me about simulations, verifications and process mining for the LEGO Factory!",
+    title="Digital Twin Production System Assistant",
+    description="Ask me about simulations, verifications and process mining for the extracted Digital Twin!",
     theme="ocean"
 )
 

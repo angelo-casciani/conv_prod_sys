@@ -502,7 +502,7 @@ class LLMPipeline:
         prompts = ""
         answers = ""
         failure_delay = 0
-        type_counters = {"failure": 0, "simulation": 0, "validation": 0, "extract_digital_twin": 0}
+        type_counters = {"failure": 0, "simulation": 0, "validation": 0}
         last_sim_time = None 
         for i, action in enumerate(plan):
             action_lower = action.lower()

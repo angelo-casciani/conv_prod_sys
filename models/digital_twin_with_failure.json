@@ -24,12 +24,12 @@
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.006,
+        "failure_rate": 0.002,
         "repair_time": {
-          "mean": 23.6,
+          "mean": 27.1,
           "std": 4.9
         },
-        "degradation_factor": 0.0005
+        "degradation_factor": 0.0012
       }
     },
     "A2": {
@@ -47,12 +47,12 @@
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.008,
+        "failure_rate": 0.002,
         "repair_time": {
-          "mean": 31.5,
-          "std": 5.3
+          "mean": 21.9,
+          "std": 6.1
         },
-        "degradation_factor": 0.0004
+        "degradation_factor": 0.0006
       }
     },
     "A5": {
@@ -70,12 +70,12 @@
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.006,
+        "failure_rate": 0.01,
         "repair_time": {
-          "mean": 21.6,
-          "std": 3.2
+          "mean": 19.4,
+          "std": 6.1
         },
-        "degradation_factor": 0.0012
+        "degradation_factor": 0.0003
       }
     },
     "A4": {
@@ -93,12 +93,12 @@
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.01,
+        "failure_rate": 0.007,
         "repair_time": {
-          "mean": 15.9,
-          "std": 6.3
+          "mean": 26.2,
+          "std": 3.8
         },
-        "degradation_factor": 0.0008
+        "degradation_factor": 0.0004
       }
     },
     "A6": {
@@ -112,12 +112,12 @@
       },
       "next_activities": {},
       "failure_parameters": {
-        "failure_rate": 0.004,
+        "failure_rate": 0.008,
         "repair_time": {
-          "mean": 20.7,
-          "std": 5.4
+          "mean": 25.2,
+          "std": 3.6
         },
-        "degradation_factor": 0.0007
+        "degradation_factor": 0.0006
       }
     },
     "A3": {
@@ -135,12 +135,12 @@
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.007,
+        "failure_rate": 0.001,
         "repair_time": {
-          "mean": 28.2,
-          "std": 2.7
+          "mean": 22.8,
+          "std": 6.7
         },
-        "degradation_factor": 0.001
+        "degradation_factor": 0.0009
       }
     }
   },
