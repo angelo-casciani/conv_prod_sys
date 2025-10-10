@@ -1,0 +1,21 @@
+question,answer,evaluation_type
+Can you list the start and end activities for the process?,no_answer,process_mining
+Can you perform conformance checking between the event log and the reference model?,no_answer,process_mining
+Can you show me the top 3 variants that are present in the event log?,no_answer,process_mining
+What are the top 5 most frequent variants in the log?,no_answer,process_mining
+Can you show the discovered Petri net model?,no_answer,process_mining
+Can you list the start and end activities for the process?,no_answer,process_mining
+What are the frequencies of each activity in the event log?,no_answer,process_mining
+Can you discover the process model from the event log?,no_answer,process_mining
+What is the mean throughput time of all completed cases?,no_answer,process_mining
+Can you perform conformance checking between the event log and the reference model?,no_answer,process_mining
+Can you perform conformance checking between the event log and the reference model?,no_answer,process_mining
+Can you list the start and end activities for the process?,no_answer,process_mining
+Can you list the start and end activities for the process?,no_answer,process_mining
+What are the top 5 most frequent variants in the log?,no_answer,process_mining
+What is the mean throughput time of all completed cases?,no_answer,process_mining
+What are the frequencies of each activity in the event log?,no_answer,process_mining
+Can you discover the process model from the event log?,no_answer,process_mining
+What are the top 5 most frequent variants in the log?,no_answer,process_mining
+Can you filter the log between 2025-03-01T00:00:00 and 2025-03-05T23:59:00?,no_answer,process_mining
+Can you show me the top 3 variants that are present in the event log?,no_answer,process_mining

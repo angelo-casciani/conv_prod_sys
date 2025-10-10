@@ -1,0 +1,21 @@
+question,answer,evaluation_type
+"How much time is needed to produce 60 pieces given that activity3 might fail? Also, verify if the system avoids deadlocks during production.",no_answer,hybrid
+Is state q2 reachable during production? Estimate the time needed to manufacture 40 pieces assuming activity1 failure.,no_answer,hybrid
+Simulate the system for 150 products and verify if q1 is eventually reached. Then confirm there are no deadlocks in the process.,no_answer,hybrid
+Can 80 pieces be produced within 60 time units when activity2 is subject to failure?,no_answer,hybrid
+Simulate the system for 150 products and verify if q1 is eventually reached. Then confirm there are no deadlocks in the process.,no_answer,hybrid
+"How much time is needed to produce 60 pieces given that activity3 might fail? Also, verify if the system avoids deadlocks during production.",no_answer,hybrid
+Can the system produce 120 products in 100 units of time while keeping all reachable states deadlock free?,no_answer,hybrid
+Can 80 pieces be produced within 60 time units when activity2 is subject to failure?,no_answer,hybrid
+Can you simulate 300 time units and verify if all activities eventually complete without entering a deadlock state?,no_answer,hybrid
+Is it possible to produce 150 pieces in 90 time units given that activity5 may fail? Validate that q2 remains reachable.,no_answer,hybrid
+Can 100 products be made within 200 units of time? Validate whether state q4 is reachable and check activity5 failure likelihood.,no_answer,hybrid
+Can 100 products be made within 200 units of time? Validate whether state q4 is reachable and check activity5 failure likelihood.,no_answer,hybrid
+"Given potential failures in activity2, what is the maximum number of products that can be produced in 120 units of time?",no_answer,hybrid
+Simulate the system for 150 products and verify if q1 is eventually reached. Then confirm there are no deadlocks in the process.,no_answer,hybrid
+Is it possible to produce 150 pieces in 90 time units given that activity5 may fail? Validate that q2 remains reachable.,no_answer,hybrid
+"How long does it take to produce 200 pieces when activity5 is under maintenance? Also, check whether q3 remains reachable.",no_answer,hybrid
+"How much time is needed to produce 60 pieces given that activity3 might fail? Also, verify if the system avoids deadlocks during production.",no_answer,hybrid
+"If activity3 experiences failures, how long does it take to complete 60 pieces?",no_answer,hybrid
+"How much time is needed to produce 60 pieces given that activity3 might fail? Also, verify if the system avoids deadlocks during production.",no_answer,hybrid
+Will the process reach state q3? How long does it take to produce 25 units considering possible degradation on activity2?,no_answer,hybrid

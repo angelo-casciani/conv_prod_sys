@@ -504,68 +504,69 @@ class LLMPipeline:
         
         prompts = ""
         answers = ""
-        failure_delay = 0
-        type_counters = {"failure": 0, "simulation": 0, "validation": 0}
-        last_sim_time = None 
-        for i, action in enumerate(plan):
-            action_lower = action.lower()
-            if "simulate" in action_lower:
-                qtype = "simulation"
-            elif "validate" in action_lower:
-                qtype = "validation"
-            elif "maintenance" in action_lower:
-                qtype = "failure"
-            elif "extract_digital_twin" in action_lower:
-                continue
-            else:
-                print(f"Unknown plan action '{action}', skipping.")
-                continue
+        if 'evaluation' not in modality:
+            failure_delay = 0
+            type_counters = {"failure": 0, "simulation": 0, "validation": 0}
+            last_sim_time = None 
+            for i, action in enumerate(plan):
+                action_lower = action.lower()
+                if "simulate" in action_lower:
+                    qtype = "simulation"
+                elif "validate" in action_lower:
+                    qtype = "validation"
+                elif "maintenance" in action_lower:
+                    qtype = "failure"
+                elif "extract_digital_twin" in action_lower:
+                    continue
+                else:
+                    print(f"Unknown plan action '{action}', skipping.")
+                    continue
 
-            idx = type_counters[qtype]
-            if idx >= len(typed_questions[qtype]):
-                print(f"No remaining questions of type {qtype} for plan step {action}, skipping this step.")
-                continue
+                idx = type_counters[qtype]
+                if idx >= len(typed_questions[qtype]):
+                    print(f"No remaining questions of type {qtype} for plan step {action}, skipping this step.")
+                    continue
 
-            q_text = typed_questions[qtype][idx]
-            type_counters[qtype] += 1
+                q_text = typed_questions[qtype][idx]
+                type_counters[qtype] += 1
 
-            if qtype == "simulation":
-                prompt, answer = self._produce_answer_simulation(q_text, modality)
+                if qtype == "simulation":
+                    prompt, answer = self._produce_answer_simulation(q_text, modality)
 
-            elif qtype == "failure":
-                last_sim_time = self.sim_time
-                prompt, answer = self._produce_answer_failure(q_text, last_sim_time)
-                try:
-                    delay = json.loads(answer).get("estimated_maintenance_delay", 0)
-                    if isinstance(delay, (int, float)):
-                        failure_delay += delay
-                        answer = f"Estimated maintenance delay: {delay} units of time"
-                    else:
-                        print(f"Warning: Delay value is not numeric: {delay}. Ignoring.")
-                except (json.JSONDecodeError, TypeError) as e:
-                    print(f"Warning: Failed to parse failure delay from answer. Using 0. Reason: {e}")
+                elif qtype == "failure":
+                    last_sim_time = self.sim_time
+                    prompt, answer = self._produce_answer_failure(q_text, last_sim_time)
+                    try:
+                        delay = json.loads(answer).get("estimated_maintenance_delay", 0)
+                        if isinstance(delay, (int, float)):
+                            failure_delay += delay
+                            answer = f"Estimated maintenance delay: {delay} units of time"
+                        else:
+                            print(f"Warning: Delay value is not numeric: {delay}. Ignoring.")
+                    except (json.JSONDecodeError, TypeError) as e:
+                        print(f"Warning: Failed to parse failure delay from answer. Using 0. Reason: {e}")
 
-            elif qtype == "validation":
-                prompt, answer = self._produce_answer_verification(q_text, modality)
-                if "deadlock" in q_text.lower():
-                    is_deadlock_free = any(phrase in answer.lower() for phrase in [
-                        "deadlock free", "no deadlock", "deadlock-free", "free from deadlock"
-                    ]) and not any(phrase in answer.lower() for phrase in [
-                        "not deadlock free", "deadlock detected", "has deadlock"
-                    ])
-                    
-                    if not is_deadlock_free:
-                        print(f"Deadlock detected in validation step {i+1}. Stopping further simulations.")
-                        answers += f"\nCRITICAL: Deadlock detected. Further simulations may be unreliable.\n"
-                        break                
+                elif qtype == "validation":
+                    prompt, answer = self._produce_answer_verification(q_text, modality)
+                    if "deadlock" in q_text.lower():
+                        is_deadlock_free = any(phrase in answer.lower() for phrase in [
+                            "deadlock free", "no deadlock", "deadlock-free", "free from deadlock"
+                        ]) and not any(phrase in answer.lower() for phrase in [
+                            "not deadlock free", "deadlock detected", "has deadlock"
+                        ])
+                        
+                        if not is_deadlock_free:
+                            print(f"Deadlock detected in validation step {i+1}. Stopping further simulations.")
+                            answers += f"\nCRITICAL: Deadlock detected. Further simulations may be unreliable.\n"
+                            break                
 
-            prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
-            answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
-        if last_sim_time and failure_delay:
-            total_time = last_sim_time + failure_delay
-            answers += f"Adding {failure_delay} units of maintenance delay, the total estimated time is {total_time} units.\n"
-            
-        #print(answers)
+                prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
+                answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
+            if last_sim_time and failure_delay:
+                total_time = last_sim_time + failure_delay
+                answers += f"Adding {failure_delay} units of maintenance delay, the total estimated time is {total_time} units.\n"
+                
+            #print(answers)
         prompt, answer = self._produce_rewritten_answer(answers) 
         return prompts, answer
     
