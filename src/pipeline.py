@@ -316,19 +316,22 @@ class LLMPipeline:
 
         if 'evaluation' not in modality:
             results = factory_interface.interface_with_llm(answer)
-            if results['target_pieces'] != '' and results['simulation_time']:
-                is_negative_result = self._check_negative_result(results)
-                print(results)
-                print(is_negative_result)
-                if is_negative_result:
-                    new_question = self._generate_new_sim_question(results)
-                    new_results = self._execute_follow_up_simulation(new_question, activity_names)
+            if "event_prediction" not in answer:
+                if results['target_pieces'] != '' and results['simulation_time']:
+                    is_negative_result = self._check_negative_result(results)
+                    print(results)
+                    print(is_negative_result)
+                    if is_negative_result:
+                        new_question = self._generate_new_sim_question(results)
+                        new_results = self._execute_follow_up_simulation(new_question, activity_names)
 
-                    combined_results = self._format_results_for_llm(results, new_results)
+                        combined_results = self._format_results_for_llm(results, new_results)
+                    else:
+                        combined_results = self._format_results_for_llm(results)
                 else:
-                    combined_results = self._format_results_for_llm(results)
+                    self.sim_time = results['results']['total_execution_time'] 
+                    combined_results = results
             else:
-                self.sim_time = results['results']['total_execution_time']
                 combined_results = results
             print(combined_results)
 
