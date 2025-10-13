@@ -1,21 +1,16 @@
 question,answer,evaluation_type
-What is the capacity of activity5?,no_answer,factory_info
-What is the mean processing time at activity1?,no_answer,factory_info
-What is the standard deviation of the processing time at activity2?,no_answer,factory_info
-How many activities are there in the production line?,no_answer,factory_info
-What is the capacity of activity5?,no_answer,factory_info
-What is the probability of routing from activity1 to activity2?,no_answer,factory_info
-What is the mean transfer time from activity3 to activity4?,no_answer,factory_info
-What is the capacity of activity5?,no_answer,factory_info
-What are the possible next activities after activity3?,no_answer,factory_info
-What is the mean processing time at activity1?,no_answer,factory_info
-Which activities have probabilistic routing defined?,no_answer,factory_info
-Which activities have probabilistic routing defined?,no_answer,factory_info
-What is the mean processing time at activity1?,no_answer,factory_info
-What is the capacity of activity5?,no_answer,factory_info
-What is the mean processing time at activity1?,no_answer,factory_info
-What is the inter-arrival time of products?,no_answer,factory_info
-Is there any activity with parallel routing options?,no_answer,factory_info
-What is the mean transfer time between activity1 and activity5?,no_answer,factory_info
-What is the standard deviation of the inter-arrival time?,no_answer,factory_info
-Which activity has the longest mean processing time?,no_answer,factory_info
+What is the capacity of activity5?,"{""task"": ""factory_info"", ""query_nl"": ""What is the capacity of activity5?"", ""response"": """"}",factory_info
+What is the probability of routing from activity1 to activity2?,"{""task"": ""factory_info"", ""query_nl"": ""What is the probability of routing from activity1 to activity2?"", ""response"": """"}",factory_info
+Is there any activity with parallel routing options?,"{""task"": ""factory_info"", ""query_nl"": ""Is there any activity with parallel routing options?"", ""response"": """"}",factory_info
+What is the probability of routing from activity1 to activity2?,"{""task"": ""factory_info"", ""query_nl"": ""What is the probability of routing from activity1 to activity2?"", ""response"": """"}",factory_info
+What are the possible next activities after activity3?,"{""task"": ""factory_info"", ""query_nl"": ""What are the possible next activities after activity3?"", ""response"": """"}",factory_info
+What are the possible next activities after activity3?,"{""task"": ""factory_info"", ""query_nl"": ""What are the possible next activities after activity3?"", ""response"": """"}",factory_info
+What are the possible next activities after activity3?,"{""task"": ""factory_info"", ""query_nl"": ""What are the possible next activities after activity3?"", ""response"": """"}",factory_info
+Is there any activity with parallel routing options?,"{""task"": ""factory_info"", ""query_nl"": ""Is there any activity with parallel routing options?"", ""response"": """"}",factory_info
+What is the standard deviation of the inter-arrival time?,"{""task"": ""factory_info"", ""query_nl"": ""What is the standard deviation of the inter-arrival time?"", ""response"": """"}",factory_info
+What is the capacity of activity5?,"{""task"": ""factory_info"", ""query_nl"": ""What is the capacity of activity5?"", ""response"": """"}",factory_info
+What is the standard deviation of the inter-arrival time?,"{""task"": ""factory_info"", ""query_nl"": ""What is the standard deviation of the inter-arrival time?"", ""response"": """"}",factory_info
+What is the standard deviation of the inter-arrival time?,"{""task"": ""factory_info"", ""query_nl"": ""What is the standard deviation of the inter-arrival time?"", ""response"": """"}",factory_info
+Which activity has the longest mean processing time?,"{""task"": ""factory_info"", ""query_nl"": ""Which activity has the longest mean processing time?"", ""response"": """"}",factory_info
+How many activities are there in the production line?,"{""task"": ""factory_info"", ""query_nl"": ""How many activities are there in the production line?"", ""response"": """"}",factory_info
+What is the mean transfer time between activity1 and activity5?,"{""task"": ""factory_info"", ""query_nl"": ""What is the mean transfer time between activity1 and activity5?"", ""response"": """"}",factory_info

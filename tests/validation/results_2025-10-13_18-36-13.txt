@@ -1,0 +1,800 @@
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gemini-2.0-flash
+LLM ID Simulation: gemini-2.0-flash
+LLM ID Verification: gemini-2.0-flash
+Max Generated Tokens LLM: 512
+Interaction Modality: evaluation-verification
+
+-----------------------------------
+Accuracy: 1.0000
+Precision: 1.0000
+Recall: 1.0000
+F1-score: 1.0000
+Elapsed: 0.00 hours
+-----------------------------------
+
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Verify if the automaton reaches at least once the states q_14 and q_1.
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Verify if the automaton reaches at least once the states q_14 and q_1.",
+  "uppaal_query": "E<> (s.q_14 && s.q_1)"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Verify if the automaton reaches at least once the states q_14 and q_1.", "uppaal_query": "E<> (s.q_14 && s.q_1)"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: If the system reaches q_7, will it eventually be in q_10?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "If the system reaches q_7, will it eventually be in q_10?",
+  "uppaal_query": "s.q_7 --> s.q_10"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "If the system reaches q_7, will it eventually be in q_10?", "uppaal_query": "s.q_7 --> s.q_10"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Does a path where the system stays in state q_6 forever exist?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Does a path where the system stays in state q_6 forever exist?",
+  "uppaal_query": "E[] s.q_6"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Does a path where the system stays in state q_6 forever exist?", "uppaal_query": "E[] s.q_6"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Does a path where the system stays in state q_13 forever exist?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Does a path where the system stays in state q_13 forever exist?",
+  "uppaal_query": "E[] s.q_13"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Does a path where the system stays in state q_13 forever exist?", "uppaal_query": "E[] s.q_13"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: If the system reaches q_4, will it eventually be in q_3?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "If the system reaches q_4, will it eventually be in q_3?",
+  "uppaal_query": "s.q_4 --> s.q_3"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "If the system reaches q_4, will it eventually be in q_3?", "uppaal_query": "s.q_4 --> s.q_3"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: If the system reaches q_12, will it eventually be in q_8?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "If the system reaches q_12, will it eventually be in q_8?",
+  "uppaal_query": "s.q_12 --> s.q_8"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "If the system reaches q_12, will it eventually be in q_8?", "uppaal_query": "s.q_12 --> s.q_8"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Check if state q_14 is reachable within 50 time units.
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Check if state q_14 is reachable within 50 time units.",
+  "uppaal_query": "E<> s.q_14 && s.x <= 50"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Check if state q_14 is reachable within 50 time units.", "uppaal_query": "E<> s.q_14 && s.x <= 50"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Verify if the automaton reaches at least once the states q_10 and q_5.
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Verify if the automaton reaches at least once the states q_10 and q_5.",
+  "uppaal_query": "E<> (s.q_10 && s.q_5)"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Verify if the automaton reaches at least once the states q_10 and q_5.", "uppaal_query": "E<> (s.q_10 && s.q_5)"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Verify if the automaton reaches at least once the states q_1 and q_7.
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Verify if the automaton reaches at least once the states q_1 and q_7.",
+  "uppaal_query": "E<> (s.q_1 && s.q_7)"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Verify if the automaton reaches at least once the states q_1 and q_7.", "uppaal_query": "E<> (s.q_1 && s.q_7)"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Does a path where state q_4 is reached exist?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Does a path where state q_4 is reached exist?",
+  "uppaal_query": "E<> s.q_4"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Does a path where state q_4 is reached exist?", "uppaal_query": "E<> s.q_4"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Does the system will always eventually reach state q_4.
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Does the system will always eventually reach state q_4.",
+  "uppaal_query": "A<> s.q_4"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Does the system will always eventually reach state q_4.", "uppaal_query": "A<> s.q_4"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Verify if the automaton reaches at least once the states q_10 and q_0.
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Verify if the automaton reaches at least once the states q_10 and q_0.",
+  "uppaal_query": "E<> (s.q_10 && s.q_0)"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Verify if the automaton reaches at least once the states q_10 and q_0.", "uppaal_query": "E<> (s.q_10 && s.q_0)"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Verify if the automaton can always stay in state q_10 for up to 25 time units.
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Verify if the automaton can always stay in state q_10 for up to 25 time units.",
+  "uppaal_query": "A[] s.q_10 && s.x <= 25"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Verify if the automaton can always stay in state q_10 for up to 25 time units.", "uppaal_query": "A[] s.q_10 && s.x <= 25"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: If the system reaches q_14, will it eventually be in q_5?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "If the system reaches q_14, will it eventually be in q_5?",
+  "uppaal_query": "s.q_14 --> s.q_5"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "If the system reaches q_14, will it eventually be in q_5?", "uppaal_query": "s.q_14 --> s.q_5"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: If the system reaches q_2, will it eventually be in q_4?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "If the system reaches q_2, will it eventually be in q_4?",
+  "uppaal_query": "s.q_2 --> s.q_4"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "If the system reaches q_2, will it eventually be in q_4?", "uppaal_query": "s.q_2 --> s.q_4"}
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as an assistant that translates natural language queries into a JSON object containing the Uppaal syntax to be verified against a timed automaton. The automaton has several locations (states) such as q_1, q_6, and q_11, and uses variables like x (a clock), Tcdf (for time bounds), and loc_entity, edge_entity (for entities in the system). Remember that x is a local clock in the template instance s, so it must be referenced as s.x.
+
+The properties in Uppaal are typically expressed using Computation Tree Logic (CTL) and involve temporal operators such as:
+A<>: "Always eventually" (checks if something will always eventually happen).
+E<>: "Exists eventually" (checks if there is at least one path where something eventually happens).
+A[]: "Always" (checks if something always holds).
+E[]: "Exists" (checks if there's a path where something holds forever).
+simulate[...]: Simulates the system behavior over a time period.
+p --> q: Whenever p holds, q will eventually hold (not allowed within the scope of a quantifier).
+p imply q: if p holds, then q holds.
+deadlock: check for the presence of a deadlock.
+Given a query in natural language, you will translate it into an Uppaal query compatible with the model.
+Examples:
+1. Input (Natural Language Query): "Check if the system will always eventually reach state q_1."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system will always eventually reach state q_1.", "uppaal_query": "A<> s.q_1"}
+2. Input (Natural Language Query): "Is there a path where state q_1 is reached?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a path where state q_1 is reached?", "uppaal_query": "E<> s.q_1"}
+3. Input (Natural Language Query): "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Simulate the system for up to 30 time units and track the states of all locations and the entity's location and edge.", "uppaal_query": "simulate[<=30]{s.q_1, s.q_6, s.q_11, s.q_10, s.q_0, s.q_13, s.__init__, s.q_3, s.q_4, s.q_12, s.q_14, s.q_9, s.q_5, s.q_7, s.q_8, s.q_2, s.loc_entity, s.edge_entity}"}
+4. Input (Natural Language Query): "Check if the system can always stay in state q_0 for up to 30 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if the system can always stay in state q_0 for up to 30 time units.", "uppaal_query": "A[] s.q_0 && s.x <= 30"}
+5. Input (Natural Language Query): "Is there any path where the system stays in state q_3 forever?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there any path where the system stays in state q_3 forever?", "uppaal_query": "E[] s.q_3"}
+6. Input (Natural Language Query): "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it always true that if the system is in state q_14, it is not in state q_1, or if it is in state q_13, it is not in state q_1?", "uppaal_query": "A[] s.q_14 imply not s.q_1 or s.q_13 imply not s.q_1"}
+7. Input (Natural Language Query): "Check if state q_6 is reachable within 15 time units."
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Check if state q_6 is reachable within 15 time units.", "uppaal_query": "E<> s.q_6 && s.x <= 15"}
+8. Input (Natural Language Query): "If the system reaches q_0, will it eventually reach q_6?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "If the system reaches q_0, will it eventually reach q_6?", "uppaal_query": "s.q_0 --> s.q_6"
+9. Input (Natural Language Query): "Is it true that the automaton always reach both state q_1 and q_5?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is it true that the automaton always reach both state q_1 and q_5?", "uppaal_query": "A<> (s.q_1 && s.q_5)"}
+10. Input (Natural Language Query): "Is there a deadlock situation in the automaton of the factory?"
+   Output (LLM answer with Uppaal Query): {"task": "verification", "query_nl": "Is there a deadlock situation in the automaton of the factory?", "uppaal_query": "A[] not deadlock"}
+}
+Use these examples to translate user queries and construct the Uppaal syntax based on the model provided in the context. Always ensure that the queries fit the automaton's structure, and when referring to local variables like clocks, prefix them with the template instance name (e.g., s.x for the clock x in the DiscoveredSystem template).
+Here is the context: The automaton states are: ['_init_', 'q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5', 'q_6', 'q_7', 'q_8', 'q_9', 'q_10', 'q_11', 'q_12', 'q_13', 'q_14']
+Here is the user question: Is there a deadlock at some point?
+Answer: 
+Model Answer: ```json
+{
+  "task": "verification",
+  "query_nl": "Is there a deadlock at some point?",
+  "uppaal_query": "E<> deadlock"
+}
+```
+Expected Answer: {"task": "verification", "query_nl": "Is there a deadlock at some point?", "uppaal_query": "E<> deadlock"}
+Verification Result: True
+
+#####################################################################################

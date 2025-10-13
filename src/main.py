@@ -67,6 +67,12 @@ def main():
         chain.evaluate_performance('verification.csv', run_data)
     elif 'evaluation-routing' in modality:
         chain.evaluate_performance('routing.csv', run_data)
+    elif 'evaluation-factory_info' in modality:
+        chain.evaluate_performance('factory_info.csv', run_data)
+    elif 'evaluation-process_mining' in modality:
+        chain.evaluate_performance('process_mining.csv', run_data)
+    elif 'evaluation-hybrid' in modality:
+        chain.evaluate_performance('hybrid.csv', run_data)
     elif 'evaluation-answer' in modality:
         chain.evaluate_performance('answer.csv', run_data)
     else:

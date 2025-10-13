@@ -107,6 +107,8 @@ class LLMPipeline:
         self.chain_process_mining = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.failure_module = failure_maintenance.FailureMaintenanceModule()
         self.process_mining_module = process_mining.ProcessMiningModule()
+        self.extracted = False
+        self.extracted_failure = False
 
 
     def _initialize_local_model(self):
@@ -212,7 +214,9 @@ class LLMPipeline:
             context = ''
         elif answer_phase == 'factory_info':
             sys_mess = self.prompts.get('system_message_info', '') + self.prompts.get('shots_info', '')
-            self.process_mining_module.extract()
+            if not self.extracted:
+                self.process_mining_module.extract()
+                self.extracted = True
             factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'digital_twin.json')
             with open(factory_model, 'r') as factory_file:
                 factory_model = json.load(factory_file)
@@ -301,8 +305,9 @@ class LLMPipeline:
         return follow_up_results
         
     def _produce_answer_simulation(self, question, modality):
-        if self.request_type == "factory_simulation":
+        if self.request_type == "factory_simulation" and not self.extracted:
             self.process_mining_module.extract()
+            self.extracted = True
         factory_data = retrieve_factory()
         activity_names = ', '.join([activity for activity in factory_data['activities']])
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
@@ -373,7 +378,9 @@ class LLMPipeline:
         return prompt, answer
     
     def _produce_answer_failure(self, question, sim_time):
-        self.process_mining_module.extract(failure=True)
+        if not self.extracted_failure:
+            self.process_mining_module.extract(failure=True)
+            self.extracted_failure = True
         factory_model_with_failure = retrieve_factory_with_failure()
         sys_mess = self.prompts.get('system_message_failure', '') + self.prompts.get('shots_failure', '')
         context = factory_model_with_failure
@@ -400,7 +407,7 @@ class LLMPipeline:
         clean_result = json.dumps(result, indent=2, default=str)
         return prompt, clean_result
     
-    def _produce_answer_process_mining(self, question):
+    def _produce_answer_process_mining(self, question, modality):
         sys_mess = self.prompts.get('system_message_process_mining', '') + self.prompts.get('shots_process_mining', '')
         context = ''
         invoke_payload = {"question": question,
@@ -414,34 +421,37 @@ class LLMPipeline:
         parsed_json = json.loads(answer)
         #print(parsed_json)
         action = parsed_json.get("task")
-        if action is None:
-            print("Process mining JSON missing 'task' field, returning empty result.")
-            return prompt, "{}"
-        elif action == 'process_discovery':
-            net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
-            self.process_mining_module.view_petri_net(net, initial_marking, final_marking)
-            nl_output = f"I discovered the process model. The Petri net has been saved at: {net_path}."
-        elif action == 'conformance_checking':
-            log = self.process_mining_module.load_log()
-            net, initial_marking, final_marking, net_path = self.process_mining_module.discovery_from_csv()
-            trace_is_fit, trace_fitness = self.process_mining_module.conformal_checking(net, initial_marking, final_marking, log)
-            fit_text = "fits" if trace_is_fit else "does not fit"
-            nl_output = f"The event log {fit_text} the discovered model, with a fitness score of {trace_fitness:.2f}."
-        elif action == 'performance_analysis':
-            metric = parsed_json.get("metric")
-            log = self.process_mining_module.load_log()    
-            result = self.process_mining_module.performance_analysis(log, metric, parsed_json)
-            if metric == "throughput_time":
-                nl_output = f"I computed the {metric} metric. Result: {result} seconds."
+        nl_output = answer
+        if 'evaluation' not in modality:
+            
+            if action is None:
+                print("Process mining JSON missing 'task' field, returning empty result.")
+                return prompt, "{}"
+            elif action == 'process_discovery':
+                net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
+                self.process_mining_module.view_petri_net(net, initial_marking, final_marking)
+                nl_output = f"I discovered the process model. The Petri net has been saved at: {net_path}."
+            elif action == 'conformance_checking':
+                log = self.process_mining_module.load_log()
+                net, initial_marking, final_marking, net_path = self.process_mining_module.discovery_from_csv()
+                trace_is_fit, trace_fitness = self.process_mining_module.conformal_checking(net, initial_marking, final_marking, log)
+                fit_text = "fits" if trace_is_fit else "does not fit"
+                nl_output = f"The event log {fit_text} the discovered model, with a fitness score of {trace_fitness:.2f}."
+            elif action == 'performance_analysis':
+                metric = parsed_json.get("metric")
+                log = self.process_mining_module.load_log()    
+                result = self.process_mining_module.performance_analysis(log, metric, parsed_json)
+                if metric == "throughput_time":
+                    nl_output = f"I computed the {metric} metric. Result: {result} seconds."
+                else:
+                    nl_output = f"I computed the {metric} metric. Result: {result}."
+            elif action == "filter_by_time_range":
+                log = self.process_mining_module.load_log()
+                start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 
+                filtered_path = self.process_mining_module.filter_by_time_range(log, start_date, end_date)
+                nl_output = f"The filtered event log has been saved at: {filtered_path}."
             else:
-                nl_output = f"I computed the {metric} metric. Result: {result}."
-        elif action == "filter_by_time_range":
-            log = self.process_mining_module.load_log()
-            start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 
-            filtered_path = self.process_mining_module.filter_by_time_range(log, start_date, end_date)
-            nl_output = f"The filtered event log has been saved at: {filtered_path}."
-        else:
-            raise ValueError(f"Unsupported process mining action: {action}")
+                raise ValueError(f"Unsupported process mining action: {action}")
         
         return prompt, nl_output
     
@@ -458,7 +468,9 @@ class LLMPipeline:
 
 
     def _produce_answer_hybrid(self, question, modality):
-        self.process_mining_module.extract()
+        if not self.extracted:
+            self.process_mining_module.extract()
+            self.extracted = True
         factory_model = retrieve_factory()
         activities = [a for a in factory_model['activities'].keys()]
         activities_str = ", ".join(activities)
@@ -471,6 +483,8 @@ class LLMPipeline:
         prompt_gateway = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
         answer_gateway = self.chain_gateway.invoke(invoke_payload).content
         
+        if "evaluation" in modality:
+            return prompt_gateway, answer_gateway
         answer_gateway = clean_json_block(answer_gateway)
 
         #question_json = json.loads(answer_gateway)
@@ -631,18 +645,40 @@ class LLMPipeline:
     def evaluate_performance(self, test_filename, info_run):
         questions = load_csv_questions(test_filename)
         oracle = AnswerVerificationOracle(info_run)
+
+        if test_filename == 'routing.csv':
+            oracle.set_test_type('routing')
+        elif test_filename == 'simulation.csv':
+            oracle.set_test_type('simulation')
+        elif test_filename == 'verification.csv':
+            oracle.set_test_type('verification')
+        elif test_filename == 'factory_info.csv':
+            oracle.set_test_type('factory_info')
+        elif test_filename == 'process_mining.csv':
+            oracle.set_test_type('process_mining')
+        elif test_filename == 'hybrid.csv':
+            oracle.set_test_type('hybrid')
+
         count = 0
         prompt, answer = '', ''
         for el in questions:
             question = el[0]
             expected_answer = el[1]
             oracle.add_question_expected_answer_pair(question, expected_answer)
+
             if test_filename == 'simulation.csv':
+                self.request_type = "factory_simulation"
                 prompt, answer = self._produce_answer_simulation(question, 'evaluation-simulation')
             elif test_filename == 'verification.csv':
                 prompt, answer = self._produce_answer_verification(question, 'evaluation-verification')
             elif test_filename == 'routing.csv':
                 prompt, answer = self._produce_answer_gateway(question, 'routing')
+            elif test_filename == 'factory_info.csv':
+                prompt, answer = self._produce_answer_gateway(question, 'factory_info')
+            elif test_filename == 'process_mining.csv':
+                prompt, answer = self._produce_answer_process_mining(question, 'evaluation-process_mining')
+            elif test_filename == 'hybrid.csv':
+                prompt, answer = self._produce_answer_hybrid(question, 'evaluation-hybrid')
             oracle.verify_answer(prompt, question, answer)
             count += 1
             print(f'Processing answer for question {count} of {len(questions)}...')
