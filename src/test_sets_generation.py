@@ -6,6 +6,7 @@ import random
 import llm_factory_interface as fa
 import uppaal_interface as up
 import json
+from datetime import datetime, timedelta
 
 simulation_tasks = {
     "sim_with_time": [
@@ -224,24 +225,24 @@ def generate_unrelated_questions(unrelated_questions, number_samples=100):
 
 
 factory_info_questions = [
-    ("What is the mean processing time at activity1?", {
+    ("What is the mean processing time at {activity}?", {
     "task": "factory_info",
-    "query_nl": "What is the mean processing time at activity1?",
+    "query_nl": "What is the mean processing time at {activity}",
     "response": ""
 }),
-    ("What is the standard deviation of the processing time at activity2?", {
+    ("What is the standard deviation of the processing time at {activity}?", {
     "task": "factory_info",
-    "query_nl": "What is the standard deviation of the processing time at activity2?",
+    "query_nl": "What is the standard deviation of the processing time at {activity}?",
     "response": ""
 }),
-    ("What are the possible next activities after activity3?", {
+    ("What are the possible next activities after {activity}?", {
     "task": "factory_info",
-    "query_nl": "What are the possible next activities after activity3?",
+    "query_nl": "What are the possible next activities after {activity}?",
     "response": ""
 }),
-    ("What is the probability of routing from activity1 to activity2?", {
+    ("What is the probability of routing from {activity1} to {activity2}?", {
     "task": "factory_info",
-    "query_nl": "What is the probability of routing from activity1 to activity2?",
+    "query_nl": "What is the probability of routing from {activity1} to {activity2}?",
     "response": ""
 }),
     ("What is the inter-arrival time of products?", {
@@ -249,14 +250,14 @@ factory_info_questions = [
     "query_nl": "What is the inter-arrival time of products?",
     "response": ""
 }),
-    ("What is the mean transfer time from activity3 to activity4?", {
+    ("What is the mean transfer time from {activity1} to {activity2}?", {
     "task": "factory_info",
-    "query_nl": "What is the mean transfer time from activity3 to activity4?",
+    "query_nl": "What is the mean transfer time from {activity1} to {activity2}?",
     "response": ""
 }),
-    ("What is the capacity of activity5?", {
+    ("What is the capacity of {activity}?", {
     "task": "factory_info",
-    "query_nl": "What is the capacity of activity5?",
+    "query_nl": "What is the capacity of {activity}?",
     "response": ""
 }),
     ("How many activities are there in the production line?", {
@@ -279,9 +280,9 @@ factory_info_questions = [
     "query_nl": "Which activity has the smallest capacity?",
     "response": ""
 }),
-    ("What is the mean transfer time between activity1 and activity5?", {
+    ("What is the mean transfer time between {activity1} and {activity2}?", {
     "task": "factory_info",
-    "query_nl": "What is the mean transfer time between activity1 and activity5?",
+    "query_nl": "What is the mean transfer time between {activity1} and {activity2}?",
     "response": ""
 }),
     ("Is there any activity with parallel routing options?", {
@@ -298,14 +299,24 @@ factory_info_questions = [
 
 
 def generate_factory_info_questions(factory_info_questions, number_samples=15):
-    samples = random.choices(factory_info_questions, k=number_samples)
-    questions = []
-    for s, a in samples:
-        questions.append([s, a])
+    samples = []
+    for _ in range(number_samples):
+        s, a = random.choice(factory_info_questions)
+        activity = random.choice(activities)
+        activity1 = random.choice(activities)
+        activity2 = random.choice(activities)
+        while activity1 == activity2:
+            activity2 = random.choice(activities)
+        
+        s = s.format(activity=activity, activity1=activity1, activity2=activity2)
+        a = a.copy()
+        query_nl = a["query_nl"]
+        a["query_nl"] = query_nl.format(activity=f"{activity}", activity1=f"{activity1}", activity2=f"{activity2}")
+        samples.append([s, a])
 
-    write_samples_to_csv('factory_info', questions)
+    write_samples_to_csv('factory_info', samples)
 
-process_mining_questions = process_mining_questions = [
+process_mining_questions = [
     ("Can you discover the process model from the event log?", {
     "task": "process_discovery"
 }),
@@ -320,49 +331,95 @@ process_mining_questions = process_mining_questions = [
     "task": "performance_analysis",
     "metric": "activity_frequency"
 }),
-    ("What are the top 5 most frequent variants in the log?", {
+    ("What are the top {k} most frequent variants in the log?", {
     "task": "performance_analysis",
     "metric": "top_variants",
-    "k": 5
+    "k": "{k}"
 }),
     ("Can you list the start and end activities for the process?", {
     "task": "performance_analysis",
     "metric": "start_end_activities"
 }),
-    ("Can you filter the log between 2025-03-01T00:00:00 and 2025-03-05T23:59:00?", {
+    ("Can you filter the log between {year}-{month}-{day}T{hour}:{minute}:{second} and {year1}-{month1}-{day1}T{hour1}:{minute1}:{second1}?", {
     "task": "filter_by_time_range",
-    "start_date": "2025-03-01T00:00:00", 
-    "end_date": "2025-03-05T23:59:00"
+    "start_date": "{year}-{month}-{day}T{hour}:{minute}:{second}", 
+    "end_date": "{year1}-{month1}-{day1}T{hour1}:{minute1}:{second1}"
 }),
     ("Can you show the discovered Petri net model?", {
     "task": "process_discovery"
 }),
-    ("Can you show me the top 3 variants that are present in the event log?", {
+    ("Can you show me the top {k} variants that are present in the event log?", {
     "task": "performance_analysis",
     "metric": "top_variants",
-    "k": 3
+    "k": "{k}"
 })
 ]
 
+k_range = range(1, 10, 1)
+year_range = range(2015, 2025, 1)
+month_range = range(1, 12, 1)
+day_range = range(1, 31, 1)
+hour_range = range(0, 24, 1)
+minute_range = range(0, 59, 1)
+second_range = range(0, 59, 1)
 def generate_process_mining_questions(process_mining_questions, number_samples=15):
-    samples = random.choices(process_mining_questions, k=number_samples)
-    questions = []
-    for s, a in samples:
-        questions.append([s, a])
+    samples = []
+    for _ in range(number_samples):
+        s, a = random.choice(process_mining_questions)
+        k = random.choice(k_range)
+        year = random.choice(year_range)
+        month = random.choice(month_range)
+        day = random.choice(day_range)
+        hour = random.choice(hour_range)
+        minute = random.choice(minute_range)
+        second = random.choice(second_range)
+        
+        try:
+            start_dt = datetime(year, month, day, hour, minute, second)
+        except ValueError:
+            continue
 
-    write_samples_to_csv('process_mining', questions)
+        delta = timedelta(
+            days=random.randint(0, 3),
+            hours=random.randint(0, 23),
+            minutes=random.randint(0, 59),
+            seconds=random.randint(1, 59)
+        )
+        end_dt = start_dt + delta
+
+        fmt = lambda d: d.strftime("%Y-%m-%dT%H:%M:%S")
+
+        s = s.format(
+            k=k,
+            year=start_dt.year, month=f"{start_dt.month:02d}", day=f"{start_dt.day:02d}",
+            hour=f"{start_dt.hour:02d}", minute=f"{start_dt.minute:02d}", second=f"{start_dt.second:02d}",
+            year1=end_dt.year, month1=f"{end_dt.month:02d}", day1=f"{end_dt.day:02d}",
+            hour1=f"{end_dt.hour:02d}", minute1=f"{end_dt.minute:02d}", second1=f"{end_dt.second:02d}"
+        )
+        
+        a = a.copy()
+        if "k" in a:
+            a["k"] = a["k"].format(k=k)
+            a["k"] = int(a["k"])
+        if "start_date" in a and "end_date" in a:
+            a["start_date"] = fmt(start_dt)
+            a["end_date"] = fmt(end_dt)
+
+        samples.append([s, a])
+
+    write_samples_to_csv('process_mining', samples)
 
 hybrid_questions = hybrid_questions = [
-    ("How much time is needed to produce 60 pieces given that activity3 might fail? Also, verify if the system avoids deadlocks during production.", {
+    ("How much time is needed to produce {pieces} pieces given that {activity} might fail? Also, verify if the system avoids deadlocks during production.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "How much time is needed to produce 60 pieces?",
+            "question": "How much time is needed to produce {pieces} pieces?",
             "type": "simulation"
         },
         {
-            "question": "What are the failure patterns of activity3?",
+            "question": "What are the failure patterns of {activity}?",
             "type": "failure"
         },
         {
@@ -371,52 +428,52 @@ hybrid_questions = hybrid_questions = [
         }
     ]
 }),
-    ("Can 100 products be made within 200 units of time? Validate whether state q4 is reachable and check activity5 failure likelihood.", {
+    ("Can {pieces} products be made within {time} units of time? Validate whether state {state} is reachable and check {activity} failure likelihood.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Can 100 products be made within 200 units of time?",
+            "question": "Can {pieces} products be made within {time} units of time?",
             "type": "simulation"
         },
         {
-            "question": "What is the failure likelihood of activity5?",
+            "question": "What is the failure likelihood of {activity}?",
             "type": "failure"
         },
         {
-            "question": "Is state q4 reachable?",
+            "question": "Is state {state} reachable?",
             "type": "validation"
         }
     ]
 }),
-    ("Will the process reach state q3? How long does it take to produce 25 units considering possible degradation on activity2?", {
+    ("Will the process reach state {state}? How long does it take to produce {pieces} units considering possible degradation on {activity}?", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "How long does it take to produce 25 units?",
+            "question": "How long does it take to produce {pieces} units?",
             "type": "simulation"
         },
         {
-            "question": "What are the degradation effects on activity2?",
+            "question": "What are the degradation effects on {activity}?",
             "type": "failure"
         },
         {
-            "question": "Will the process reach state q3?",
+            "question": "Will the process reach state {state}?",
             "type": "validation"
         }
     ]
 }),
-    ("Simulate the system for 150 products and verify if q1 is eventually reached. Then confirm there are no deadlocks in the process.", {
+    ("Simulate the system for {pieces} products and verify if {state} is eventually reached. Then confirm there are no deadlocks in the process.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Simulate the system for 150 products.",
+            "question": "Simulate the system for {pieces} products.",
             "type": "simulation"
         },
         {
-            "question": "Is state q1 eventually reached?",
+            "question": "Is state {state} eventually reached?",
             "type": "validation"
         },
         {
@@ -425,62 +482,62 @@ hybrid_questions = hybrid_questions = [
         }
     ]
 }),
-    ("Considering preventive maintenance on activity4, how many pieces can be produced in 100 units of time?", {
+    ("Considering preventive maintenance on {activity}, how many pieces can be produced in {time} units of time?", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "How many pieces can be produced in 100 units of time?",
+            "question": "How many pieces can be produced in {time} units of time?",
             "type": "simulation"
         },
         {
-            "question": "What are the maintenance effects on activity4?",
+            "question": "What are the maintenance effects on {activity}?",
             "type": "failure"
         }
     ]
 }),
-    ("Is state q2 reachable during production? Estimate the time needed to manufacture 40 pieces assuming activity1 failure.", {
+    ("Is state {state} reachable during production? Estimate the time needed to manufacture {pieces} pieces assuming {activity} failure.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Estimate the time needed to manufacture 40 pieces.",
+            "question": "Estimate the time needed to manufacture {pieces} pieces.",
             "type": "simulation"
         },
         {
-            "question": "Check activity1's failure predictions.",
+            "question": "Check {activity}'s failure predictions.",
             "type": "failure"
         },
         {
-            "question": "Is state q2 reachable during production?",
+            "question": "Is state {state} reachable during production?",
             "type": "validation"
         }
     ]
 }),
-    ("How long does it take to produce 200 pieces when activity5 is under maintenance? Also, check whether q3 remains reachable.", {
+    ("How long does it take to produce {pieces} pieces when {activity} is under maintenance? Also, check whether {state} remains reachable.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "How long does it take to produce 200 pieces?",
+            "question": "How long does it take to produce {pieces} pieces?",
             "type": "simulation"
         },
         {
-            "question": "What are the effects of maintenance on activity5?",
+            "question": "What are the effects of maintenance on {activity}?",
             "type": "failure"
         },
         {
-            "question": "Is state q3 reachable during production?",
+            "question": "Is state {state} reachable during production?",
             "type": "validation"
         }
     ]
 }),
-    ("Can you simulate 300 time units and verify if all activities eventually complete without entering a deadlock state?", {
+    ("Can you simulate {time} time units and verify if all activities eventually complete without entering a deadlock state?", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Simulate the system for 300 time units.",
+            "question": "Simulate the system for {time} time units.",
             "type": "simulation"
         },
         {
@@ -489,72 +546,72 @@ hybrid_questions = hybrid_questions = [
         }
     ]
 }),
-    ("Given potential failures in activity2, what is the maximum number of products that can be produced in 120 units of time?", {
+    ("Given potential failures in {activity}, what is the maximum number of products that can be produced in {time} units of time?", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "What is the maximum number of products that can be produced in 120 units of time?",
+            "question": "What is the maximum number of products that can be produced in {time} units of time?",
             "type": "simulation"
         },
         {
-            "question": "What are the potential failures in activity2?",
+            "question": "What are the potential failures in {activity}?",
             "type": "failure"
         }
     ]
 }),
-    ("Simulate the process for 250 pieces and validate that q4 is reached at least once.", {
+    ("Simulate the process for {pieces} pieces and validate that {state} is reached at least once.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Simulate the process for 250 pieces.",
+            "question": "Simulate the process for {pieces} pieces.",
             "type": "simulation"
         },
         {
-            "question": "Is state q4 reached at least once?",
+            "question": "Is state {state} reached at least once?",
             "type": "validation"
         }
     ]
 }),
-    ("Will the system remain operational if activity1 fails temporarily? How long will it take to produce 50 pieces?", {
+    ("What happens if {activity} fails temporarily? How long will it take to produce {pieces} pieces?", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "How long will it take to produce 50 pieces?",
+            "question": "How long will it take to produce {pieces} pieces?",
             "type": "simulation"
         },
         {
-            "question": "What is the effect of a temporary failure in activity1?",
+            "question": "What is the effect of a temporary failure in {activity}?",
             "type": "failure"
         }
     ]
 }),
-    ("Estimate how many products can be produced in 70 units of time considering failures in activity3.", {
+    ("Estimate how many products can be produced in {time} units of time considering failures in {activity}.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "How many products can be produced in 70 units of time?",
+            "question": "How many products can be produced in {time} units of time?",
             "type": "simulation"
         },
         {
-            "question": "What failures may occur in activity3?",
+            "question": "What failures may occur in {activity}?",
             "type": "failure"
         }
     ]
 }),
-    ("Simulate 400 time units and verify whether q5 is ever reached. Check if the process remains deadlock free.", {
+    ("Simulate {time} time units and verify whether {state} is ever reached. Check if the process remains deadlock free.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Simulate the system for 400 time units.",
+            "question": "Simulate the system for {time} time units.",
             "type": "simulation"
         },
         {
-            "question": "Is state q5 ever reached?",
+            "question": "Is state {state} ever reached?",
             "type": "validation"
         },
         {
@@ -563,44 +620,44 @@ hybrid_questions = hybrid_questions = [
         }
     ]
 }),
-    ("Can 80 pieces be produced within 60 time units when activity2 is subject to failure?", {
+    ("Can {pieces} pieces be produced within {time} time units when {activity} is subject to failure?", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Can 80 pieces be produced within 60 time units?",
+            "question": "Can {pieces} pieces be produced within {time} time units?",
             "type": "simulation"
         },
         {
-            "question": "What failures affect activity2?",
+            "question": "What failures affect {activity}?",
             "type": "failure"
         }
     ]
 }),
-    ("How much time is required to produce 100 pieces assuming maintenance on activity4? Validate if q1 stays reachable.", {
+    ("How much time is required to produce {pieces} pieces assuming maintenance on {activity}? Validate if {state} stays reachable.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "How much time is required to produce 100 pieces?",
+            "question": "How much time is required to produce {pieces} pieces?",
             "type": "simulation"
         },
         {
-            "question": "What is the effect of maintenance on activity4?",
+            "question": "What is the effect of maintenance on {activity}?",
             "type": "failure"
         },
         {
-            "question": "Is state q1 reachable during production?",
+            "question": "Is state {state} reachable during production?",
             "type": "validation"
         }
     ]
 }),
-    ("Simulate the system for 500 time units and verify that there are no deadlocks.", {
+    ("Simulate the system for {time} time units and verify that there are no deadlocks.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Simulate the system for 500 time units.",
+            "question": "Simulate the system for {time} time units.",
             "type": "simulation"
         },
         {
@@ -609,30 +666,30 @@ hybrid_questions = hybrid_questions = [
         }
     ]
 }),
-    ("Is it possible to produce 150 pieces in 90 time units given that activity5 may fail? Validate that q2 remains reachable.", {
+    ("Is it possible to produce {pieces} pieces in {time} time units given that {activity} may fail? Validate that {state} remains reachable.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Is it possible to produce 150 pieces in 90 time units?",
+            "question": "Is it possible to produce {pieces} pieces in {time} time units?",
             "type": "simulation"
         },
         {
-            "question": "Check activity5's failure predictions.",
+            "question": "Check {activity}'s failure predictions.",
             "type": "failure"
         },
         {
-            "question": "Is state q2 reachable?",
+            "question": "Is state {state} reachable?",
             "type": "validation"
         }
     ]
 }),
-    ("Run a simulation with 200 products and confirm that the system avoids deadlocks and eventually reaches q4.", {
+    ("Run a simulation with {pieces} products and confirm that the system avoids deadlocks and eventually reaches {state}.", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Run a simulation with 200 products.",
+            "question": "Run a simulation with {pieces} products.",
             "type": "simulation"
         },
         {
@@ -640,31 +697,31 @@ hybrid_questions = hybrid_questions = [
             "type": "validation"
         },
         {
-            "question": "Is state q4 eventually reached?",
+            "question": "Is state {state} eventually reached?",
             "type": "validation"
         }
     ]
 }),
-    ("If activity3 experiences failures, how long does it take to complete 60 pieces?", {
+    ("If {activity} experiences failures, how long does it take to complete {pieces} pieces?", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "How long does it take to complete 60 pieces?",
+            "question": "How long does it take to complete {pieces} pieces?",
             "type": "simulation"
         },
         {
-            "question": "What happens if activity3 experiences failures?",
+            "question": "What happens if {activity} experiences failures?",
             "type": "failure"
         }
     ]
 }),
-    ("Can the system produce 120 products in 100 units of time while keeping all reachable states deadlock free?", {
+    ("Can the system produce {pieces} products in {time} units of time while keeping all reachable states deadlock free?", {
     "task": "hybrid",
     "pddl_problem": "",
     "questions": [
         {
-            "question": "Can the system produce 120 products in 100 units of time?",
+            "question": "Can the system produce {pieces} products in {time} units of time?",
             "type": "simulation"
         },
         {
@@ -679,12 +736,27 @@ hybrid_questions = hybrid_questions = [
 
 
 def generate_hybrid_questions(hybrid_questions, number_samples=10):
-    samples = random.choices(hybrid_questions, k=number_samples)
-    questions = []
-    for s,a in samples:
-        questions.append([s, a])
+    samples = []
+    for _ in range(number_samples):
+        s, a = random.choice(hybrid_questions)
+        pieces = random.choice(pieces_range)
+        time = random.choice(time_range_sim)
+        activity = random.choice(activities)
+        state = random.choice(states_verification)
 
-    write_samples_to_csv('hybrid', questions)
+        s = s.format(pieces=pieces, time=time, activity=activity, state=state)
+        a = a.copy()
+        for q in a["questions"]:
+            q["question"] = q["question"].format(
+                pieces=pieces,
+                time=time,
+                activity=activity,
+                state=state
+            )
+        
+        samples.append([s, a])
+
+    write_samples_to_csv('hybrid', samples)
 
 
 def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_csv, process_mining_csv, hybrid_csv, output_csv, sim_proportions, total_samples=15):
