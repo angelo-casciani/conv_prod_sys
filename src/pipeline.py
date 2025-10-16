@@ -46,8 +46,8 @@ def explicit_deadlock_free(qjson, plan):
 class LLMPipeline:
     MODELS = {
         'api': {
-            'openai': ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o'],
-            'google_genai': ['gemini-2.0-flash', 'gemini-2.5-flash-preview-05-20', 'gemini-2.5-pro', 'gemini-2.5-flash'],
+            'openai': ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano'],
+            'google_genai': ['gemini-2.5-pro', 'gemini-2.5-flash'],
             'deepseek': ['deepseek-chat', 'deepseek-reasoner'],
             'anthropic': [],
         },
@@ -59,7 +59,8 @@ class LLMPipeline:
             'qwen': ['Qwen/Qwen2.5-7B-Instruct'],
             'google_genai': ['google/gemma-2-9b-it'],
             'microsoft': ['microsoft/phi-4'],
-            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B']
+            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B'],
+            'openai': ['gpt-oss-20b'],
         }
     }
     TERMINATOR_TOKENS = {
@@ -178,6 +179,20 @@ class LLMPipeline:
         template = self.prompts.get(template_key, '')
 
         return PromptTemplate.from_template(template)
+
+    def _parse_llm_answer(self, complete_answer, model_family):
+        model_family_key = model_family.lower()
+        delimiter = LLMPipeline.RESPONSE_DELIMITERS.get(model_family_key, 'Answer:')
+
+        index = complete_answer.find(delimiter)
+        if index != -1:
+            prompt = complete_answer[:index + len(delimiter)]
+            answer = complete_answer[index + len(delimiter):]
+        else:
+            prompt = complete_answer
+            answer = ""
+
+        return prompt, answer
     
 
     def _initialize_chain(self, model_id, model_family, model_type):
@@ -222,7 +237,10 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_gateway.invoke(invoke_payload)
-        answer = complete_answer.content
+        if self.model_type_gateway == 'local':
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+        else:
+            answer = complete_answer.content
         return prompt, answer
 
     def _format_results_for_llm(self, results, follow_up_results=None):
@@ -313,7 +331,10 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_simulation.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_simulation.invoke(invoke_payload)
-        answer = complete_answer.content
+        if self.model_type_simulation == 'local':
+            answer = complete_answer
+        else:
+            answer = complete_answer.content
 
         if 'evaluation' not in modality:
             results = factory_interface.interface_with_llm(answer)
@@ -346,7 +367,10 @@ class LLMPipeline:
                             "system_message": sys_mess}
             prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
             complete_answer = self.chain_gateway.invoke(invoke_payload)
-            answer = complete_answer.content
+            if self.model_type_gateway == 'local':
+                prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+            else:
+                answer = complete_answer.content
         return prompt, answer
 
 
@@ -359,7 +383,10 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_verification.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_verification.invoke(invoke_payload)
-        answer = complete_answer.content
+        if self.model_type_verification == 'local':
+            answer = complete_answer
+        else:
+            answer = complete_answer.content
 
         if 'evaluation' not in modality:
             results = uppaal_interface.interface_with_llm(answer)
@@ -370,7 +397,10 @@ class LLMPipeline:
                         "system_message": sys_mess}
             prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
             complete_answer = self.chain_gateway.invoke(invoke_payload)
-            answer = complete_answer.content
+            if self.model_type_gateway == 'local':
+                prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+            else:
+                answer = complete_answer.content
         return prompt, answer
     
     def _produce_answer_failure(self, question, sim_time):
@@ -385,7 +415,10 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_failure.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_failure.invoke(invoke_payload)
-        answer = complete_answer.content
+        if self.model_type_gateway == 'local':
+            answer = complete_answer
+        else:
+            answer = complete_answer.content
 
         answer = clean_json_block(answer)
         parsed_json = json.loads(answer)
@@ -411,7 +444,10 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_process_mining.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_process_mining.invoke(invoke_payload)
-        answer = complete_answer.content
+        if self.model_type_gateway == 'local':
+            answer = complete_answer
+        else:
+            answer = complete_answer.content
 
         answer = clean_json_block(answer)
         parsed_json = json.loads(answer)
@@ -458,7 +494,11 @@ class LLMPipeline:
                     "context": answers,
                     "system_message": sys_mess}
         prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
-        answer = self.chain_gateway.invoke(invoke_payload).content
+        complete_answer = self.chain_gateway.invoke(invoke_payload)
+        if self.model_type_gateway == 'local':
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+        else:
+            answer = complete_answer.content
 
         return prompt, answer
 
@@ -477,7 +517,11 @@ class LLMPipeline:
                     "context": context,
                     "system_message": sys_mess}
         prompt_gateway = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
-        answer_gateway = self.chain_gateway.invoke(invoke_payload).content
+        complete_answer = self.chain_gateway.invoke(invoke_payload)
+        if self.model_type_gateway == 'local':
+            answer_gateway = complete_answer
+        else:
+            answer_gateway = complete_answer.content
         
         if "evaluation" in modality:
             return prompt_gateway, answer_gateway
