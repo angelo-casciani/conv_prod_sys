@@ -42,10 +42,11 @@ git clone https://github.com/angelo-casciani/conv_prod_sys
 cd conv_prod_sys
 ```
 
-Create a new [conda](https://docs.anaconda.com/free/miniconda/) environment:
+Assuming a working version of Python (v.3.10.12) installed on the machine, create a virtual environment in the root folder of the project.
+
 ```bash
-conda create -n conv_prod_sys python=3.10 --yes
-conda activate conv_prod_sys
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 Run the following command to install the necessary packages along with their dependencies in the `requirements.txt` file using `pip`:
@@ -60,7 +61,9 @@ Upon first launch, request and register a valid license key when prompted.
 Set up a [HuggingFace token](https://huggingface.co/) and/or an [OpenAI API key](https://platform.openai.com/overview) in a `.env` file in the root directory:
     ```env
     HF_TOKEN=<your token, should start with hf_>
+    DEEPSEEK_API_KEY=<your key, should start with sk->
     OPENAI_API_KEY=<your key, should start with sk->
+    GOOGLE_API_KEY=<your Gemini API key>
     ```
 
 ## LLMs Requirements

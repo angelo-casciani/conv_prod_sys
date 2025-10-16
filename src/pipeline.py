@@ -17,8 +17,8 @@ import pddl_interface
 import tempfile
 import failure_maintenance
 import ast
-import re
 import process_mining
+
 
 def clean_json_block(text: str) -> str:
     if text.startswith("```"):
@@ -26,6 +26,7 @@ def clean_json_block(text: str) -> str:
         if len(lines) >= 3 and lines[0].startswith("```") and lines[-1].startswith("```"):
             return "\n".join(lines[1:-1]).strip()
     return text.strip()
+
 
 def explicit_deadlock_free(qjson, plan):
     questions = qjson.get("questions", [])
@@ -40,18 +41,20 @@ def explicit_deadlock_free(qjson, plan):
 
     qjson["questions"] = questions
     return qjson
+
+
 class LLMPipeline:
     MODELS = {
         'api': {
             'openai': ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o'],
-            'google_genai': ['gemini-2.0-flash', 'gemini-2.5-flash-preview-05-20'],
+            'google_genai': ['gemini-2.0-flash', 'gemini-2.5-flash-preview-05-20', 'gemini-2.5-pro', 'gemini-2.5-flash'],
             'deepseek': ['deepseek-chat', 'deepseek-reasoner'],
             'anthropic': [],
         },
         'local': {
-            'metaai': ['meta-llama/Meta-Llama-3-8B-Instruct', 'meta-llama/Meta-Llama-3.1-8B-Instruct',
+            'metaai': ['meta-llama/Meta-Llama-3-8B-Instruct', 'meta-llama/Llama-3.1-8B-Instruct',
                        'meta-llama/Llama-3.2-1B-Instruct', 'meta-llama/Llama-3.2-3B-Instruct'],
-            'mistral': ['mistralai/Mistral-7B-Instruct-v0.2','mistralai/Mistral-7B-Instruct-v0.3', 
+            'mistral': ['mistralai/Mistral-7B-Instruct-v0.2','mistralai/Mistral-7B-Instruct-v0.3',
                         'mistralai/Mistral-Nemo-Instruct-2407', 'mistralai/Ministral-8B-Instruct-2410'],
             'qwen': ['Qwen/Qwen2.5-7B-Instruct'],
             'google_genai': ['google/gemma-2-9b-it'],
@@ -111,7 +114,7 @@ class LLMPipeline:
         self.extracted_failure = False
 
 
-    def _initialize_local_model(self):
+    def _initialize_local_model(self, model_id, model_family):
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type='nf4',
@@ -119,11 +122,11 @@ class LLMPipeline:
             bnb_4bit_compute_dtype=bfloat16
         )
         model_config = AutoConfig.from_pretrained(
-            self.model_id,
+            model_id,
             token=self.hf_token
         )
         model = AutoModelForCausalLM.from_pretrained(
-            self.model_id,
+            model_id,
             trust_remote_code=True,
             config=model_config,
             quantization_config=bnb_config,
@@ -133,7 +136,7 @@ class LLMPipeline:
         model.eval()
 
         tokenizer = AutoTokenizer.from_pretrained(
-            self.model_id,
+            model_id,
             token=self.hf_token
         )
 
@@ -148,21 +151,14 @@ class LLMPipeline:
             "repetition_penalty": 1.1
         }
     
-        model_family_key = self.model_family.lower() if self.model_family else None
-        if model_family_key and model_family_key in LLMPipeline.TERMINATOR_TOKENS:
-            special_token_str = LLMPipeline.TERMINATOR_TOKENS[model_family_key] 
-            terminators_ids = [tokenizer.eos_token_id]
-            if isinstance(special_token_str, str):
-                if special_token_str in tokenizer.get_vocab():
-                    terminators_ids.append(tokenizer.convert_tokens_to_ids(special_token_str))
-            elif isinstance(special_token_str, list):
-                 for tok_str in special_token_str:
-                      if tok_str in tokenizer.get_vocab():
-                           terminators_ids.append(tokenizer.convert_tokens_to_ids(tok_str))
-            pipeline_params.update({
-                "eos_token_id": terminators_ids, # A list of token IDs
-                "pad_token_id": tokenizer.eos_token_id 
-            })
+        model_family_key = model_family.lower()
+        if model_family_key in LLMPipeline.TERMINATOR_TOKENS:
+            terminators = [
+                tokenizer.eos_token_id,
+                tokenizer.convert_tokens_to_ids(LLMPipeline.TERMINATOR_TOKENS[model_family_key])
+            ]
+            pipeline_params["eos_token_id"] = terminators
+            pipeline_params["pad_token_id"] = tokenizer.eos_token_id
 
         generate_text = pipeline(**pipeline_params)
         return generate_text
@@ -187,7 +183,7 @@ class LLMPipeline:
     def _initialize_chain(self, model_id, model_family, model_type):
         prompt_template_structure = self._generate_prompt_template(model_family)
         if model_type == 'local':
-            generate_text = self._initialize_local_model() 
+            generate_text = self._initialize_local_model(model_id, model_family) 
             model = HuggingFacePipeline(pipeline=generate_text)
         elif model_type == 'api':
             model_family_for_provider = model_family
