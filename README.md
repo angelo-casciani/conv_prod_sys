@@ -1,6 +1,6 @@
 # A Conversational Framework for Faithful Multi-Perspective Analysis of Production Processes
 
-Source code, datasets, and instructions for the paper "_A Conversational Framework for Faithful Multi-Perspective Analysis of Production Processes_".
+Source code, datasets, and instructions for the paper "*A Conversational Framework for Faithful Multi-Perspective Analysis of Production Processes*".
 
 ## About
 
@@ -12,9 +12,9 @@ Production systems call for analysis techniques yielding reliable diagnostic and
 
 The Figure shows the components of the framework and how they interact.
 
-The framework is designed to provide grounded and interpretable answers to natural language requests concerning a production process, i.e., the representation of the activities performed within a production system. It achieves this through the integration of a _Conversational Layer_ and a _Reasoning Layer_. The former tackles the formulation of the problem to be fed to the Reasoning Layer and the interpretation of the results in response to the user. The latter exploits either a digital twin simulating the production process or a formal verifier reasoning on its automaton. Therefore, the approach assumes the availability of the simulation parameters and the automaton modeling the production process, provided by a domain expert rather than being LLM-generated to ensure their correctness.
+The framework is designed to provide grounded and interpretable answers to natural language requests concerning a production process, i.e., the representation of the activities performed within a production system. It achieves this through the integration of a *Conversational Layer* and a *Reasoning Layer*. The former tackles the formulation of the problem to be fed to the Reasoning Layer and the interpretation of the results in response to the user. The latter exploits either a digital twin simulating the production process or a formal verifier reasoning on its automaton. Therefore, the approach assumes the availability of the simulation parameters and the automaton modeling the production process, provided by a domain expert rather than being LLM-generated to ensure their correctness.
 
-As illustrated in the Figure, the Conversational Layer includes a set of LLMs: the _Gateway LLM_, which routes the user’s questions, and the _Translator LLMs_ for _Simulation_ and _Verification_, which translate these requests into machine-readable representations compatible with the corresponding reasoners' syntax.
+As illustrated in the Figure, the Conversational Layer includes a set of LLMs: the *Gateway LLM*, which routes the user’s questions, and the *Translator LLMs* for *Simulation* and *Verification*, which translate these requests into machine-readable representations compatible with the corresponding reasoners' syntax.
 
 ## Structure of the repository
 
@@ -26,6 +26,9 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   └── ...
 ├── src               # source code of proposed approach
 |   ├── uppaal        # source code of the Uppaal verifier
+|   ├── DTLogExtSim   # submodule code for the digital twin extractor 
+|   ├── log           # folder where to insert the event log
+|   ├── pddl          # source code for the PDDL orchestrator
 |   └── ...
 ├── tests             # sources for the evaluation
 |   ├── outputs       # outputs of the live convesations
@@ -37,44 +40,49 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 ## Getting Started
 
 First, you need to clone the repository:
-```bash
+
+``` bash
 git clone https://github.com/angelo-casciani/conv_prod_sys
 cd conv_prod_sys
 ```
 
 Assuming a working version of Python (v.3.10.12) installed on the machine, create a virtual environment in the root folder of the project.
 
-```bash
+``` bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 Run the following command to install the necessary packages along with their dependencies in the `requirements.txt` file using `pip`:
-```bash
+
+``` bash
 pip install -r requirements.txt
 ```
 
-Visit the [official Uppaal downloads page](https://uppaal.org/downloads/#downloads) and download the appropriate version for your OS.  
-Run the installer and follow the instructions on the website.  
-Upon first launch, request and register a valid license key when prompted.  
+Visit the [official Uppaal downloads page](https://uppaal.org/downloads/#downloads) and download the appropriate version for your OS.
+Run the installer and follow the instructions on the website.
+Upon first launch, request and register a valid license key when prompted.
 
 Set up a [HuggingFace token](https://huggingface.co/) and/or an [OpenAI API key](https://platform.openai.com/overview) in a `.env` file in the root directory:
-    ```env
-    HF_TOKEN=<your token, should start with hf_>
-    DEEPSEEK_API_KEY=<your key, should start with sk->
-    OPENAI_API_KEY=<your key, should start with sk->
-    GOOGLE_API_KEY=<your Gemini API key>
-    ```
+```env HF_TOKEN=<your token, should start with hf_> DEEPSEEK_API_KEY=<your key, should start with sk-> OPENAI_API_KEY=<your key, should start with sk-> GOOGLE_API_KEY=<your Gemini API key>```
+
+Create a folder named `extractor_outputs` inside `src` and insert the line `./../extractor_outputs:/app/extractor` in the file `src/DTLogExtSim/docker-compose.yml` as showed below:
+
+``` yml
+extractor:
+  volumes:
+    - ./../extractor_outputs:/app/extractor
+```
 
 ## LLMs Requirements
 
 Please note that this software leverages the open-source and closed-source LLMs reported in the table:
 
 | Model | HuggingFace Link |
-|-----------|-----------|
+| ----- | ---------------- |
 | meta-llama/Meta-Llama-3-8B-Instruct | [HF link](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) |
 | meta-llama/Meta-Llama-3.1-8B-Instruct | [HF link](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct) |
-| meta-llama/Llama-3.2-1B-Instruct | [HF Link](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct)|
+| meta-llama/Llama-3.2-1B-Instruct | [HF Link](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct) |
 | meta-llama/Llama-3.2-3B-Instruct | [HF link](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) |
 | mistralai/Mistral-7B-Instruct-v0.2 | [HF link](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2) |
 | mistralai/Mistral-7B-Instruct-v0.3 | [HF link](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) |
@@ -96,26 +104,39 @@ It is recommended to have access to a GPU-enabled environment meeting at least t
 ## Usage
 
 Run the conversational framework:
-```bash
+
+``` bash
 cd src
 python3 main.py
 ```
 
+or
+
+``` bash
+cd src
+python3 chatbot.py
+```
+
+The first run allows to interact with the conversational agent through the terminal.
+Runnin `chatbot.py` you're launching a local web application that provides a graphical user interface (GUI) for the conversational agent. Once the script is launched, your terminal will provide a local link, typically something like `http://127.0.0.1:7860`. This address acts as a local server that you can access directly from your web browser, so when you open this link, you'll see the chatbot's GUI.
+
 The complete conversation will be stored in a `.txt` file in the [outputs](tests/outputs) folder.
 
-The default parameters are: 
-- Gateway LLM: `'gpt-4o-mini'`;
-- Simulation LLM: `'gpt-4o-mini'`;
-- Verification LLM: `'gpt-4o-mini'`;
-- Number of generated tokens: `512`;
-- Interaction Modality: `'live'`, i.e., the live chat with the conversational framework.
+The default parameters are:
+
+* Gateway LLM: `'gpt-4o-mini'`;
+* Simulation LLM: `'gpt-4o-mini'`;
+* Verification LLM: `'gpt-4o-mini'`;
+* Number of generated tokens: `512`;
+* Interaction Modality: `'live'`, i.e., the live chat with the conversational framework.
 
 To customize these settings, modify the corresponding arguments when executing `main.py`:
-- Use `--llm_id_gateway` to specify a different Gateway LLM (e.g., among the ones reported in the _LLMs Requirements_ section).
-- Use `--llm_id_simulation` to specify a different Translator LLM for Simulation (e.g., among the ones reported in the _LLMs Requirements_ section).
-- Use `--llm_id_verification` to specify a different Translator LLM for Verification (e.g., among the ones reported in the _LLMs Requirements_ section).
-- Adjust `--max_new_tokens` to change the number of generated tokens.
-- Set `--modality` to alter the interaction modality (i.e., `'live'`, `'evaluation-simulation'`, '`evaluation-verification`', and '`evaluation-routing`').
+
+* Use `--llm_id_gateway` to specify a different Gateway LLM (e.g., among the ones reported in the *LLMs Requirements* section).
+* Use `--llm_id_simulation` to specify a different Translator LLM for Simulation (e.g., among the ones reported in the *LLMs Requirements* section).
+* Use `--llm_id_verification` to specify a different Translator LLM for Verification (e.g., among the ones reported in the *LLMs Requirements* section).
+* Adjust `--max_new_tokens` to change the number of generated tokens.
+* Set `--modality` to alter the interaction modality (i.e., `'live'`, `'evaluation-simulation'`, '`evaluation-verification`', `'evaluation-factory_info`', `'evaluation-process_mining`', `'evaluation-hybrid`' and '`evaluation-routing`').
 
 A comprehensive list of commands can be found in `src/cmd4tests.sh`.
 
@@ -123,8 +144,9 @@ A comprehensive list of commands can be found in `src/cmd4tests.sh`.
 
 ### Simulation experiments
 
-To reprodure the experiments for the _simulation_ evaluation, for example:
-```bash
+To reproduce the experiments for the *simulation* evaluation, for example:
+
+``` bash
 cd src
 python3 main.py --llm_id_simulation Qwen/Qwen2.5-7B-Instruct --modality evaluation-simulation --max_new_tokens 512
 ```
@@ -133,18 +155,53 @@ The results will be stored in a `.txt` file reporting all the information for th
 
 ### Verification experiments
 
-To reprodure the experiments for the _verification_ evaluation, for example:
-```bash
+To reproduce the experiments for the *verification* evaluation, for example:
+
+``` bash
 cd src
 python3 main.py --llm_id_verification gpt-4o-mini --modality evaluation-verification --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
 
+### Factory info experiments
+
+To reproduce the experiments for the *factory\_info* evaluation, for example:
+
+``` bash
+cd src
+python3 main.py --llm_id_gateway gemini-2.0-flash --modality evaluation-factory_info --max_new_tokens 512
+```
+
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+
+### Process mining experiments
+
+To reproduce the experiments for the *process\_mining* evaluation, for example:
+
+``` bash
+cd src
+python3 main.py --llm_id_gateway mistralai/Mistral-Nemo-Instruct-2407 --modality evaluation-process_mining --max_new_tokens 512
+```
+
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+
+### Hybrid experiments
+
+To reproduce the experiments for the *hybrid* evaluation, for example:
+
+``` bash
+cd src
+python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-hybrid --max_new_tokens 512
+```
+
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+
 ### Routing experiments
 
-To reprodure the experiments for the _routing_ evaluation, for example:
-```bash
+To reproduce the experiments for the *routing* evaluation, for example:
+
+``` bash
 cd src
 python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.3 --modality evaluation-routing --max_new_tokens 512
 ```
@@ -154,10 +211,11 @@ The results will be stored in a `.txt` file reporting all the information for th
 ### Generation of New Test Sets
 
 To generate new test sets for the three supported evaluation, run the script `test_sets_generation.py` before running an evaluation.
-```bash
+
+``` bash
 python3 test_sets_generation.py
 ```
 
 ## License
-Distributed under the GNU GPL License. See [LICENSE](LICENSE) for more information.
 
+Distributed under the GNU GPL License. See [LICENSE](LICENSE) for more information.
