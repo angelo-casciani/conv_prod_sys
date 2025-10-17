@@ -84,7 +84,7 @@ class LLMPipeline:
         'deepseek': 'Assistant: '
     }
 
-    def __init__(self, model_id_gateway, model_id_simulation, model_id_verification, hf_token, max_new_tokens):
+    def __init__(self, model_id_gateway, model_id_simulation, model_id_verification, hf_token, max_new_tokens, extracted_model, extracted_model_failure):
         self.model_id_gateway = model_id_gateway
         self.model_id_simulation = model_id_simulation
         self.model_id_verification = model_id_verification
@@ -111,8 +111,8 @@ class LLMPipeline:
         self.chain_process_mining = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.failure_module = failure_maintenance.FailureMaintenanceModule()
         self.process_mining_module = process_mining.ProcessMiningModule()
-        self.extracted = False
-        self.extracted_failure = False
+        self.extracted = extracted_model
+        self.extracted_failure = extracted_model_failure
 
 
     def _initialize_local_model(self, model_id, model_family):

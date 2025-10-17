@@ -26,6 +26,8 @@ def parse_arguments():
     parser.add_argument('--llm_id_verification', type=str, default='gpt-4o-mini', help='LLM model identifier for Verification')
     parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=512)
     parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, live')
+    parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
+    parser.add_argument('--extracted_model_failure', type=bool, default=False, help='True if already exists the file digital_twin_with_failure.json. Default False')
     args = parser.parse_args()
     return args
 
@@ -43,7 +45,9 @@ class GradioHandler:
             model_id_verification = args.llm_id_verification
             modality = args.modality
             max_new_tokens = args.max_new_tokens
-            self.chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens)
+            extracted_model = args.extracted_model
+            extracted_model_failure = args.extracted_model_failure
+            self.chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens, extracted_model, extracted_model_failure)
 
             self.initialized = True
             self.run_data = {
