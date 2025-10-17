@@ -642,7 +642,7 @@ class LLMPipeline:
             parsed_json = json.loads(answer)
             answer = parsed_json["response"]
         elif 'process_mining' in answer.lower():
-            complete_prompt, answer = self._produce_answer_process_mining(question)
+            complete_prompt, answer = self._produce_answer_process_mining(question, 'live')
         elif 'hybrid' in answer.lower():
             complete_prompt, answer = self._produce_answer_hybrid(question, 'live')
         else:

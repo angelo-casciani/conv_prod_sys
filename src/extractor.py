@@ -60,7 +60,12 @@ class Extractor:
 
                 if src not in next_activities:
                     next_activities[src] = {}
-                next_activities[src][dst] = {"probability": prob}
+                
+                #if destination already exists we sum the probability
+                if dst in next_activities[src]:
+                    next_activities[src][dst]["probability"] += prob
+                else:
+                    next_activities[src][dst] = {"probability": prob}
 
         return next_activities
     
@@ -221,6 +226,6 @@ class Extractor:
 
 if __name__ == "__main__":
     extractor = Extractor()
-    xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test5.xes')
+    xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test4.xes')
     net, initial_marking, final_marking = extractor.extract_model(xes_path, failure=True)
     pm4py.view_petri_net(net, initial_marking, final_marking, format="png")

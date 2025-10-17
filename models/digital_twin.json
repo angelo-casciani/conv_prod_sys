@@ -63,11 +63,11 @@
         "A5": {
           "probability": 0.37
         },
-        "A6": {
-          "probability": 0.38
-        },
         "abort2": {
           "probability": 0.25
+        },
+        "A6": {
+          "probability": 0.38
         }
       }
     },
@@ -126,8 +126,8 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A10": {
-          "probability": 0.4
+        "A8": {
+          "probability": 1.0
         }
       }
     },
@@ -141,11 +141,11 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A11": {
-          "probability": 0.75
-        },
         "A3": {
           "probability": 0.25
+        },
+        "A11": {
+          "probability": 0.75
         }
       }
     },
