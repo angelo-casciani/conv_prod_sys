@@ -5,7 +5,7 @@
 
 ################### Evaluation for Simulation ####################
 python3 main.py --llm_id_simulation meta-llama/Meta-Llama-3-8B-Instruct --modality evaluation-simulation --max_new_tokens 512
-python3 main.py --llm_id_simulation meta-llama/Meta-Llama-3.1-8B-Instruct --modality evaluation-simulation --max_new_tokens 512
+python3 main.py --llm_id_simulation meta-llama/meta-llama/Llama-3.1-8B-Instruct --modality evaluation-simulation --max_new_tokens 512
 python3 main.py --llm_id_simulation meta-llama/Llama-3.2-1B-Instruct --modality evaluation-simulation --max_new_tokens 512
 python3 main.py --llm_id_simulation meta-llama/Llama-3.2-3B-Instruct --modality evaluation-simulation --max_new_tokens 512
 python3 main.py --llm_id_simulation mistralai/Mistral-7B-Instruct-v0.2 --modality evaluation-simulation --max_new_tokens 512
@@ -18,7 +18,7 @@ python3 main.py --llm_id_simulation google/gemma-2-9b-it --modality evaluation-s
 
 ################# Evaluation for Verification ###################
 python3 main.py --llm_id_verification meta-llama/Meta-Llama-3-8B-Instruct --modality evaluation-verification --max_new_tokens 512
-python3 main.py --llm_id_verification meta-llama/Meta-Llama-3.1-8B-Instruct --modality evaluation-verification --max_new_tokens 512
+python3 main.py --llm_id_verification meta-llama/meta-llama/Llama-3.1-8B-Instruct --modality evaluation-verification --max_new_tokens 512
 python3 main.py --llm_id_verification meta-llama/Llama-3.2-1B-Instruct --modality evaluation-verification --max_new_tokens 512
 python3 main.py --llm_id_verification meta-llama/Llama-3.2-3B-Instruct --modality evaluation-verification --max_new_tokens 512
 python3 main.py --llm_id_verification mistralai/Mistral-7B-Instruct-v0.2 --modality evaluation-verification --max_new_tokens 512
@@ -31,7 +31,7 @@ python3 main.py --llm_id_verification google/gemma-2-9b-it --modality evaluation
 
 #################### Evaluation for Routing #####################
 python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3-8B-Instruct --modality evaluation-routing --max_new_tokens 512
-python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3.1-8B-Instruct --modality evaluation-routing --max_new_tokens 512
+python3 main.py --llm_id_gateway meta-llama/meta-llama/Llama-3.1-8B-Instruct --modality evaluation-routing --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-1B-Instruct --modality evaluation-routing --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-3B-Instruct --modality evaluation-routing --max_new_tokens 512
 python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.2 --modality evaluation-routing --max_new_tokens 512
@@ -44,7 +44,7 @@ python3 main.py --llm_id_gateway google/gemma-2-9b-it --modality evaluation-rout
 
 ################## Evaluation for Factory Info ###################
 python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3-8B-Instruct --modality evaluation-factory_info --max_new_tokens 512
-python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3.1-8B-Instruct --modality evaluation-factory_info --max_new_tokens 512
+python3 main.py --llm_id_gateway meta-llama/meta-llama/Llama-3.1-8B-Instruct --modality evaluation-factory_info --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-1B-Instruct --modality evaluation-factory_info --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-3B-Instruct --modality evaluation-factory_info --max_new_tokens 512
 python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.2 --modality evaluation-factory_info --max_new_tokens 512
@@ -57,7 +57,7 @@ python3 main.py --llm_id_gateway google/gemma-2-9b-it --modality evaluation-fact
 
 ################ Evaluation for Process Mining ##################
 python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3-8B-Instruct --modality evaluation-process_mining --max_new_tokens 512
-python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3.1-8B-Instruct --modality evaluation-process_mining --max_new_tokens 512
+python3 main.py --llm_id_gateway meta-llama/meta-llama/Llama-3.1-8B-Instruct --modality evaluation-process_mining --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-1B-Instruct --modality evaluation-process_mining --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-3B-Instruct --modality evaluation-process_mining --max_new_tokens 512
 python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.2 --modality evaluation-process_mining --max_new_tokens 512
@@ -70,7 +70,7 @@ python3 main.py --llm_id_gateway google/gemma-2-9b-it --modality evaluation-proc
 
 ################### Evaluation for Hybrid ######################
 python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3-8B-Instruct --modality evaluation-hybrid --max_new_tokens 512
-python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3.1-8B-Instruct --modality evaluation-hybrid --max_new_tokens 512
+python3 main.py --llm_id_gateway meta-llama/meta-llama/Llama-3.1-8B-Instruct --modality evaluation-hybrid --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-1B-Instruct --modality evaluation-hybrid --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-3B-Instruct --modality evaluation-hybrid --max_new_tokens 512
 python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.2 --modality evaluation-hybrid --max_new_tokens 512
@@ -83,7 +83,7 @@ python3 main.py --llm_id_gateway google/gemma-2-9b-it --modality evaluation-hybr
 
 ################### Evaluation for Answer ######################
 python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3-8B-Instruct --modality evaluation-answer --max_new_tokens 512
-python3 main.py --llm_id_gateway meta-llama/Meta-Llama-3.1-8B-Instruct --modality evaluation-answer --max_new_tokens 512
+python3 main.py --llm_id_gateway meta-llama/meta-llama/Llama-3.1-8B-Instruct --modality evaluation-answer --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-1B-Instruct --modality evaluation-answer --max_new_tokens 512
 python3 main.py --llm_id_gateway meta-llama/Llama-3.2-3B-Instruct --modality evaluation-answer --max_new_tokens 512
 python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.2 --modality evaluation-answer --max_new_tokens 512

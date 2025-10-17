@@ -1,0 +1,585 @@
+INFORMATION ON THE RUN
+
+LLM ID Gateway: meta-llama/Meta-Llama-3-8B-Instruct
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: evaluation-factory_info
+
+-----------------------------------
+Accuracy: 0.2000
+Precision: 1.0000
+Recall: 0.2000
+F1-score: 0.3333
+Elapsed: 0.03 hours
+-----------------------------------
+
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: How many activities are there in the production line?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+{"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are 6 activities in the production line: A1, A2, A3, A4, A5, and A6."}
+Expected Answer: {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": ""}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: How many activities are there in the production line?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+{"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are 6 activities in the production line: A1, A2, A3, A4, A5, and A6."}
+Expected Answer: {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": ""}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the standard deviation of the inter-arrival time?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+I'm happy to help! However, I must inform you that the provided JSON data does not contain any information about the standard deviation of the inter-arrival time. The JSON data only contains information about the mean inter-arrival time.
+
+As per your request, I will provide a response based on the available data. Since the standard deviation of the inter-arrival time is not present in the JSON data, my response will be:
+
+"Unfortunately, I couldn't find the standard deviation of the inter-arrival time in the provided data. The JSON data only contains the mean inter-arrival time, which is 300.0."
+
+Please note that if you need more information or clarification regarding the inter-arrival time or any other aspect of the factory's digital twin, I'll be happy to assist you within the scope of the provided data.
+Expected Answer: {"task": "factory_info", "query_nl": "What is the standard deviation of the inter-arrival time?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the probability of routing from activity2 to activity6?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+Based on the provided JSON model, I found the relevant information.
+
+The probability of routing from activity2 to activity6 is:
+
+**0.0**
+
+This is because activity2 only has one possible next activity, which is activity4, with a probability of 1.0. There is no direct route from activity2 to activity6.
+
+Please note that this answer is based solely on the given JSON model and may not reflect any external factors or additional information. If you have any further questions or need clarification, feel free to ask!
+Expected Answer: {"task": "factory_info", "query_nl": "What is the probability of routing from activity2 to activity6?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the mean transfer time between activity1 and activity5?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+I'm happy to help! However, I must inform you that the provided JSON data does not contain any information about transfer times between activities. The `transfer_times` key is empty.
+
+As a result, I cannot provide an answer to your question because the necessary information is missing. If you could provide additional data or clarify what you mean by "mean transfer time" in this context, I'd be happy to try and assist you further.
+Expected Answer: {"task": "factory_info", "query_nl": "What is the mean transfer time between activity1 and activity5?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: Which activity has the smallest capacity?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+Based on the provided JSON model, I can extract the necessary information.
+
+According to the model, all activities have a capacity of 1. Therefore, none of them have a smaller capacity than others. They all have the same capacity, which is 1.
+
+So, my response would be:
+
+"Which activity has the smallest capacity? The capacity of all activities is 1, so they all have the same smallest capacity."
+
+Please note that this response is based solely on the provided JSON model and does not consider any external factors or additional information.
+Expected Answer: {"task": "factory_info", "query_nl": "Which activity has the smallest capacity?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What are the possible next activities after activity6?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+Based on the provided context, I can extract the necessary information.
+
+According to the given data, the next activities after activity6 are not specified because activity6 has no outgoing edges in the graph. In other words, there are no probabilities associated with any next activities for activity6.
+
+So, my response would be:
+
+"What are the possible next activities after activity6?"
+"There are no next activities defined for activity6."
+
+Please note that this is a straightforward answer based on the provided data, and if you'd like me to clarify anything else, feel free to ask!
+Expected Answer: {"task": "factory_info", "query_nl": "What are the possible next activities after activity6?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the capacity of activity5?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+The task is to extract information from the given JSON model.
+
+The capacity of activity5 is... 1.
+Expected Answer: {"task": "factory_info", "query_nl": "What is the capacity of activity5?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the standard deviation of the processing time at activity1?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+Based on the provided JSON model, I found the relevant information for your query.
+
+The processing time at activity1 is modeled as a uniform distribution with a mean of 2.02 and a standard deviation of 0.09. Therefore, the standard deviation of the processing time at activity1 is **0.09**.
+
+Please note that this information is based on the given JSON model, and any further questions regarding the factory's digital twin should be related to the structure itself, such as the number of activities, capacities, processing times, or routing probabilities. If you have any other queries within these boundaries, feel free to ask!
+Expected Answer: {"task": "factory_info", "query_nl": "What is the standard deviation of the processing time at activity1?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the probability of routing from activity5 to activity1?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+I'm happy to help! However, I must inform you that the given JSON model does not contain any information about the probability of routing from activity5 to activity1. The provided data only includes information about the activities' capacities, processing times, and probabilistic routing between adjacent activities.
+
+As a result, I cannot provide an answer to this specific question. If you'd like to ask another question related to the factory's digital twin, I'll do my best to extract the necessary information from the provided data.
+Expected Answer: {"task": "factory_info", "query_nl": "What is the probability of routing from activity5 to activity1?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the mean transfer time from activity1 to activity3?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+{"task": "factory_info", "query_nl": "What is the mean transfer time from activity1 to activity3?", "response": "Sorry, I'm unable to provide this information because the provided data does not contain any transfer times between activities. The given data only includes information about the activities themselves, their capacities, processing times, and probabilistic routing between them."}
+Expected Answer: {"task": "factory_info", "query_nl": "What is the mean transfer time from activity1 to activity3?", "response": ""}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the standard deviation of the inter-arrival time?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+I'm happy to help! However, I must inform you that the provided JSON data does not contain any information about the standard deviation of the inter-arrival time. The JSON data only provides information about the mean inter-arrival time.
+
+As per your request, I will provide an answer based on the given data. Since the standard deviation of the inter-arrival time is not present in the JSON data, I will respond accordingly:
+
+"Unfortunately, the standard deviation of the inter-arrival time is not specified in the provided data."
+
+Please note that if you would like to simulate or verify something related to the factory, I'd be happy to assist you with that.
+Expected Answer: {"task": "factory_info", "query_nl": "What is the standard deviation of the inter-arrival time?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the probability of routing from activity3 to activity1?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+I'm happy to help! However, I must inform you that the provided JSON data does not contain any information about the probability of routing from activity3 to activity1.
+
+The JSON data only provides information about the next activities for each activity, but it does not specify the probabilities of transitioning between activities. The probabilities are only specified for the next activities within each activity's definition.
+
+Therefore, I cannot provide an answer to this specific question based on the given data. If you could provide more information or clarify what you mean by "routing" and "probability," I'd be happy to try and assist you further.
+Expected Answer: {"task": "factory_info", "query_nl": "What is the probability of routing from activity3 to activity1?", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the mean processing time at activity3?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+The task is to extract information from the given JSON model.
+
+According to the provided JSON model, we find that activity3 has a processing time distribution of type GAMMA with a mean of 25.4 and no additional arguments. Therefore, the mean processing time at activity3 is 25.4.
+
+Here is the response:
+
+{"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is 25.4."}
+Expected Answer: {"task": "factory_info", "query_nl": "What is the mean processing time at activity3", "response": ""}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as an assistant that extracts information of the factory's digital twin from its JSON model. You have access to data such as:
+- the activities involved (e.g A1, A2, ...);
+- their capacities and processing times (expressed as means and standard deviations);
+- the probabilistic routing between activities;
+- the inter-arrival time of products;
+- the transfer times between activities.
+ Times are expressed in 'units of time', do not talk about seconds, minutes, etc. when answering. 
+
+Given a natural language question, generate a natural language response, not in JSON or other type of format, with the appropriate answer extracted from the available data.
+If the user question does not concern the factory structure (e.g., it’s about simulation or verification), kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): What is the mean processing time at activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean processing time at activity3?", "response": "The mean processing time at activity3 is ... with a standard deviation of ...."}
+2. Input (Natural Language Query): What are the possible next activities after activity2?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What are the possible next activities after activity2?", "response": "From activity2, the next activities can be activity3 with probability ... and activity4 with probability ...."}
+3. Input (Natural Language Query): How many activities are there in the production line?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "How many activities are there in the production line?", "response": "There are ... activities in the production line: <list of activities>."}
+4. Input (Natural Language Query): What is the capacity of activity4?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the capacity of activity4?", "response": "The capacity of activity4 is ... ."}
+5. Input (Natural Language Query): What is the mean transfer time from activity2 to activity3?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the mean transfer time from activity2 to activity3?", "response": "The mean transfer time from activity2 to activity3 is ... ."}
+6. Input (Natural Language Query): What is the inter-arrival time of products?
+   Output (LLM answer): {"task": "factory_info", "query_nl": "What is the inter-arrival time of products?", "response": "The mean inter-arrival time of products is ... units with a standard deviation of ... ."}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: {'inter_arrival_time': {'type': 'fixed', 'mean': 300.0, 'arg1': 0, 'arg2': 0}, 'activities': {'A1': {'capacity': 1, 'processing_time': {'type': 'UNIFORM', 'mean': '2.02', 'arg1': '0.09', 'arg2': '3.94', 'timeUnit': 'seconds'}, 'next_activities': {'A3': {'probability': 0.3}, 'A2': {'probability': 0.7}}}, 'A2': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '38.67', 'arg1': '1041.5', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}, 'A5': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '96.85', 'arg1': '4684.24', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A4': {'capacity': 1, 'processing_time': {'type': 'LOGNORMAL', 'mean': '41.22', 'arg1': '15.6', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A6': {'probability': 1.0}}}, 'A6': {'capacity': 1, 'processing_time': {'type': 'TRIANGULAR', 'mean': '51.76', 'arg1': '', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {}}, 'A3': {'capacity': 1, 'processing_time': {'type': 'GAMMA', 'mean': '25.4', 'arg1': '118.45', 'arg2': '', 'timeUnit': 'seconds'}, 'next_activities': {'A4': {'probability': 1.0}}}}, 'transfer_times': {}}
+Here is the user question: What is the mean transfer time between activity5 and activity6?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: 
+
+I'm happy to help! However, I must inform you that the provided JSON data does not contain any information about transfer times between activities. The `transfer_times` key in the JSON object is empty.
+
+As a result, I cannot provide an answer to your question because the necessary information is missing. If you could provide additional data or clarify what you mean by "mean transfer time" in this context, I'd be happy to try and assist you further.
+Expected Answer: {"task": "factory_info", "query_nl": "What is the mean transfer time between activity5 and activity6?", "response": ""}
+Verification Result: False
+
+#####################################################################################
