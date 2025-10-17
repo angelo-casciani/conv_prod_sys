@@ -227,7 +227,7 @@ def generate_unrelated_questions(unrelated_questions, number_samples=100):
 factory_info_questions = [
     ("What is the mean processing time at {activity}?", {
     "task": "factory_info",
-    "query_nl": "What is the mean processing time at {activity}",
+    "query_nl": "What is the mean processing time at {activity}?",
     "response": ""
 }),
     ("What is the standard deviation of the processing time at {activity}?", {

@@ -1,7 +1,7 @@
 {
   "inter_arrival_time": {
     "type": "fixed",
-    "mean": 5.0,
+    "mean": 300.0,
     "arg1": 0,
     "arg2": 0
   },
@@ -9,313 +9,140 @@
     "A1": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "20.0",
-        "arg1": "",
-        "arg2": "",
+        "type": "UNIFORM",
+        "mean": "2.02",
+        "arg1": "0.09",
+        "arg2": "3.94",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "abort1": {
-          "probability": 0.13
+        "A3": {
+          "probability": 0.3
         },
         "A2": {
-          "probability": 0.87
+          "probability": 0.7
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.008,
+        "failure_rate": 0.006,
         "repair_time": {
-          "mean": 27.0,
-          "std": 4.5
+          "mean": 23.6,
+          "std": 4.9
         },
-        "degradation_factor": 0.0006
+        "degradation_factor": 0.0005
       }
     },
     "A2": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "10.0",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A3": {
-          "probability": 1.0
-        }
-      },
-      "failure_parameters": {
-        "failure_rate": 0.009,
-        "repair_time": {
-          "mean": 17.1,
-          "std": 6.6
-        },
-        "degradation_factor": 0.0011
-      }
-    },
-    "A3": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "10.0",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.005,
-        "repair_time": {
-          "mean": 29.1,
-          "std": 2.0
-        },
-        "degradation_factor": 0.001
-      }
-    },
-    "A4": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "LOGNORMAL",
-        "mean": "38.11",
-        "arg1": "953.61",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "abort2": {
-          "probability": 0.24
-        },
-        "A5": {
-          "probability": 0.38
-        },
-        "A6": {
-          "probability": 0.38
-        }
-      },
-      "failure_parameters": {
-        "failure_rate": 0.007,
-        "repair_time": {
-          "mean": 33.4,
-          "std": 2.5
-        },
-        "degradation_factor": 0.0011
-      }
-    },
-    "A7": {
-      "capacity": 1,
-      "processing_time": {
         "type": "GAMMA",
-        "mean": "17.33",
-        "arg1": "257.83",
+        "mean": "38.67",
+        "arg1": "1041.5",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A8": {
+        "A4": {
           "probability": 1.0
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.003,
+        "failure_rate": 0.008,
         "repair_time": {
-          "mean": 17.7,
-          "std": 5.8
+          "mean": 31.5,
+          "std": 5.3
         },
-        "degradation_factor": 0.0011
+        "degradation_factor": 0.0004
       }
     },
     "A5": {
       "capacity": 1,
       "processing_time": {
-        "type": "GAMMA",
-        "mean": "28.16",
-        "arg1": "296.19",
+        "type": "LOGNORMAL",
+        "mean": "96.85",
+        "arg1": "4684.24",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A10": {
+        "A6": {
           "probability": 1.0
         }
       },
       "failure_parameters": {
         "failure_rate": 0.006,
         "repair_time": {
-          "mean": 22.7,
-          "std": 4.2
+          "mean": 21.6,
+          "std": 3.2
         },
-        "degradation_factor": 0.0009
+        "degradation_factor": 0.0012
       }
     },
-    "A8": {
+    "A4": {
       "capacity": 1,
       "processing_time": {
-        "type": "EXPONENTIAL",
-        "mean": "23.64",
-        "arg1": "",
+        "type": "LOGNORMAL",
+        "mean": "41.22",
+        "arg1": "15.6",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A9": {
+        "A6": {
           "probability": 1.0
         }
       },
       "failure_parameters": {
         "failure_rate": 0.01,
         "repair_time": {
-          "mean": 28.7,
-          "std": 6.2
+          "mean": 15.9,
+          "std": 6.3
         },
-        "degradation_factor": 0.001
+        "degradation_factor": 0.0008
       }
     },
-    "A9": {
+    "A6": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "TRIANGULAR",
+        "mean": "51.76",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {},
+      "failure_parameters": {
+        "failure_rate": 0.004,
+        "repair_time": {
+          "mean": 20.7,
+          "std": 5.4
+        },
+        "degradation_factor": 0.0007
+      }
+    },
+    "A3": {
       "capacity": 1,
       "processing_time": {
         "type": "GAMMA",
-        "mean": "15.44",
-        "arg1": "171.18",
+        "mean": "25.4",
+        "arg1": "118.45",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A10": {
+        "A4": {
           "probability": 1.0
         }
       },
       "failure_parameters": {
         "failure_rate": 0.007,
         "repair_time": {
-          "mean": 18.6,
-          "std": 6.7
+          "mean": 28.2,
+          "std": 2.7
         },
-        "degradation_factor": 0.0009
-      }
-    },
-    "A10": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "30.0",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A11": {
-          "probability": 0.75
-        },
-        "A3": {
-          "probability": 0.25
-        }
-      },
-      "failure_parameters": {
-        "failure_rate": 0.003,
-        "repair_time": {
-          "mean": 15.4,
-          "std": 2.5
-        },
-        "degradation_factor": 0.0004
-      }
-    },
-    "A11": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "10.0",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.004,
-        "repair_time": {
-          "mean": 34.1,
-          "std": 6.1
-        },
-        "degradation_factor": 0.0009
-      }
-    },
-    "A6": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "GAMMA",
-        "mean": "28.45",
-        "arg1": "568.94",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A10": {
-          "probability": 1.0
-        }
-      },
-      "failure_parameters": {
-        "failure_rate": 0.008,
-        "repair_time": {
-          "mean": 32.9,
-          "std": 5.8
-        },
-        "degradation_factor": 0.0005
-      }
-    },
-    "abort2": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1.0",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.008,
-        "repair_time": {
-          "mean": 25.7,
-          "std": 6.3
-        },
-        "degradation_factor": 0.0006
-      }
-    },
-    "abort1": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1.0",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.004,
-        "repair_time": {
-          "mean": 20.8,
-          "std": 6.5
-        },
-        "degradation_factor": 0.0006
+        "degradation_factor": 0.001
       }
     }
   },
-  "transfer_times": {
-    "A1": {
-      "abort1": {
-        "type": "lognorm",
-        "mean": 26.0,
-        "arg1": 158.0,
-        "arg2": 0
-      },
-      "A2": {
-        "type": "lognorm",
-        "mean": 26.0,
-        "arg1": 158.0,
-        "arg2": 0
-      }
-    }
-  }
+  "transfer_times": {}
 }

@@ -97,6 +97,8 @@ class LLMPipeline:
         #self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'digital_twin.json')
         #self.factory_model_with_failure = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory_with_failure.json')
         self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
+        with open(self.pddl_domain, 'r') as f:
+            self.pddl_domain = f.read()
         self.digital_twin_csv_logs = os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv')
         with open(self.path_prompts, 'r') as prompt_file:
             self.prompts = json.load(prompt_file)
@@ -513,6 +515,7 @@ class LLMPipeline:
         activities_context = f"\n\nAvailable activities in the system: {activities_str}\n"
         sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
         context = self.pddl_domain + activities_context
+        #print(context)
         invoke_payload = {"question": question,
                     "context": context,
                     "system_message": sys_mess}
