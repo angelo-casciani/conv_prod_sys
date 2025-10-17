@@ -128,7 +128,9 @@ The default parameters are:
 * Simulation LLM: `'gpt-4o-mini'`;
 * Verification LLM: `'gpt-4o-mini'`;
 * Number of generated tokens: `512`;
-* Interaction Modality: `'live'`, i.e., the live chat with the conversational framework.
+* Interaction Modality: `'live'`, i.e., the live chat with the conversational framework.;
+* Extracted model: `False`;
+* Extracted model with failure data: `False`.
 
 To customize these settings, modify the corresponding arguments when executing `main.py`:
 
@@ -137,6 +139,8 @@ To customize these settings, modify the corresponding arguments when executing `
 * Use `--llm_id_verification` to specify a different Translator LLM for Verification (e.g., among the ones reported in the *LLMs Requirements* section).
 * Adjust `--max_new_tokens` to change the number of generated tokens.
 * Set `--modality` to alter the interaction modality (i.e., `'live'`, `'evaluation-simulation'`, '`evaluation-verification`', `'evaluation-factory_info`', `'evaluation-process_mining`', `'evaluation-hybrid`' and '`evaluation-routing`').
+* Use `--extracted_model` to specify if the model has already been extracted (True or False).
+* Use `--extracted_model_failure` to specify if the model with failure data has already been extracted (True or False).
 
 A comprehensive list of commands can be found in `src/cmd4tests.sh`.
 
