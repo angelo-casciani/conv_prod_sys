@@ -2,5 +2,5 @@
 	path = src/pddl/downward
 	url = https://github.com/aibasel/downward.git
 [submodule "src/DTLogExtSim"]
-	path = src/DTLogExtSim
+	path = src/src/DTLogExtSim
 	url = https://github.com/bpm-diag/DTLogExtSim.git

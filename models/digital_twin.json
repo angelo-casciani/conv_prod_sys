@@ -1,7 +1,7 @@
 {
   "inter_arrival_time": {
     "type": "fixed",
-    "mean": 300.0,
+    "mean": 5.0,
     "arg1": 0,
     "arg2": 0
   },
@@ -9,32 +9,79 @@
     "A1": {
       "capacity": 1,
       "processing_time": {
-        "type": "UNIFORM",
-        "mean": "2.02",
-        "arg1": "0.09",
-        "arg2": "3.94",
+        "type": "FIXED",
+        "mean": "20.0",
+        "arg1": "",
+        "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A3": {
-          "probability": 0.3
+        "abort1": {
+          "probability": 0.13
         },
         "A2": {
-          "probability": 0.7
+          "probability": 0.87
         }
       }
     },
     "A2": {
       "capacity": 1,
       "processing_time": {
-        "type": "GAMMA",
-        "mean": "38.67",
-        "arg1": "1041.5",
+        "type": "FIXED",
+        "mean": "10.0",
+        "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A4": {
+        "A3": {
+          "probability": 1.0
+        }
+      }
+    },
+    "A3": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "10.0",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "A4": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "LOGNORMAL",
+        "mean": "38.11",
+        "arg1": "953.61",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "A5": {
+          "probability": 0.37
+        },
+        "A6": {
+          "probability": 0.38
+        },
+        "abort2": {
+          "probability": 0.25
+        }
+      }
+    },
+    "A7": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "GAMMA",
+        "mean": "17.33",
+        "arg1": "257.83",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "A8": {
           "probability": 1.0
         }
       }
@@ -42,59 +89,129 @@
     "A5": {
       "capacity": 1,
       "processing_time": {
-        "type": "LOGNORMAL",
-        "mean": "96.85",
-        "arg1": "4684.24",
+        "type": "GAMMA",
+        "mean": "28.16",
+        "arg1": "296.19",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A6": {
+        "A10": {
           "probability": 1.0
         }
       }
     },
-    "A4": {
+    "A8": {
       "capacity": 1,
       "processing_time": {
-        "type": "LOGNORMAL",
-        "mean": "41.22",
-        "arg1": "15.6",
+        "type": "EXPONENTIAL",
+        "mean": "23.64",
+        "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A6": {
+        "A9": {
           "probability": 1.0
         }
       }
     },
-    "A6": {
+    "A9": {
       "capacity": 1,
       "processing_time": {
-        "type": "TRIANGULAR",
-        "mean": "51.76",
+        "type": "GAMMA",
+        "mean": "15.44",
+        "arg1": "171.18",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "A10": {
+          "probability": 0.4
+        }
+      }
+    },
+    "A10": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "30.0",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "A11": {
+          "probability": 0.75
+        },
+        "A3": {
+          "probability": 0.25
+        }
+      }
+    },
+    "A11": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "10.0",
         "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {}
     },
-    "A3": {
+    "A6": {
       "capacity": 1,
       "processing_time": {
         "type": "GAMMA",
-        "mean": "25.4",
-        "arg1": "118.45",
+        "mean": "28.45",
+        "arg1": "568.94",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A4": {
+        "A10": {
           "probability": 1.0
         }
       }
+    },
+    "abort2": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1.0",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "abort1": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1.0",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
     }
   },
-  "transfer_times": {}
+  "transfer_times": {
+    "A1": {
+      "abort1": {
+        "type": "lognorm",
+        "mean": 26.0,
+        "arg1": 158.0,
+        "arg2": 0
+      },
+      "A2": {
+        "type": "lognorm",
+        "mean": 26.0,
+        "arg1": 158.0,
+        "arg2": 0
+      }
+    }
+  }
 }
