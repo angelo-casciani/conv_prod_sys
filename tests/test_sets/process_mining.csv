@@ -1,16 +1,16 @@
 question,answer,evaluation_type
-What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
-Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
-Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
-Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
-Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
-Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
-What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
-Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
-Can you show me the top 5 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 5}",process_mining
-Can you filter the log between 2016-11-05T18:55:00 and 2016-11-06T16:45:01?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2016-11-05T18:55:00"", ""end_date"": ""2016-11-06T16:45:01""}",process_mining
 Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
 What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
 Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
-What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show me the top 7 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
 What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you filter the log between 2023-08-18T06:40:52 and 2023-08-21T08:30:38?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2023-08-18T06:40:52"", ""end_date"": ""2023-08-21T08:30:38""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you show me the top 4 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+Can you filter the log between 2018-08-08T20:14:21 and 2018-08-12T06:15:33?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2018-08-08T20:14:21"", ""end_date"": ""2018-08-12T06:15:33""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining

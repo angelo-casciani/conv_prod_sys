@@ -1,3 +1,3 @@
-sim_with_time: 5
-sim_with_number_products: 6
+sim_with_time: 8
+sim_with_number_products: 3
 event_prediction: 4

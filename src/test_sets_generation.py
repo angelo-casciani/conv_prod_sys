@@ -790,7 +790,7 @@ def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_c
     ver_samples = ver_df.sample(ver_samples_count, random_state=42)
     ver_samples["answer"] = "uppaal_verification"
     unrel_samples = unrel_df.sample(refuse_samples_count, random_state=42)
-    unrel_samples["answer"] = "conversational gateway"
+    unrel_samples["answer"] = "conversational_gateway"
     factinf_samples = factinf_df.sample(factinf_samples_count, random_state=42)
     factinf_samples["answer"] = "factory_info"
     pm_samples = pm_df.sample(pm_samples_count, random_state=42)

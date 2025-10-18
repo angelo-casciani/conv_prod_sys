@@ -109,7 +109,7 @@ class AnswerVerificationOracle:
         expected_route_lower = expected_route.lower()
 
         valid_routes = ["factory_simulation", "uppaal_verification", "factory_info", 
-                       "process_mining", "hybrid", "conversational gateway"]
+                       "process_mining", "hybrid", "conversational_gateway"]
 
         if expected_route == "unrelated":
             return self._verify_no_answer(model_answer)
