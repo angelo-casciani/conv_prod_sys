@@ -16,11 +16,11 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A2": {
-          "probability": 0.7
-        },
         "A3": {
           "probability": 0.3
+        },
+        "A2": {
+          "probability": 0.7
         }
       },
       "failure_parameters": {
