@@ -77,8 +77,6 @@ def main():
         chain.evaluate_performance('process_mining.csv', run_data)
     elif 'evaluation-hybrid' in modality:
         chain.evaluate_performance('hybrid.csv', run_data)
-    elif 'evaluation-answer' in modality:
-        chain.evaluate_performance('answer.csv', run_data)
     else:
         for _ in chain.live_prompting(info_run=run_data, chatbot=False):
             pass

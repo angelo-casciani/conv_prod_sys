@@ -123,7 +123,8 @@ def main_simulation():
             sequence = ", ".join(activities[:sequence_length])
             question = template.format(sequence=sequence)
             answer = answer_template.copy()
-            answer["activities_sequence"] = sequence.split(", ")        
+            answer["activities_sequence"] = sequence.split(", ")
+        answer["query_nl"] = question
         samples.append((question, str(answer)))
 
     write_samples_to_csv('simulation', samples)

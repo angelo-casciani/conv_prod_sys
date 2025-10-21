@@ -447,13 +447,14 @@ class LLMPipeline:
         prompt = self.chain_process_mining.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_process_mining.invoke(invoke_payload)
         if self.model_type_gateway == 'local':
-            answer = complete_answer
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+            print("Risposta LLM:" + answer)
         else:
             answer = complete_answer.content
-
+            
         answer = clean_json_block(answer)
+        print(answer)
         parsed_json = json.loads(answer)
-        #print(parsed_json)
         action = parsed_json.get("task")
         nl_output = answer
         if 'evaluation' not in modality:
