@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 from typing import Dict, Tuple
+import re
 
 from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFacePipeline
@@ -21,11 +22,16 @@ import process_mining
 
 
 def clean_json_block(text: str) -> str:
-    if text.startswith("```"):
-        lines = text.strip().splitlines()
-        if len(lines) >= 3 and lines[0].startswith("```") and lines[-1].startswith("```"):
-            return "\n".join(lines[1:-1]).strip()
-    return text.strip()
+    match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
+    
+    if match:
+        return match.group(1).strip()
+    
+    stripped_text = text.strip()
+    if stripped_text.startswith("{") and stripped_text.endswith("}"):
+        return stripped_text
+        
+    return None
 
 
 def explicit_deadlock_free(qjson, plan):
@@ -334,7 +340,7 @@ class LLMPipeline:
         prompt = self.chain_simulation.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_simulation.invoke(invoke_payload)
         if self.model_type_simulation == 'local':
-            answer = complete_answer
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
         else:
             answer = complete_answer.content
 
@@ -386,7 +392,7 @@ class LLMPipeline:
         prompt = self.chain_verification.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_verification.invoke(invoke_payload)
         if self.model_type_verification == 'local':
-            answer = complete_answer
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
         else:
             answer = complete_answer.content
 
@@ -418,7 +424,7 @@ class LLMPipeline:
         prompt = self.chain_failure.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_failure.invoke(invoke_payload)
         if self.model_type_gateway == 'local':
-            answer = complete_answer
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
         else:
             answer = complete_answer.content
 
@@ -448,12 +454,12 @@ class LLMPipeline:
         complete_answer = self.chain_process_mining.invoke(invoke_payload)
         if self.model_type_gateway == 'local':
             prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
-            print("Risposta LLM:" + answer)
+            #print("Risposta LLM:" + answer)
         else:
             answer = complete_answer.content
             
         answer = clean_json_block(answer)
-        print(answer)
+        #print(answer)
         parsed_json = json.loads(answer)
         action = parsed_json.get("task")
         nl_output = answer

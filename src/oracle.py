@@ -135,7 +135,6 @@ class AnswerVerificationOracle:
                (text.startswith('[') and text.endswith(']'))
     
     def _verify_json_answer(self, expected_answer, model_answer):
-        """Verifica risposte strutturate JSON (factory_info, process_mining, hybrid)"""
         try:
             expected_dict = self._reconstruct_json_from_csv(expected_answer)
             
@@ -180,15 +179,24 @@ class AnswerVerificationOracle:
         try:
             return json.loads(model_answer)
         except json.JSONDecodeError:
-            json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
-            matches = re.findall(json_pattern, model_answer, re.DOTALL)
-            
-            for match in matches:
-                try:
-                    return json.loads(match)
-                except json.JSONDecodeError:
-                    continue
-            
+            pass
+
+        match = re.search(r"```(?:json)?\s*(\{.*\}|\[.*\])\s*```", model_answer, re.DOTALL)
+        if match:
+            json_part = match.group(1)
+            try:
+                return json.loads(json_part)
+            except json.JSONDecodeError:
+                print(f"Warning: Found a Markdown block that looked like JSON but failed to parse: {json_part}")
+
+        match = re.search(r'(\{.*\}|\[.*\])', model_answer, re.DOTALL)
+        if match:
+            json_part = match.group(0)
+            try:
+                return json.loads(json_part)
+            except json.JSONDecodeError:
+                print(f"Warning: Found a raw JSON-like string that failed to parse: {json_part}")
+                
             return None
     
     def _reconstruct_json_from_csv(self, damaged_json_str):
@@ -243,9 +251,19 @@ class AnswerVerificationOracle:
         return expected_types == model_types
 
     def _verify_verification_task(self, expected, model):
-        expected_query = expected.get('uppaal_query', '').replace(' ', '').lower()
-        model_query = model.get('uppaal_query', '').replace(' ', '').lower()
-        
+        expected_raw = expected.get('uppaal_query', '')
+        model_raw = model.get('uppaal_query', '')
+
+        expected_query = re.sub(r'\s+', '', expected_raw).lower()
+        model_query = re.sub(r'\s+', '', model_raw).lower()
+
+    
+        print(f"RAW Expected: {repr(expected_raw)}")
+        print(f"RAW Model:    {repr(model_raw)}")
+        print(f"NORME Expected: '{expected_query}'")
+        print(f"NORME Model:    '{model_query}'")
+        print("----------------------------------\n")
+    
         return expected_query == model_query
 
     def _verify_simulation_task(self, expected, model):
