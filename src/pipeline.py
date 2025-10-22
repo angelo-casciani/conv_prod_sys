@@ -340,7 +340,7 @@ class LLMPipeline:
         prompt = self.chain_simulation.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_simulation.invoke(invoke_payload)
         if self.model_type_simulation == 'local':
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+            answer = complete_answer
         else:
             answer = complete_answer.content
 
@@ -392,7 +392,7 @@ class LLMPipeline:
         prompt = self.chain_verification.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_verification.invoke(invoke_payload)
         if self.model_type_verification == 'local':
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+            answer = complete_answer
         else:
             answer = complete_answer.content
 
@@ -424,7 +424,7 @@ class LLMPipeline:
         prompt = self.chain_failure.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_failure.invoke(invoke_payload)
         if self.model_type_gateway == 'local':
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+            answer = complete_answer
         else:
             answer = complete_answer.content
 

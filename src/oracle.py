@@ -2,6 +2,7 @@ import datetime
 import os
 import time
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from utility import load_csv_questions
 import json
 import re
 
@@ -72,8 +73,10 @@ class AnswerVerificationOracle:
             result['expected_answer'] = expected_answer
             
             if self.test_type == 'routing':
+                print("Using routing verification")
                 result['verification_result'] = self._verify_routing(model_answer, expected_answer)
             elif self._is_json_structure(expected_answer):
+                print("Using JSON structure verification")
                 result['verification_result'] = self._verify_json_answer(expected_answer, model_answer)
             else:
                 # Fallback to old logic
@@ -88,6 +91,7 @@ class AnswerVerificationOracle:
             self.predicted_answers.append(model_answer)
             
             print(f"Answer: {model_answer}\nExpected_answer: {result['expected_answer']}\nResult: {result['verification_result']}")
+            #print(result['verification_result'])
         self.results.append(result)
 
         return result['verification_result']
@@ -139,10 +143,12 @@ class AnswerVerificationOracle:
             expected_dict = self._reconstruct_json_from_csv(expected_answer)
             
             if expected_dict is None:
+                print("Failed to reconstruct expected JSON from CSV")
                 expected_dict = json.loads(expected_answer) if isinstance(expected_answer, str) else expected_answer
             
             model_dict = self._extract_json_from_answer(model_answer)
-            
+            print(f"Expected JSON: {expected_dict}")
+            print(f"Model JSON: {model_dict}")
             if model_dict is None:
                 return False
             
@@ -179,27 +185,109 @@ class AnswerVerificationOracle:
         try:
             return json.loads(model_answer)
         except json.JSONDecodeError:
-            pass
-
-        match = re.search(r"```(?:json)?\s*(\{.*\}|\[.*\])\s*```", model_answer, re.DOTALL)
+            print("Direct JSON parsing failed, trying to extract JSON from answer.")
+        
+        response_markers = [
+            "[/INST]", 
+            "Here's my response:",
+            "Here is my response:",
+            "Based on the provided context",
+            "<|start_header_id|>assistant<|end_header_id|>",
+            "<<ANSWER>>"
+        ]
+        
+        # Find the last occurrence of response markers to get actual response
+        response_start = 0
+        for marker in response_markers:
+            idx = model_answer.rfind(marker)
+            if idx > response_start:
+                response_start = idx
+        
+        # Extract only the actual response part
+        actual_response = model_answer[response_start:] if response_start > 0 else model_answer
+        
+        match = re.search(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", actual_response, re.DOTALL)
         if match:
+            print("Found JSON block in Markdown format.")
             json_part = match.group(1)
             try:
                 return json.loads(json_part)
             except json.JSONDecodeError:
                 print(f"Warning: Found a Markdown block that looked like JSON but failed to parse: {json_part}")
-
-        match = re.search(r'(\{.*\}|\[.*\])', model_answer, re.DOTALL)
+        
+        def extract_json_objects(text):
+            json_objects = []
+            i = 0
+            while i < len(text):
+                if text[i] == '{':
+                    # Found start of potential JSON
+                    brace_count = 0
+                    start = i
+                    in_string = False
+                    escape = False
+                    
+                    for j in range(i, len(text)):
+                        char = text[j]
+                        
+                        # Handle string escaping
+                        if escape:
+                            escape = False
+                            continue
+                        if char == '\\':
+                            escape = True
+                            continue
+                        
+                        # Toggle string state
+                        if char == '"':
+                            in_string = not in_string
+                            continue
+                        
+                        # Only count braces outside strings
+                        if not in_string:
+                            if char == '{':
+                                brace_count += 1
+                            elif char == '}':
+                                brace_count -= 1
+                                if brace_count == 0:
+                                    # Found complete JSON object
+                                    json_str = text[start:j+1]
+                                    if '"task"' in json_str:  # Only consider objects with 'task' field
+                                        json_objects.append(json_str)
+                                    i = j
+                                    break
+                    i += 1
+                else:
+                    i += 1
+            
+            return json_objects
+        
+        json_candidates = extract_json_objects(actual_response)
+        
+        if json_candidates:
+            print(f"Found {len(json_candidates)} potential JSON objects with 'task' field")
+            for i, json_part in enumerate(reversed(json_candidates)):
+                try:
+                    parsed = json.loads(json_part)
+                    print(f"Successfully extracted JSON #{len(json_candidates)-i} from response (length: {len(json_part)} chars)")
+                    return parsed
+                except json.JSONDecodeError as e:
+                    print(f"Failed to parse JSON #{len(json_candidates)-i}: {e}")
+                    continue
+        
+        # Fallback: try any JSON-like structure
+        match = re.search(r'(\{.*?\})', actual_response, re.DOTALL)
         if match:
+            print("Found a raw JSON-like string in the answer.")
             json_part = match.group(0)
             try:
                 return json.loads(json_part)
             except json.JSONDecodeError:
-                print(f"Warning: Found a raw JSON-like string that failed to parse: {json_part}")
-                
-            return None
+                print(f"Warning: Found a raw JSON-like string that failed to parse: {json_part[:100]}...")
+        
+        return None
     
     def _reconstruct_json_from_csv(self, damaged_json_str):
+        print(f"Reconstructing JSON from damaged string: {damaged_json_str}")
         try:
             cleaned = damaged_json_str.strip().strip('"')
             
@@ -331,3 +419,33 @@ class AnswerVerificationOracle:
                 file.write(f"Expected Answer: {result['expected_answer']}\n")
                 file.write(f"Verification Result: {result['verification_result']}\n")
                 file.write("\n#####################################################################################\n")
+
+
+
+
+if __name__ == "__main__":
+    test_filename = 'hybrid.csv'
+    run_data = {
+        'LLM ID Gateway': 'gemini-2.5-flash',
+        'LLM ID Simulation': 'gemini-2.5-flash',
+        'LLM ID Verification': 'gemini-2.5-flash',
+        'Max Generated Tokens LLM': 2700,
+        'Interaction Modality': 'evaluation-hybrid'
+    }
+    questions = load_csv_questions(test_filename)
+    oracle = AnswerVerificationOracle(run_data)
+    oracle.set_test_type('hybrid')
+    
+    prompt = """"""
+
+    model_answer = """"""
+
+    question = questions[2][0]
+
+    expected_answer = questions[2][1]
+
+    oracle.add_question_expected_answer_pair(question, expected_answer)
+    oracle.verify_answer(prompt, question, model_answer)
+
+
+    

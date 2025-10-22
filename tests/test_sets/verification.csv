@@ -1,5 +1,5 @@
 question,answer,evaluation_type
-Does a path where the system stays in state q_7 forever exist?,"{""task"": ""verification"", ""query_nl"": ""Does a path where the system stays in state q_7 forever exist?"", ""uppaal_query"": ""E[] s.q_7""}",verification
+Does a path where the system stays in state q_14 forever exist?,"{""task"": ""verification"", ""query_nl"": ""Does a path where the system stays in state q_14 forever exist?"", ""uppaal_query"": ""E[] s.q_14""}",verification
 Verify if the automaton can always stay in state q_11 for up to 15 time units.,"{""task"": ""verification"", ""query_nl"": ""Verify if the automaton can always stay in state q_11 for up to 15 time units."", ""uppaal_query"": ""A[] s.q_11 && s.x <= 15""}",verification
 Does the system will always eventually reach state q_14.,"{""task"": ""verification"", ""query_nl"": ""Does the system will always eventually reach state q_14."", ""uppaal_query"": ""A<> s.q_14""}",verification
 Verify if the automaton reaches at least once the states q_11 and q_14.,"{""task"": ""verification"", ""query_nl"": ""Verify if the automaton reaches at least once the states q_11 and q_14."", ""uppaal_query"": ""E<> (s.q_11 && s.q_14)""}",verification
