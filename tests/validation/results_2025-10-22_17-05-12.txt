@@ -1,0 +1,379 @@
+INFORMATION ON THE RUN
+
+LLM ID Gateway: google/gemma-2-9b-it
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 1024
+Interaction Modality: evaluation-routing
+
+-----------------------------------
+Accuracy: 0.2000
+Precision: 1.0000
+Recall: 0.2000
+F1-score: 0.3333
+Elapsed: 0.02 hours
+-----------------------------------
+
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: What is the mean transfer time from activity6 to activity4?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: factory_info
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Can you filter the log between 2021-08-17T21:27:01 and 2021-08-18T14:55:13?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: process_mining
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Based on the sequence activity1, activity2, activity3, activity4, what is the most likely next activity?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: factory_simulation
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Can you simulate 4700 time units and verify if all activities eventually complete without entering a deadlock state?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: hybrid
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Translate 'hello' to Spanish.
+Answer:
+Model Answer:  
+conversational_gateway
+
+
+
+Expected Answer: conversational_gateway
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: How do I bake a cake?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: conversational_gateway
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Does a path where the system stays in state q_6 forever exist?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: uppaal_verification
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Based on the sequence activity1, activity2, what is the most likely next activity?
+Answer:
+Model Answer:  
+
+
+```python
+# This code snippet assumes you have access to the user's question and the defined rules.
+
+user_question = "Based on the sequence activity1, activity2, what is the most likely next activity?"
+
+# Implement your logic here to determine the appropriate task handler based on the user's question and the provided rules.
+
+if "deadlock" in user_question or "reachability" in user_question:
+    task_handler = 'uppaal_verification'
+elif "simulate" in user_question or "metrics" in user_question or "predict" in user_question:
+    task_handler = 'factory_simulation'
+elif "process mining" in user_question or "discovery" in user_question or "conformance" in user_question:
+    task_handler = 'process_mining'
+elif "maintenance" in user_question or "failure" in user_question:
+    task_handler = 'hybrid'
+elif "structure" in user_question or "processing times" in user_question or "routing probabilities" in user_question:
+    task_handler = 'factory_info'
+else:
+    task_handler = 'conversational_gateway'  
+
+print(task_handler) 
+```
+
+
+
+
+Expected Answer: factory_simulation
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Can 350 products be made within 3200 units of time? Validate whether state q_0 is reachable and check activity4 failure likelihood.
+Answer:
+Model Answer:  
+
+
+```python
+# This code snippet demonstrates how to analyze the user query and determine the appropriate task handler.
+
+query = "Can 350 products be made within 3200 units of time? Validate whether state q_0 is reachable and check activity4 failure likelihood."
+
+# Analyze the query for keywords related to different task handlers.
+if "deadlock" in query or "reachability" in query:
+    task_handler = 'uppaal_verification'
+elif "simulate" in query or "metrics" in query or "predict" in query:
+    task_handler = 'factory_simulation'
+elif "process mining" in query or "discovery" in query or "conformity" in query:
+    task_handler = 'process_mining'
+elif "simulation" in query and "verification" in query and "failure" in query:
+    task_handler = 'hybrid'
+elif "structure" in query or "processing times" in query or "routing probabilities" in query:
+    task_handler = 'factory_info'
+else:
+    task_handler = 'conversational_gateway'  
+
+print(task_handler) 
+```
+
+
+
+
+Expected Answer: hybrid
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Tell me a fun fact about space.
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: conversational_gateway
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: What are black holes?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: conversational_gateway
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Which activity has the smallest capacity?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: factory_info
+Verification Result: False
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Can you discover the process model from the event log?
+Answer:
+Model Answer:  
+
+
+```python
+# This code snippet will be executed when the user asks a question.
+
+answer = "process_mining"  
+print(answer)
+```
+
+
+
+
+Expected Answer: process_mining
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: If the system reaches q_6, will it eventually be in q_2?
+Answer:
+Model Answer:  
+
+
+```python
+answer = 'uppaal_verification'
+print(answer)
+```
+
+Expected Answer: uppaal_verification
+Verification Result: True
+
+#####################################################################################
+Prompt: Act as a conversational gateway that redirects user queries related to the Digital Twin factory's automata or digital twin to the appropriate task handler (reasoner) based on the rules in the context.
+You don't have to answer to the user question!
+Just use it to route the request to the appropriate task handler.
+Here is the context: Rules for routing:
+- If the question involves verifying temporal properties (e.g., deadlocks, reachability) in the factory automata, respond with the string 'uppaal_verification'.
+- If the question involves simulating the factory digital twin to compute some metrics (e.g., number of pieces produced in a certain time, units of time needed to produce a certain number of pieces, processing times, etc.) or predicting the next activity, respond with the string 'factory_simulation'.
+- If the question involves any functionalities of process mining (discovery, conformace checking, etc.) respond with the string 'process_mining'.
+- If the question involves any combination of simulation, verification, and failure reasoning (e.g., maintenance delays affecting production time, or checking deadlocks after maintenance), respond with the string 'hybrid'.
+- If the question involves the structure of the factory, activity processing times, routing probabilities, capacities or transfer times, respond with the string 'factory_info'.
+- If user's question does not match any of the previous two rules (i.e., the user is giving opinions, greetings, feedback, or asking about previous results from the reasoners and interactions and that information is available in the conversation history), redirect again to the conversational gateway responding 'conversational_gateway'.
+Here is the user question: Can you describe the Eiffel Tower?
+Answer:
+Model Answer:  
+
+
+
+Expected Answer: conversational_gateway
+Verification Result: False
+
+#####################################################################################

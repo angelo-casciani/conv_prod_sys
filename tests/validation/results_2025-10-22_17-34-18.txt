@@ -1,0 +1,511 @@
+INFORMATION ON THE RUN
+
+LLM ID Gateway: mistralai/Ministral-8B-Instruct-2410
+LLM ID Simulation: gpt-4o-mini
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: evaluation-process_mining
+
+-----------------------------------
+Accuracy: 1.0000
+Precision: 1.0000
+Recall: 1.0000
+F1-score: 1.0000
+Elapsed: 0.01 hours
+-----------------------------------
+
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you perform conformance checking between the event log and the reference model?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "conformance_checking"}
+Expected Answer: {"task": "conformance_checking"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you filter the log between 2020-04-08T17:26:12 and 2020-04-12T11:01:58?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "filter_by_time_range", "start_date": "2020-04-08T17:26:12", "end_date": "2020-04-12T11:01:58"}
+Expected Answer: {"task": "filter_by_time_range", "start_date": "2020-04-08T17:26:12", "end_date": "2020-04-12T11:01:58"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you show the discovered Petri net model?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "process_discovery"}
+Expected Answer: {"task": "process_discovery"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+What are the top 4 most frequent variants in the log?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "performance_analysis", "metric": "top_variants", "k": 4}
+Expected Answer: {"task": "performance_analysis", "metric": "top_variants", "k": 4}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you show the discovered Petri net model?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "process_discovery"}
+Expected Answer: {"task": "process_discovery"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+What is the mean throughput time of all completed cases?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "performance_analysis", "metric": "throughput_time"}
+Expected Answer: {"task": "performance_analysis", "metric": "throughput_time"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you discover the process model from the event log?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "process_discovery"}
+Expected Answer: {"task": "process_discovery"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you show the discovered Petri net model?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "process_discovery"}
+Expected Answer: {"task": "process_discovery"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you filter the log between 2024-05-29T18:44:45 and 2024-05-30T04:54:00?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "filter_by_time_range", "start_date": "2024-05-29T18:44:45", "end_date": "2024-05-30T04:54:00"}
+Expected Answer: {"task": "filter_by_time_range", "start_date": "2024-05-29T18:44:45", "end_date": "2024-05-30T04:54:00"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you filter the log between 2021-08-17T21:27:01 and 2021-08-18T14:55:13?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "filter_by_time_range", "start_date": "2021-08-17T21:27:01", "end_date": "2021-08-18T14:55:13"}
+Expected Answer: {"task": "filter_by_time_range", "start_date": "2021-08-17T21:27:01", "end_date": "2021-08-18T14:55:13"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+What is the mean throughput time of all completed cases?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "performance_analysis", "metric": "throughput_time"}
+Expected Answer: {"task": "performance_analysis", "metric": "throughput_time"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you discover the process model from the event log?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "process_discovery"}
+Expected Answer: {"task": "process_discovery"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you discover the process model from the event log?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "process_discovery"}
+Expected Answer: {"task": "process_discovery"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you filter the log between 2022-07-13T19:06:06 and 2022-07-15T14:03:42?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "filter_by_time_range", "start_date": "2022-07-13T19:06:06", "end_date": "2022-07-15T14:03:42"}
+Expected Answer: {"task": "filter_by_time_range", "start_date": "2022-07-13T19:06:06", "end_date": "2022-07-15T14:03:42"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <s>[INST]
+<<SYS>>
+Act as an assistant that analyzes event logs of the Digital Twin factory using process mining techniques. You can perform tasks such as: 'process_discovery' to extract a process model (e.g., Petri Net) from an event log, 'conformance_checking' to verify if the observed executions in the log match a given process model, 'performance_analysis' to compute performance indicators such as throughput time or activity frequencies, and 'filter_by_time_range' to filter the log between a specific time range. Given a natural language question, generate a JSON object containing one of these allowed 'task'. If the user question does not match an allowed task, kindly refuse to answer.Examples:
+1. Input (Natural Language Query): "Can you discover the process model from the production log?"
+ Output: (LLM answer): {"task": "process_discovery"}
+2. Input (Natural Language Query): "The registered behavior in the event log is conforming to the factory model?"
+ Output: (LLM answer): {"task": "conformance_checking"}
+3. Input (Natural Language Query): "What is the mean throughput time of the produced pieces in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "throughput_time"}
+4. Input (Natural Language Query): "What the frequencies of the activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "activity_frequency"}
+5. Input (Natural Language Query): "What are the top 7 variants in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "top_variants", "k": 7}
+6. Input (Natural Language Query): "Give me the resource analysis of the event log."
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "resource_analysis"}
+7. Input (Natural Language Query): "Can you provide me the start and end activities in the event log?"
+ Output: (LLM answer): {"task": "performance_analysis", "metric": "start_end_activities"}
+8. Input (Natural Language Query): "Can you provide me the filtered event log between the start date 2025-02-17T17:07:00.000000 to the end date 2025-02-18T17:07:00.000000?"
+ Output: (LLM answer): {"task": "filter_by_time_range", "start_date": "2025-02-17T17:07:00.000000", "end_date": "2025-02-18T17:07:00.000000"}
+ The only metrics allowed in the "performance_analysis" task are: "throughput_time", "activity_frequency", "top_variants", "start_end_activities", "resource_analysis".
+<</SYS>>
+<<CONTEXT>>
+
+<</CONTEXT>>
+<<QUESTION>>
+Can you show me the top 1 variants that are present in the event log?
+<</QUESTION>>
+<<ANSWER>> [/INST]
+Model Answer: {"task": "performance_analysis", "metric": "top_variants", "k": 1}
+Expected Answer: {"task": "performance_analysis", "metric": "top_variants", "k": 1}
+Verification Result: True
+
+#####################################################################################

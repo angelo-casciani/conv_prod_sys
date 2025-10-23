@@ -1,0 +1,878 @@
+INFORMATION ON THE RUN
+
+LLM ID Gateway: gpt-4o-mini
+LLM ID Simulation: meta-llama/Llama-3.2-3B-Instruct
+LLM ID Verification: gpt-4o-mini
+Max Generated Tokens LLM: 512
+Interaction Modality: evaluation-simulation
+
+-----------------------------------
+Accuracy: 0.9333
+Precision: 1.0000
+Recall: 0.9333
+F1-score: 0.9655
+Elapsed: 0.03 hours
+-----------------------------------
+
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean processing time after executing the factory to generate 200 products?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean processing time after executing the factory to generate 200 products?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+To answer this question, we will use the'sim_with_number_products' task.
+
+Here's the JSON response:
+
+```
+{
+  "task": "sim_with_number_products",
+  "simulation_time": "",
+  "target_pieces": 200,
+  "activities_sequence": [],
+  "query_nl": "What is the mean processing time after executing the factory to generate 200 products?"
+}
+```
+Expected Answer: {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean processing time after executing the factory to generate 200 products?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Carry out a simulation for 1200 units of time to check how many pieces are produced.
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Carry out a simulation for 1200 units of time to check how many pieces are produced.
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that corresponds to the allowed task'sim_with_time'.
+
+{"task": "sim_with_time", "simulation_time": 1200, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1200 units of time to check how many pieces are produced."}
+Expected Answer: {"task": "sim_with_time", "simulation_time": 1200, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1200 units of time to check how many pieces are produced."}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Predict the next activity given this sequence: activity1, activity2.
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Predict the next activity given this sequence: activity1, activity2.
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that corresponds to the 'event_prediction' task.
+
+{"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "Predict the next activity given this sequence: activity1, activity2."}
+Expected Answer: {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "Predict the next activity given this sequence: activity1, activity2."}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean waiting time of activity3 for creating 100 products?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean waiting time of activity3 for creating 100 products?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that corresponds to the allowed task'sim_with_number_products'. Here's my response:
+
+{"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": ["A3"], "query_nl": "What is the mean waiting time of activity3 for creating 100 products?"}
+
+Note that I've used'sim_with_number_products' instead of 'event_prediction' because the user's query asks about the mean waiting time for a specific activity (A3) and a target number of products (100). This matches the definition of'sim_with_number_products', which allows simulating the execution of the production process to produce a certain number of pieces and returns related metrics such as processing time or waiting time.
+
+However, please note that the actual output may vary depending on the specifics of your system, such as the exact meaning of'mean waiting time' and how it's calculated. In this case, I assumed it refers to the average time spent by activity A3 in producing 100 products. 
+
+Also, since there is no information about the current state of the production process, I left'simulation_time' empty. If you want to simulate the process for a certain amount of time, you would use'sim_with_time' instead.
+Expected Answer: {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity3 for creating 100 products?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean waiting time for producing 450 pieces?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean waiting time for producing 450 pieces?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will interpret the user's question as follows:
+
+* The task is'sim_with_number_products'
+* The target is 450 pieces
+* There is no specific mention of a time frame, so I will assume it's asking for the general mean waiting time.
+
+My response would be:
+
+{"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 450, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 450 pieces?"}
+
+Note that I did not include any activities sequence as there is no information about the specific activities involved in producing 450 pieces. If you want me to add some default activities, I can do that too!
+Expected Answer: {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 450, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 450 pieces?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Based on the sequence activity1, activity2, activity3, activity4, what is the most likely next activity?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Based on the sequence activity1, activity2, activity3, activity4, what is the most likely next activity?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that corresponds to the 'event_prediction' task.
+
+{"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2", "activity3", "activity4"], "query_nl": "Based on the sequence activity1, activity2, activity3, activity4, what is the most likely next activity?"}
+Expected Answer: {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2", "activity3", "activity4"], "query_nl": "Based on the sequence activity1, activity2, activity3, activity4, what is the most likely next activity?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean waiting time of activity5 after executing the factory for 3700 time units?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean waiting time of activity5 after executing the factory for 3700 time units?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+To answer this question, we will use the'sim_with_time' task.
+
+Here's the JSON response:
+
+```
+{
+  "task": "sim_with_time",
+  "simulation_time": 3700,
+  "target_pieces": "",
+  "activities_sequence": [],
+  "query_nl": "What is the mean waiting time of activity5 after executing the factory for 3700 time units?"
+}
+```
+Expected Answer: {"task": "sim_with_time", "simulation_time": 3700, "target_pieces": "", "activities_sequence": [], "query_nl": "What is the mean waiting time of activity5 after executing the factory for 3700 time units?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the next production activity after activity1?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the next production activity after activity1?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond:
+
+{"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["A1"], "query_nl": "What is the next production activity after activity1?"}
+Expected Answer: {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1"], "query_nl": "What is the next production activity after activity1?"}
+Verification Result: False
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean processing time after executing the factory for 200 time units?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean processing time after executing the factory for 200 time units?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+To answer this question, we will use the'sim_with_time' task.
+
+Here's the JSON response:
+
+```
+{
+  "task": "sim_with_time",
+  "simulation_time": 200,
+  "target_pieces": "",
+  "activities_sequence": [],
+  "query_nl": "What is the mean processing time after executing the factory for 200 time units?"
+}
+```
+Expected Answer: {"task": "sim_with_time", "simulation_time": 200, "target_pieces": "", "activities_sequence": [], "query_nl": "What is the mean processing time after executing the factory for 200 time units?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean processing time of activity6 to produce 300 pieces?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean processing time of activity6 to produce 300 pieces?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that matches the user's query.
+
+{"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": ["A6"], "query_nl": "What is the mean processing time of activity6 to produce 300 pieces?"}
+Expected Answer: {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "What is the mean processing time of activity6 to produce 300 pieces?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Simulate the execution of the production process to produce 250 pieces.
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Simulate the execution of the production process to produce 250 pieces.
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that corresponds to the allowed task'sim_with_number_products'.
+
+{"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 250, "activities_sequence": [], "query_nl": "Simulate the execution of the production process to produce 250 pieces."}
+Expected Answer: {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 250, "activities_sequence": [], "query_nl": "Simulate the execution of the production process to produce 250 pieces."}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean waiting time of activity2 for creating 500 products?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: What is the mean waiting time of activity2 for creating 500 products?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that matches the user's query.
+
+{"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 500, "activities_sequence": ["A2"], "query_nl": "What is the mean waiting time of activity2 for creating 500 products?"}
+Expected Answer: {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 500, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity2 for creating 500 products?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Based on the sequence activity1, activity2, what is the most likely next activity?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Based on the sequence activity1, activity2, what is the most likely next activity?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that corresponds to the 'event_prediction' task.
+
+{"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "Based on the sequence activity1, activity2, what is the most likely next activity?"}
+Expected Answer: {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "Based on the sequence activity1, activity2, what is the most likely next activity?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Tell me the mean transfer time after executing the factory to produce 100 units?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Tell me the mean transfer time after executing the factory to produce 100 units?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will interpret the user's question as follows:
+
+* The task is'sim_with_number_products'
+* The target is 100 units
+* There is no specific mention of a particular activity, so I will assume it refers to the overall factory process.
+
+My response would be:
+
+{"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": ["A1", "A2", "A5", "A4", "A6", "A3"], "query_nl": "Tell me the mean transfer time after executing the factory to produce 100 units."}
+
+Note that I included all the activities in the sequence, even though they may not be directly relevant to the specific query. This is because the user did not specify which activity to focus on, and the context suggests that the factory process involves multiple activities. If you'd like to refine this interpretation or provide additional context, please let me know!
+Expected Answer: {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Tell me the mean transfer time after executing the factory to produce 100 units?"}
+Verification Result: True
+
+#####################################################################################
+Prompt: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Based on the sequence activity1, activity2, what is the most likely next activity?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+Model Answer: <|begin_of_text|><|start_header_id|>system<|end_header_id|> Act as a conversational interface towards the digital twin of the Digital Twin factory.
+Use the following pieces of context to generate from the user question a JSON object containing one of the allowed 'task': 'sim_with_time' for the number of pieces produced in a certain time and related metrics (e.g. processing time), 'sim_with_number_products' to know how much units of time needed to produce a certain number of pieces and related metrics (e.g. processing time) and 'event_prediction' for predicting the next activity.
+IMPORTANT: Treat 'pieces', 'products', and 'units' as synonymous in user queries. Do not create separate interpretations based on these terms.
+If the user question does not match an allowed tasks kindly refuse to answer.
+Examples:
+1. Input (Natural Language Query): Carry out a simulation for 1000 units of time to check how many pieces are produced.
+   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 1000, "target_pieces": "", "activities_sequence": [], "query_nl": "Carry out a simulation for 1000 units of time to check how many pieces are produced."}
+2. Input (Natural Language Query): Simulate the execution of the production process to produce 100 pieces.
+   Output (LLM answer with Uppaal Query): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 100, "activities_sequence": [], "query_nl": "Simulate the execution of the production process."}
+3. Input (Natural Language Query): What is the next production activity after activity 1 and activity 2?
+   Output (LLM answer): {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "What is the next production activity after activity 1 and activity 2?"
+4. Input (Natural Language Query): What is the mean waiting time for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time for producing 200 products?"
+5. Input (Natural Language Query): What is the mean waiting time of activity 3 for producing 200 products?
+   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 200, "activities_sequence": [], "query_nl": "What is the mean waiting time of activity 3 for producing 200 products?"},
+6. Input (Natural Language Query): How much time do I need to produce 300 products?   Output (LLM answer): {"task": "sim_with_number_products", "simulation_time": "", "target_pieces": 300, "activities_sequence": [], "query_nl": "How much time do I need to produce 300 products?"},
+7. Input (Natural Language Query): Simulate the process for 800 units of time. How many products can be made? Output (LLM answer): {"task": "sim_with_time", "simulation_time": 800, "target_pieces": "", "activities_sequence": [], "query_nl": "Simulate the process for 800 units of time. How many products can be made?"},
+8. Input (Natural Language Query): Can 50 products be produced in 100 time units?   Output (LLM answer): {"task": "sim_with_time", "simulation_time": 100, "target_pieces": 50, "activities_sequence": [], "query_nl": "Can 50 products be produced in 100 time units?"}
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Here is the context: The allowed values for 'task' are: 'sim_with_time', 'sim_with_number_products', 'event_prediction'.
+The labels for the activities are: A1, A2, A5, A4, A6, A3
+Here is the user question: Based on the sequence activity1, activity2, what is the most likely next activity?
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+Based on the provided context, I will respond with a JSON object that corresponds to the 'event_prediction' task.
+
+{"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "Based on the sequence activity1, activity2, what is the most likely next activity?"}
+Expected Answer: {"task": "event_prediction", "simulation_time": "", "target_pieces": "", "activities_sequence": ["activity1", "activity2"], "query_nl": "Based on the sequence activity1, activity2, what is the most likely next activity?"}
+Verification Result: True
+
+#####################################################################################
