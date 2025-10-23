@@ -760,7 +760,7 @@ def generate_hybrid_questions(hybrid_questions, number_samples=10):
     write_samples_to_csv('hybrid', samples)
 
 
-def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_csv, process_mining_csv, hybrid_csv, output_csv, sim_proportions, total_samples=15):
+def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_csv, process_mining_csv, hybrid_csv, output_csv, sim_proportions, total_samples=50):
     sim_df = pd.read_csv(simulation_csv)
     ver_df = pd.read_csv(verification_csv)
     unrel_df = pd.read_csv(unrelated_csv)
@@ -768,13 +768,19 @@ def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_c
     pm_df = pd.read_csv(process_mining_csv)
     hybrid_df = pd.read_csv(hybrid_csv)
 
-    sim_samples_count = total_samples // 6
-    ver_samples_count = total_samples // 6
-    factinf_samples_count = total_samples // 6
-    pm_samples_count = total_samples // 6
-    hybrid_samples_count = total_samples // 6
+    num_categories = 6
+    base_samples_per_cat = total_samples // num_categories
+    remaining_samples = total_samples % num_categories
+    counts = [base_samples_per_cat] * num_categories
+    for i in range(remaining_samples):
+        counts[i] += 1
 
-    refuse_samples_count = total_samples - sim_samples_count - ver_samples_count - factinf_samples_count - pm_samples_count - hybrid_samples_count
+    sim_samples_count = counts[0]
+    ver_samples_count = counts[1]
+    unrel_samples_count = counts[2]
+    factinf_samples_count = counts[3]
+    pm_samples_count = counts[4]
+    hybrid_samples_count = counts[5]
     sim_with_time_count = int(sim_samples_count * sim_proportions[0])
     sim_with_number_products_count = int(sim_samples_count * sim_proportions[1])
     event_prediction_count = sim_samples_count - sim_with_time_count - sim_with_number_products_count
@@ -790,7 +796,7 @@ def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_c
     sim_samples["answer"] = "factory_simulation"
     ver_samples = ver_df.sample(ver_samples_count, random_state=42)
     ver_samples["answer"] = "uppaal_verification"
-    unrel_samples = unrel_df.sample(refuse_samples_count, random_state=42)
+    unrel_samples = unrel_df.sample(unrel_samples_count, random_state=42)
     unrel_samples["answer"] = "conversational_gateway"
     factinf_samples = factinf_df.sample(factinf_samples_count, random_state=42)
     factinf_samples["answer"] = "factory_info"
@@ -802,6 +808,8 @@ def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_c
     
     combined_samples.to_csv(output_csv, index=False, quoting=csv.QUOTE_ALL)
     print(f"Generated mixed CSV with {len(combined_samples)} samples and saved to {output_csv}")
+    print("Sample distribution per category:")
+    print(combined_samples['answer'].value_counts())
 
 
 def main_answer(routing_csv_path):

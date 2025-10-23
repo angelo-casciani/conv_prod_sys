@@ -1,16 +1,16 @@
 question,answer,evaluation_type
-Which activities have probabilistic routing defined?,"{""task"": ""factory_info"", ""query_nl"": ""Which activities have probabilistic routing defined?"", ""response"": """"}",factory_info
-Is there any activity with parallel routing options?,"{""task"": ""factory_info"", ""query_nl"": ""Is there any activity with parallel routing options?"", ""response"": """"}",factory_info
-What is the capacity of activity5?,"{""task"": ""factory_info"", ""query_nl"": ""What is the capacity of activity5?"", ""response"": """"}",factory_info
-What is the mean transfer time between activity5 and activity2?,"{""task"": ""factory_info"", ""query_nl"": ""What is the mean transfer time between activity5 and activity2?"", ""response"": """"}",factory_info
-What is the inter-arrival time of products?,"{""task"": ""factory_info"", ""query_nl"": ""What is the inter-arrival time of products?"", ""response"": """"}",factory_info
-Is there any activity with parallel routing options?,"{""task"": ""factory_info"", ""query_nl"": ""Is there any activity with parallel routing options?"", ""response"": """"}",factory_info
-What is the inter-arrival time of products?,"{""task"": ""factory_info"", ""query_nl"": ""What is the inter-arrival time of products?"", ""response"": """"}",factory_info
+How many activities are there in the production line?,"{""task"": ""factory_info"", ""query_nl"": ""How many activities are there in the production line?"", ""response"": """"}",factory_info
+What is the standard deviation of the inter-arrival time?,"{""task"": ""factory_info"", ""query_nl"": ""What is the standard deviation of the inter-arrival time?"", ""response"": """"}",factory_info
 Which activities have probabilistic routing defined?,"{""task"": ""factory_info"", ""query_nl"": ""Which activities have probabilistic routing defined?"", ""response"": """"}",factory_info
 Which activities have probabilistic routing defined?,"{""task"": ""factory_info"", ""query_nl"": ""Which activities have probabilistic routing defined?"", ""response"": """"}",factory_info
-What is the capacity of activity3?,"{""task"": ""factory_info"", ""query_nl"": ""What is the capacity of activity3?"", ""response"": """"}",factory_info
 Which activity has the longest mean processing time?,"{""task"": ""factory_info"", ""query_nl"": ""Which activity has the longest mean processing time?"", ""response"": """"}",factory_info
-What is the standard deviation of the processing time at activity6?,"{""task"": ""factory_info"", ""query_nl"": ""What is the standard deviation of the processing time at activity6?"", ""response"": """"}",factory_info
-What is the mean transfer time from activity3 to activity6?,"{""task"": ""factory_info"", ""query_nl"": ""What is the mean transfer time from activity3 to activity6?"", ""response"": """"}",factory_info
-What is the mean transfer time from activity2 to activity1?,"{""task"": ""factory_info"", ""query_nl"": ""What is the mean transfer time from activity2 to activity1?"", ""response"": """"}",factory_info
-Is there any activity with parallel routing options?,"{""task"": ""factory_info"", ""query_nl"": ""Is there any activity with parallel routing options?"", ""response"": """"}",factory_info
+What is the mean transfer time from activity1 to activity3?,"{""task"": ""factory_info"", ""query_nl"": ""What is the mean transfer time from activity1 to activity3?"", ""response"": """"}",factory_info
+What is the mean processing time at activity2?,"{""task"": ""factory_info"", ""query_nl"": ""What is the mean processing time at activity2?"", ""response"": """"}",factory_info
+What is the mean transfer time between activity1 and activity3?,"{""task"": ""factory_info"", ""query_nl"": ""What is the mean transfer time between activity1 and activity3?"", ""response"": """"}",factory_info
+What are the possible next activities after activity6?,"{""task"": ""factory_info"", ""query_nl"": ""What are the possible next activities after activity6?"", ""response"": """"}",factory_info
+Which activity has the smallest capacity?,"{""task"": ""factory_info"", ""query_nl"": ""Which activity has the smallest capacity?"", ""response"": """"}",factory_info
+What is the inter-arrival time of products?,"{""task"": ""factory_info"", ""query_nl"": ""What is the inter-arrival time of products?"", ""response"": """"}",factory_info
+Which activities have probabilistic routing defined?,"{""task"": ""factory_info"", ""query_nl"": ""Which activities have probabilistic routing defined?"", ""response"": """"}",factory_info
+Which activity has the longest mean processing time?,"{""task"": ""factory_info"", ""query_nl"": ""Which activity has the longest mean processing time?"", ""response"": """"}",factory_info
+What is the standard deviation of the processing time at activity5?,"{""task"": ""factory_info"", ""query_nl"": ""What is the standard deviation of the processing time at activity5?"", ""response"": """"}",factory_info
+What is the probability of routing from activity6 to activity3?,"{""task"": ""factory_info"", ""query_nl"": ""What is the probability of routing from activity6 to activity3?"", ""response"": """"}",factory_info
