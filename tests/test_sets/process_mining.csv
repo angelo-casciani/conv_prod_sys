@@ -1,16 +1,301 @@
 question,answer,evaluation_type
-Can you filter the log between 2019-04-28T00:02:20 and 2019-04-28T08:11:31?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2019-04-28T00:02:20"", ""end_date"": ""2019-04-28T08:11:31""}",process_mining
-Can you filter the log between 2019-11-15T00:07:04 and 2019-11-17T01:16:03?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2019-11-15T00:07:04"", ""end_date"": ""2019-11-17T01:16:03""}",process_mining
-Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
-What are the top 4 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
-Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
-Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
-Can you filter the log between 2023-06-03T08:50:44 and 2023-06-04T11:46:30?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2023-06-03T08:50:44"", ""end_date"": ""2023-06-04T11:46:30""}",process_mining
-Can you show me the top 7 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
-Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you filter the log between 2016-11-10T00:22:34 and 2016-11-13T09:13:02?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2016-11-10T00:22:34"", ""end_date"": ""2016-11-13T09:13:02""}",process_mining
 What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
-Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
-Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
-What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
 Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
 Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the top 9 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 9}",process_mining
+Can you filter the log between 2019-06-18T07:29:16 and 2019-06-20T09:41:04?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2019-06-18T07:29:16"", ""end_date"": ""2019-06-20T09:41:04""}",process_mining
+What are the top 1 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you show me the top 5 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 5}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you filter the log between 2015-03-01T06:06:17 and 2015-03-03T22:20:48?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2015-03-01T06:06:17"", ""end_date"": ""2015-03-03T22:20:48""}",process_mining
+Can you show me the top 8 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 8}",process_mining
+Can you filter the log between 2015-08-07T10:46:29 and 2015-08-08T10:04:41?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2015-08-07T10:46:29"", ""end_date"": ""2015-08-08T10:04:41""}",process_mining
+Can you show me the top 4 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show me the top 9 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 9}",process_mining
+Can you filter the log between 2024-05-16T03:10:58 and 2024-05-17T04:37:56?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2024-05-16T03:10:58"", ""end_date"": ""2024-05-17T04:37:56""}",process_mining
+Can you show me the top 1 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the top 4 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+What are the top 2 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the top 7 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you filter the log between 2023-06-28T14:11:09 and 2023-06-30T20:57:28?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2023-06-28T14:11:09"", ""end_date"": ""2023-06-30T20:57:28""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the top 1 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+What are the top 1 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 1 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What are the top 1 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you show me the top 1 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+What are the top 5 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 5}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 1 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you filter the log between 2019-08-02T10:14:21 and 2019-08-06T04:43:13?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2019-08-02T10:14:21"", ""end_date"": ""2019-08-06T04:43:13""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 3 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+Can you filter the log between 2015-01-09T07:25:08 and 2015-01-12T12:12:49?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2015-01-09T07:25:08"", ""end_date"": ""2015-01-12T12:12:49""}",process_mining
+Can you show me the top 2 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you filter the log between 2018-05-30T02:01:26 and 2018-05-30T05:16:18?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2018-05-30T02:01:26"", ""end_date"": ""2018-05-30T05:16:18""}",process_mining
+Can you filter the log between 2018-08-01T22:39:34 and 2018-08-02T11:35:24?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2018-08-01T22:39:34"", ""end_date"": ""2018-08-02T11:35:24""}",process_mining
+What are the top 7 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+Can you show me the top 2 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the top 4 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you show me the top 6 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 6}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 1 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you show me the top 4 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you filter the log between 2015-02-24T23:15:24 and 2015-02-27T02:13:23?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2015-02-24T23:15:24"", ""end_date"": ""2015-02-27T02:13:23""}",process_mining
+Can you filter the log between 2015-08-17T08:35:22 and 2015-08-20T23:46:08?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2015-08-17T08:35:22"", ""end_date"": ""2015-08-20T23:46:08""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show me the top 3 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 2 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the top 7 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 3 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 3 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you show me the top 6 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 6}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you filter the log between 2023-08-27T08:29:21 and 2023-08-31T06:54:33?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2023-08-27T08:29:21"", ""end_date"": ""2023-08-31T06:54:33""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the top 3 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+Can you filter the log between 2022-11-27T00:20:38 and 2022-11-29T12:09:30?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2022-11-27T00:20:38"", ""end_date"": ""2022-11-29T12:09:30""}",process_mining
+What are the top 2 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show me the top 8 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 8}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What are the top 2 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 3 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 8 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 8}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you show me the top 4 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you show me the top 7 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+What are the top 6 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 6}",process_mining
+Can you show me the top 4 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 5 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 5}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you show me the top 8 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 8}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 1 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the top 8 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 8}",process_mining
+Can you show me the top 8 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 8}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What are the top 4 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 5 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 5}",process_mining
+What are the top 5 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 5}",process_mining
+Can you filter the log between 2015-07-14T15:38:06 and 2015-07-16T00:31:05?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2015-07-14T15:38:06"", ""end_date"": ""2015-07-16T00:31:05""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you filter the log between 2022-03-03T03:35:03 and 2022-03-07T00:11:41?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2022-03-03T03:35:03"", ""end_date"": ""2022-03-07T00:11:41""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 5 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 5}",process_mining
+Can you show me the top 9 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 9}",process_mining
+Can you show me the top 2 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you filter the log between 2024-04-28T23:34:22 and 2024-05-02T14:02:33?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2024-04-28T23:34:22"", ""end_date"": ""2024-05-02T14:02:33""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 4 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+Can you show me the top 7 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the top 2 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 9 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 9}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the top 3 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show me the top 1 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show me the top 8 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 8}",process_mining
+What are the top 4 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 4}",process_mining
+Can you filter the log between 2015-06-14T06:36:08 and 2015-06-16T17:33:18?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2015-06-14T06:36:08"", ""end_date"": ""2015-06-16T17:33:18""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you show me the top 9 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 9}",process_mining
+Can you show me the top 3 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+Can you show me the top 2 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you show me the top 9 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 9}",process_mining
+Can you show me the top 5 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 5}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the top 6 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 6}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you filter the log between 2016-01-03T11:56:19 and 2016-01-06T10:01:23?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2016-01-03T11:56:19"", ""end_date"": ""2016-01-06T10:01:23""}",process_mining
+What are the top 3 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 3}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show me the top 7 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you filter the log between 2020-07-10T13:31:41 and 2020-07-12T16:27:20?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2020-07-10T13:31:41"", ""end_date"": ""2020-07-12T16:27:20""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 7 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you filter the log between 2018-05-12T03:22:02 and 2018-05-13T05:59:20?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2018-05-12T03:22:02"", ""end_date"": ""2018-05-13T05:59:20""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+What are the top 1 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you show me the top 8 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 8}",process_mining
+Can you filter the log between 2018-08-07T06:42:44 and 2018-08-11T05:34:49?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2018-08-07T06:42:44"", ""end_date"": ""2018-08-11T05:34:49""}",process_mining
+What is the mean throughput time of all completed cases?,"{""task"": ""performance_analysis"", ""metric"": ""throughput_time""}",process_mining
+Can you show me the top 1 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 1}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the top 6 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 6}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What are the frequencies of each activity in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""activity_frequency""}",process_mining
+Can you show the discovered Petri net model?,"{""task"": ""process_discovery""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+What are the top 7 most frequent variants in the log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 7}",process_mining
+Can you filter the log between 2024-02-28T21:39:47 and 2024-03-01T08:46:14?,"{""task"": ""filter_by_time_range"", ""start_date"": ""2024-02-28T21:39:47"", ""end_date"": ""2024-03-01T08:46:14""}",process_mining
+Can you show me the top 2 variants that are present in the event log?,"{""task"": ""performance_analysis"", ""metric"": ""top_variants"", ""k"": 2}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining
+Can you perform conformance checking between the event log and the reference model?,"{""task"": ""conformance_checking""}",process_mining
+Can you discover the process model from the event log?,"{""task"": ""process_discovery""}",process_mining
+Can you list the start and end activities for the process?,"{""task"": ""performance_analysis"", ""metric"": ""start_end_activities""}",process_mining

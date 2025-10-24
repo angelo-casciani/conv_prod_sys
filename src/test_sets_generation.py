@@ -93,7 +93,7 @@ def write_samples_to_csv(filename, samples):
 
 def main_simulation():
     samples = []
-    for _ in range(15):
+    for _ in range(300):
         task = random.choices(
             population=list(simulation_tasks.keys()),
             weights=tasks_proportions,
@@ -153,7 +153,7 @@ time_range_verification = range(10, 51, 5)
 
 def main_verification():
     samples = []
-    for _ in range(15):
+    for _ in range(300):
         query_template, uppaal_query_template = random.choice(queries_verification)
         state = random.choice(states_verification)
         state1 = random.choice(states_verification)
@@ -299,7 +299,7 @@ factory_info_questions = [
 ]
 
 
-def generate_factory_info_questions(factory_info_questions, number_samples=15):
+def generate_factory_info_questions(factory_info_questions, number_samples=300):
     samples = []
     for _ in range(number_samples):
         s, a = random.choice(factory_info_questions)
@@ -363,7 +363,7 @@ day_range = range(1, 31, 1)
 hour_range = range(0, 24, 1)
 minute_range = range(0, 59, 1)
 second_range = range(0, 59, 1)
-def generate_process_mining_questions(process_mining_questions, number_samples=15):
+def generate_process_mining_questions(process_mining_questions, number_samples=300):
     samples = []
     for _ in range(number_samples):
         s, a = random.choice(process_mining_questions)
@@ -736,7 +736,7 @@ hybrid_questions = hybrid_questions = [
 
 
 
-def generate_hybrid_questions(hybrid_questions, number_samples=10):
+def generate_hybrid_questions(hybrid_questions, number_samples=300):
     samples = []
     for _ in range(number_samples):
         s, a = random.choice(hybrid_questions)
@@ -760,7 +760,7 @@ def generate_hybrid_questions(hybrid_questions, number_samples=10):
     write_samples_to_csv('hybrid', samples)
 
 
-def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_csv, process_mining_csv, hybrid_csv, output_csv, sim_proportions, total_samples=50):
+def main_routing(simulation_csv, verification_csv, unrelated_csv, factory_info_csv, process_mining_csv, hybrid_csv, output_csv, sim_proportions, total_samples=300):
     sim_df = pd.read_csv(simulation_csv)
     ver_df = pd.read_csv(verification_csv)
     unrel_df = pd.read_csv(unrelated_csv)
