@@ -2,28 +2,48 @@ First, verify that the system is completely deadlock-free under normal operation
 
 Investigate the impact of activity 4 failing: how many pieces can be produced in 300 time units? Also, while activity 4 is failing, confirm if state q1 is always eventually reached. Lastly, provide a separate simulation for 50 pieces without any failures, just for comparison.
 
-Predict the failure likelihood for activity 1. Then, calculate the total production time for 80 units if activity 1 fails as predicted. Concurrently, validate if the 'q_4' state becomes reachable only during this failure. Finally, check for deadlocks under this specific failure scenario.
+Predict the failure likelihood for activity 1. Then, calculate the total production time for 80 units if activity 1 fails as predicted. Concurrently, validate if the 'q_4' state becomes reachable. Finally, check for deadlocks.
 
 Is state q5 reachable under normal operation? Then, simulate the system for 400 time units and report the total throughput. Now, repeat this 400-unit simulation, but this time with activity 3 and activity 5 failing simultaneously, and compare the two throughput results.
 
-Assess the time required to produce 100 pieces. Then, confirm if the system remains deadlock-free for that entire production run. Finally, determine if 40 pieces can be produced in 150 time units specifically if activity 2 is undergoing maintenance.
+Assess the time required to produce 100 pieces. Then, confirm if the system remains deadlock-free for that entire production run. Finally, determine if 40 pieces can be produced in 1500 time units specifically if activity 2 is undergoing maintenance.
 
 Validate if state q3 is always eventually reached. Separately, calculate the time for 25 pieces. Now, combine these: does q3 remain always eventually reached while activity 5 is failing? And under that failure, what is the new time for 25 pieces?
 
 I need a multi-step check: 1) Confirm no deadlocks. 2) Determine the time for 70 pieces. 3) Validate the reachability of 'q_9'. 4) Re-calculate the time for 70 pieces, but this time assuming a failure probability on activity 4.
 
-Run a simulation for 500 time units and report the total piece count. Also, during this simulation, confirm if state q2 is reached. Then, investigate if a deadlock is possible if activity 1 fails. Finally, how long would 10 pieces take under that specific failure?
+Run a simulation for 5000 time units and report the total piece count. Also, during this simulation, confirm if state q2 is reached. Then, investigate if a deadlock is possible if activity 1 fails. Finally, how long would 10 pieces take under that specific failure?
 
 Compare two scenarios: First, the time to produce 60 pieces normally. Second, the time to produce 60 pieces while activity 3 is offline for maintenance. Additionally, in both scenarios, verify that state q8 is never reached.
 
-Project the total output over 600 time units. Concurrently, predict any potential failures in activity 5 during this run. Then, validate if state q1 is reachable. Finally, determine if 100 pieces can be produced faster than 350 time units.
+Project the total output over 6000 time units. Concurrently, predict any potential failures in activity 5 during this run. Then, validate if state q1 is reachable. Finally, determine if 100 pieces can be produced faster than 3500 time units.
 
 Before anything else, confirm the system is deadlock-free. Then, determine the production time for 90 units. After that, assess if this time changes by more than 10% if activity 4 has a high failure rate. Lastly, is the state 'q_2' reachable?
 
-Investigate the reachability of state q7. Also, calculate the throughput for a 250 time-unit run. Now, introduce a failure on activity 2: does q7 remain reachable? And what is the new throughput in 250 time units with this failure?
+Investigate the reachability of state q7. Also, calculate the throughput for a 2500 time-unit run. Now, introduce a failure on activity 2: does q7 remain reachable? And what is the new throughput in 2500 time units with this failure?
 
-What's the maximum number of products manufacturable in 180 time units? While calculating this, also validate if state q3 is always reached. Then, check for potential deadlocks. Finally, estimate the time needed for a single piece, assuming activity 1 is failing.
+What's the maximum number of products manufacturable in 1800 time units? While calculating this, also validate if state q3 is always reached. Then, check for potential deadlocks. Finally, estimate the time needed for a single piece, assuming activity 1 is failing.
 
 Assess the failure probability of activity 3. Then, simulate the production of 50 pieces, factoring in that failure probability. Also, confirm that 'q_13' is not reachable during this simulation. Lastly, how many pieces could be made in 100 time units under the same failure condition?
 
 I need a comprehensive report: 1) Is the system deadlock-free? 2) What is the time to produce 200 pieces? 3) Is state q5 ever reachable? 4) How many pieces can be produced in 400 time units if activity 1 and activity 4 are both under maintenance?
+
+What's the impact of activity 2's maintenance on the 50-piece cycle time and the total producibility in 2000 time units? Also, check if state q7 becomes unreachable in that context.
+
+If activity 4 fails, how does our throughput in 3000 time units change? And during that failure, is the reachability of state q1 still guaranteed? I also need to know if this fault introduces deadlocks or unlocks state 'q_4'.
+
+I want a full comparison for producing 60 pieces: how long does it take normally versus when activity 3 is under maintenance? In both scenarios, ensure state q8 is never reached.
+
+I need a feasibility analysis: is it possible to produce 40 pieces in 1500 time units if activity 2 is undergoing maintenance? And generally, is it true that the system always reaches state q3 and remains deadlock-free while producing 100 pieces?
+
+Predict the failure risks for activity 1. If that failure occurs, how does it affect the production time for 80 pieces? And, most importantly, can that specific fault cause a deadlock?
+
+Simulate the system for 4000 time units and tell me the throughput. Then, compare that result with a "disaster" scenario where activities 3 and 5 fail simultaneously.
+
+Verify if the "q3 is always reached" guarantee holds even if activity 5 were to fail. Also, quantify the impact of that failure on the time needed to produce 25 pieces.
+
+Can we produce 100 pieces in under 3500 time units? And what's the standard time for 90 pieces? I'm worried about activity 4: how badly does a failure there worsen this time (more than 10%?)? Also, make sure 'q_2' is reachable.
+
+I want a safety analysis. Are there deadlocks? Is state q3 always reached? And is 'q_13' unreachable? Finally, in case of a fault on activity 1, how long does a single piece take?
+
+I need a comprehensive report: time for 200 pieces, reachability of q5, and deadlock-free assurance. But the key question is: what's the throughput in 7000 time units if activity 1 and activity 4 are both under maintenance at the same time?
