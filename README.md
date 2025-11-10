@@ -138,7 +138,7 @@ To customize these settings, modify the corresponding arguments when executing `
 * Use `--llm_id_simulation` to specify a different Translator LLM for Simulation (e.g., among the ones reported in the *LLMs Requirements* section).
 * Use `--llm_id_verification` to specify a different Translator LLM for Verification (e.g., among the ones reported in the *LLMs Requirements* section).
 * Adjust `--max_new_tokens` to change the number of generated tokens.
-* Set `--modality` to alter the interaction modality (i.e., `'live'`, `'evaluation-simulation'`, '`evaluation-verification`', `'evaluation-factory_info`', `'evaluation-process_mining`', `'evaluation-hybrid`' and '`evaluation-routing`').
+* Set `--modality` to alter the interaction modality (i.e., `'live'`, `'evaluation-simulation'`, '`evaluation-verification`', `'evaluation-factory_info`', `'evaluation-process_mining`', `'evaluation-hybrid`', '`evaluation-routing`' and '`evaluation-qualitative-hybrid`').
 * Use `--extracted_model` to specify if the model has already been extracted (True or False).
 * Use `--extracted_model_failure` to specify if the model with failure data has already been extracted (True or False).
 
@@ -208,6 +208,17 @@ To reproduce the experiments for the *routing* evaluation, for example:
 ``` bash
 cd src
 python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.3 --modality evaluation-routing --max_new_tokens 512
+```
+
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+
+### Qualitative Hybrid experiments
+
+To reproduce the experiments for the *hybrid* qualitative evaluation, for example:
+
+``` bash
+cd src
+python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-qualitative-hybrid --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
