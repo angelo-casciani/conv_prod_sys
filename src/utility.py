@@ -89,3 +89,16 @@ def retrieve_factory_with_failure():
         data = json.load(file)
         
     return data
+
+def load_txt_questions(filename):
+    questions = []
+    full_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_sets', filename)
+    
+    with open(full_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            cleaned_line = line.replace('<s>', '').replace('</s>', '').strip()
+            
+            if cleaned_line:
+                questions.append(cleaned_line)
+                
+    return questions

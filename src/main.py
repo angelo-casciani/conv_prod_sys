@@ -24,7 +24,7 @@ def parse_arguments():
     parser.add_argument('--llm_id_simulation', type=str, default='gpt-4o-mini', help='LLM model identifier for Simulation')
     parser.add_argument('--llm_id_verification', type=str, default='gpt-4o-mini', help='LLM model identifier for Verification')
     parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=512)
-    parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, evaluation-factory_info, evaluation-process_mining, evaluation-hybrid, live')
+    parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, evaluation-factory_info, evaluation-process_mining, evaluation-hybrid, evaluation-qualitative-hybrid, live')
     parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
     parser.add_argument('--extracted_model_failure', type=bool, default=False, help='True if already exists the file digital_twin_with_failure.json. Default False')
     args = parser.parse_args()
@@ -77,6 +77,8 @@ def main():
         chain.evaluate_performance('process_mining.csv', run_data)
     elif 'evaluation-hybrid' in modality:
         chain.evaluate_performance('hybrid.csv', run_data)
+    elif 'evaluation-qualitative-hybrid' in modality:
+        chain.evaluate_qualitative_hybrid('qualitative_hybrid_requests.txt', run_data)
     else:
         for _ in chain.live_prompting(info_run=run_data, chatbot=False):
             pass

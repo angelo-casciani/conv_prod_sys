@@ -3,6 +3,8 @@ import json
 import os
 from typing import Dict, Tuple
 import re
+import io
+from contextlib import redirect_stdout
 
 from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFacePipeline
@@ -13,7 +15,7 @@ from torch import bfloat16
 import llm_factory_interface as factory_interface
 from oracle import AnswerVerificationOracle
 import uppaal_interface
-from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions, retrieve_factory_with_failure
+from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions, retrieve_factory_with_failure, load_txt_questions
 import pddl_interface
 import tempfile
 import failure_maintenance
@@ -22,15 +24,25 @@ import process_mining
 
 
 def clean_json_block(text: str) -> str:
-    match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
+    match_md = re.search(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", text, re.DOTALL)
+    if match_md:
+        return match_md.group(1).strip()
     
-    if match:
-        return match.group(1).strip()
+    start_brace = text.find('{')
+    end_brace = text.rfind('}')
     
-    stripped_text = text.strip()
-    if stripped_text.startswith("{") and stripped_text.endswith("}"):
-        return stripped_text
-        
+    if start_brace != -1 and end_brace != -1 and end_brace > start_brace:
+        json_candidate = text[start_brace:end_brace+1]
+        try:
+            json.loads(json_candidate)
+            return json_candidate
+        except json.JSONDecodeError:
+            pass
+
+    match_simple = re.search(r'(\{.*?\})', text, re.DOTALL)
+    if match_simple:
+        return match_simple.group(0)
+
     return None
 
 
@@ -346,6 +358,7 @@ class LLMPipeline:
 
         if 'evaluation' not in modality:
             results = factory_interface.interface_with_llm(answer)
+            #print(answer)
             if "event_prediction" not in answer:
                 if results['target_pieces'] != '' and results['simulation_time']:
                     is_negative_result = self._check_negative_result(results)
@@ -428,8 +441,18 @@ class LLMPipeline:
         else:
             answer = complete_answer.content
 
-        answer = clean_json_block(answer)
-        parsed_json = json.loads(answer)
+        cleaned_answer = clean_json_block(answer)
+        
+        if cleaned_answer is None:
+            print(f"ERROR: Impossible to extract a clean JSON from the failure model answer. Answer: {answer}")
+            return prompt, "{}"
+
+        try:
+            parsed_json = json.loads(cleaned_answer)
+        except json.JSONDecodeError as e:
+            print(f"ERROR: Failed JSON decoding even after cleaning. JSON: {cleaned_answer}. Error: {e}")
+            return prompt, "{}" # Ritorna un JSON vuoto
+            
         action = parsed_json.get("task")
         if action is None:
             print("Failure JSON missing 'task' field, returning empty result.")
@@ -735,3 +758,53 @@ class LLMPipeline:
 
         print('Validation process completed. Check the output file.')
         oracle.write_results_to_file()
+
+
+    def evaluate_qualitative_hybrid(self, test_filename, info_run):
+        print(f"Starting hybrid qualitative evaluation from: {test_filename}")
+        
+        log_dir = os.path.join(os.path.dirname(__file__), "..", "tests", "validation")
+        os.makedirs(log_dir, exist_ok=True)
+        log_filename = f"qualitative_results_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
+        log_path = os.path.join(log_dir, log_filename)
+        
+        questions = load_txt_questions(test_filename)
+        
+        total_questions = len(questions)
+        print(f"{total_questions} question found. Logging into: {log_path}")
+        
+        with open(log_path, 'w', encoding='utf-8') as log_file:
+            log_file.write('QUALITATIVE EVALUATION INFO\n\n')
+            for key, value in info_run.items():
+                log_file.write(f"{key}: {value}\n")
+            log_file.write(f"Test file: {test_filename}\n")
+            log_file.write('\n' + '=' * 80 + '\n\n')
+            
+            for i, question in enumerate(questions):
+                print(f"Elaborating question {i+1} of {total_questions}...")
+                log_file.write(f"QUESTION {i+1}/{total_questions}: {question}\n\n")
+                
+                buffer = io.StringIO()
+                
+                final_answer = ""
+                intermediate_logs = ""
+                
+                with redirect_stdout(buffer):
+                    try:
+                        self.request_type = "hybrid"
+                        prompt, final_answer = self._produce_answer_hybrid(question, 'live')
+
+                        
+                    except Exception as e:
+                        print(f"ERROR DURING THE ELABORATION OF THE QUESTION: {e}")
+                        final_answer = f"Execution failer with error: {e}"
+                
+                intermediate_logs = buffer.getvalue()
+                
+                log_file.write("--- INTERMEDIATE LOGS (STDOUT) ---\n")
+                log_file.write(intermediate_logs)
+                log_file.write("\n--- MODEL FINAL ANSWER ---\n")
+                log_file.write(final_answer)
+                log_file.write("\n\n" + '#' * 80 + "\n\n")
+
+        print(f"QUALITATIVE EVALUATION COMPLETED. Results are in: {log_path}")
