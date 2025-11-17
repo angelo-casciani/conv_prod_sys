@@ -483,7 +483,12 @@ class LLMPipeline:
             
         answer = clean_json_block(answer)
         #print(answer)
-        parsed_json = json.loads(answer)
+        try:
+            parsed_json = json.loads(answer)
+        except json.JSONDecodeError as e:
+            print(f"ERROR: Failed JSON decoding in process mining. JSON: {answer}. Error: {e}")
+            return prompt, '{"task": "invalid_json_parse_error"}' 
+        
         action = parsed_json.get("task")
         nl_output = answer
         if 'evaluation' not in modality:

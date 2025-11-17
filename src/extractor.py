@@ -226,6 +226,6 @@ class Extractor:
 
 if __name__ == "__main__":
     extractor = Extractor()
-    xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test4.xes')
+    xes_path = os.path.join(os.path.dirname(__file__), 'DTLogExtSim', 'log_testing', 'log_test2.xes')
     net, initial_marking, final_marking = extractor.extract_model(xes_path, failure=True)
     pm4py.view_petri_net(net, initial_marking, final_marking, format="png")

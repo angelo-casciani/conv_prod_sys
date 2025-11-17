@@ -16,20 +16,20 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A3": {
-          "probability": 0.3
-        },
         "A2": {
           "probability": 0.7
+        },
+        "A3": {
+          "probability": 0.3
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.006,
+        "failure_rate": 0.002,
         "repair_time": {
-          "mean": 23.6,
-          "std": 4.9
+          "mean": 28.8,
+          "std": 6.7
         },
-        "degradation_factor": 0.0005
+        "degradation_factor": 0.0011
       }
     },
     "A2": {
@@ -49,8 +49,8 @@
       "failure_parameters": {
         "failure_rate": 0.008,
         "repair_time": {
-          "mean": 31.5,
-          "std": 5.3
+          "mean": 34.0,
+          "std": 5.6
         },
         "degradation_factor": 0.0004
       }
@@ -70,12 +70,12 @@
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.006,
+        "failure_rate": 0.002,
         "repair_time": {
-          "mean": 21.6,
-          "std": 3.2
+          "mean": 25.4,
+          "std": 4.1
         },
-        "degradation_factor": 0.0012
+        "degradation_factor": 0.0009
       }
     },
     "A4": {
@@ -93,12 +93,12 @@
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.01,
+        "failure_rate": 0.004,
         "repair_time": {
-          "mean": 15.9,
-          "std": 6.3
+          "mean": 30.9,
+          "std": 5.8
         },
-        "degradation_factor": 0.0008
+        "degradation_factor": 0.001
       }
     },
     "A6": {
@@ -112,12 +112,12 @@
       },
       "next_activities": {},
       "failure_parameters": {
-        "failure_rate": 0.004,
+        "failure_rate": 0.009,
         "repair_time": {
-          "mean": 20.7,
-          "std": 5.4
+          "mean": 17.2,
+          "std": 4.4
         },
-        "degradation_factor": 0.0007
+        "degradation_factor": 0.0003
       }
     },
     "A3": {
@@ -135,12 +135,12 @@
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.007,
+        "failure_rate": 0.004,
         "repair_time": {
-          "mean": 28.2,
-          "std": 2.7
+          "mean": 28.3,
+          "std": 4.1
         },
-        "degradation_factor": 0.001
+        "degradation_factor": 0.0005
       }
     }
   },
