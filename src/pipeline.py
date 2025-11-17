@@ -482,6 +482,13 @@ class LLMPipeline:
             answer = complete_answer.content
             
         answer = clean_json_block(answer)
+        if answer is None:
+            print(f"ERROR: clean_json_block returned None for process_mining answer")
+            print(f"Original answer: {complete_answer.content if hasattr(complete_answer, 'content') else complete_answer}")
+            if 'evaluation' in modality:
+                return prompt, '{"task": "invalid_no_json_found"}'
+            else:
+                raise ValueError("No valid JSON found in the answer")
         #print(answer)
         try:
             parsed_json = json.loads(answer)
