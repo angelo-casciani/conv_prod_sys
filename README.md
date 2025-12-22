@@ -8,7 +8,7 @@ Production systems call for analysis techniques yielding reliable diagnostic and
 
 ## Architecture
 
-![architecture](images/specific_framework_thesis.drawio.png)
+![architecture](images/architecture.png)
 
 The Figure shows the components of the framework and how they interact.
 
@@ -21,29 +21,84 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 ```
 .
 ├── images            # figures for the README file
-|   └──...
-├── models            # automaton and simulation parameters of the factory
-|   └── ...
+|   └── architecture.png
+├── models            # extracted automaton and simulation parameters
+|   ├── digital_twin_with_failure.json
+|   ├── digital_twin.json
+|   ├── factory_automaton.json
+|   ├── lego_factory_with_failure.json
+|   ├── lego_factory.json
+|   └── lego_SKG_item-10_no_doubles.xml
 ├── src               # source code of proposed approach
 |   ├── uppaal        # source code of the Uppaal verifier
 |   ├── DTLogExtSim   # submodule code for the digital twin extractor 
 |   ├── log           # folder where to insert the event log
 |   ├── pddl          # source code for the PDDL orchestrator
-|   └── ...
+|   |   ├── downward       # Fast-Downward submodule code
+|   |   ├── domain.pddl    # Orchestrator PDDL domain
+|   |   └── problem.pddl   # Orchestrator PDDL problem
+|   ├── extractor_outputs  # outputs from the digital twin extractor
+|   ├── chatbot.py         # GUI-based conversational interface
+|   ├── main.py            # main entry point for the framework
+|   ├── pipeline.py        # orchestration pipeline
+|   ├── llm_factory_interface.py  # LLM-Factory interface
+|   ├── uppaal_interface.py       # UPPAAL verification interface
+|   ├── pddl_interface.py         # Planning interface
+|   ├── process_mining.py         # Process Mining module
+|   ├── failure_interface.py      # failure handling interface
+|   ├── failure_maintenance.py    # failure maintenance logic
+|   ├── extractor.py              # digital twin extraction logic
+|   ├── oracle.py                 # evaluation oracle
+|   ├── lego_factory.py           # factory-specific implementation
+|   ├── test_sets_generation.py   # test set generation script
+|   ├── prompts.json              # LLM prompts configuration
+|   └── utility.py                # utility functions
 ├── tests             # sources for the evaluation
 |   ├── outputs       # outputs of the live convesations
 |   ├── test_sets     # test sets employed during the evaluation
+|   |   ├── factory_info.csv
+|   |   ├── hybrid.csv
+|   |   ├── process_mining.csv
+|   |   ├── qualitative_hybrid_requests.txt
+|   |   ├── routing.csv
+|   |   ├── simulation.csv
+|   |   ├── simulation_stats.txt
+|   |   ├── unrelated.csv
+|   |   └── verification.csv
 |   └── validation    # quantitative evaluation results for each run
-└──...
+├── .env              # environment variables (API keys)
+├── .gitmodules       # git submodules configuration
+├── setup_submodules.sh  # automated submodule setup script
+├── requirements.txt  # Python dependencies
+├── LICENSE           # license information
+└── README.md         # this file
 ```
 
 ## Getting Started
 
-First, you need to clone the repository:
+First, you need to clone the repository with its submodules:
 
 ``` bash
-git clone https://github.com/angelo-casciani/conv_prod_sys
+git clone --recurse-submodules https://github.com/angelo-casciani/conv_prod_sys
 cd conv_prod_sys
+```
+
+If you've already cloned the repository without submodules, you can initialize them by running the automated setup script:
+
+``` bash
+./setup_submodules.sh
+```
+
+This script will:
+- Initialize and update all git submodules (Fast Downward and DTLogExtSim)
+- Build Fast Downward automatically
+- Create the necessary directories
+- Check for Docker installation (required for DTLogExtSim)
+
+Alternatively, you can manually initialize the submodules:
+
+``` bash
+git submodule update --init --recursive
 ```
 
 Assuming a working version of Python (v.3.10.12) installed on the machine, create a virtual environment in the root folder of the project.
@@ -62,6 +117,7 @@ pip install -r requirements.txt
 Visit the [official Uppaal downloads page](https://uppaal.org/downloads/#downloads) and download the appropriate version for your OS.
 Run the installer and follow the instructions on the website.
 Upon first launch, request and register a valid license key when prompted.
+This step is needed to activate the Uppaal `verifyta` used in this project   
 
 Set up a [HuggingFace token](https://huggingface.co/) and/or an [OpenAI API key](https://platform.openai.com/overview) in a `.env` file in the root directory:
 ```env HF_TOKEN=<your token, should start with hf_> DEEPSEEK_API_KEY=<your key, should start with sk-> OPENAI_API_KEY=<your key, should start with sk-> GOOGLE_API_KEY=<your Gemini API key>```
