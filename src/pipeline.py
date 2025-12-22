@@ -112,18 +112,12 @@ class LLMPipeline:
         self.hf_token = hf_token
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
-        #self.factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'digital_twin.json')
-        #self.factory_model_with_failure = os.path.join(os.path.dirname(__file__), '..','models', 'lego_factory_with_failure.json')
+        #self.factory_model = os.path.join(os.path.dirname(__file__), '..', 'data', 'parameters', 'digital_twin.json')
         self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
         with open(self.pddl_domain, 'r') as f:
             self.pddl_domain = f.read()
-        self.digital_twin_csv_logs = os.path.join(os.path.dirname(__file__), '..', '10-Minute Sample.csv')
         with open(self.path_prompts, 'r') as prompt_file:
             self.prompts = json.load(prompt_file)
-        # with open(self.factory_model, 'r') as factory_file:
-        #     self.factory_model = json.load(factory_file)
-        # with open(self.factory_model_with_failure, 'r') as factory_file:
-        #     self.factory_model_with_failure = json.load(factory_file)
         self.chain_simulation = self._initialize_chain(model_id_simulation, self.model_family_simulation, self.model_type_simulation)
         self.chain_verification = self._initialize_chain(model_id_verification,self.model_family_verification, self.model_type_verification)
         self.chain_gateway = self._initialize_chain(model_id_gateway,self.model_family_gateway, self.model_type_gateway)
@@ -248,7 +242,7 @@ class LLMPipeline:
             if not self.extracted:
                 self.process_mining_module.extract()
                 self.extracted = True
-            factory_model = os.path.join(os.path.dirname(__file__), '..','models', 'digital_twin.json')
+            factory_model = os.path.join(os.path.dirname(__file__), '..', 'data', 'parameters', 'digital_twin.json')
             with open(factory_model, 'r') as factory_file:
                 factory_model = json.load(factory_file)
             context = factory_model

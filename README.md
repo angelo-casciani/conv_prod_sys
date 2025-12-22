@@ -22,19 +22,21 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 .
 ├── images            # figures for the README file
 |   └── architecture.png
-├── models            # extracted automaton and simulation parameters
-|   ├── digital_twin_with_failure.json
-|   ├── digital_twin.json
-|   ├── factory_automaton.json
-|   ├── lego_factory_with_failure.json
-|   ├── lego_factory.json
-|   └── lego_SKG_item-10_no_doubles.xml
+├── data              # extracted automaton and simulation parameters
+|   ├── automaton     # automaton files
+|   |   ├── factory_automaton.json
+|   |   └── lego_SKG_item-10_no_doubles.xml
+|   └── parameters    # digital twin parameters
+|       ├── digital_twin_with_failure.json
+|       ├── digital_twin.json
+|       ├── lego_factory_with_failure.json
+|       └── lego_factory.json
+├── log               # folder where to insert the event log
 ├── src               # source code of proposed approach
 |   ├── uppaal        # source code of the Uppaal verifier
 |   ├── DTLogExtSim   # submodule code for the digital twin extractor 
-|   ├── log           # folder where to insert the event log
+|   ├── downward      # Fast-Downward submodule code
 |   ├── pddl          # source code for the PDDL orchestrator
-|   |   ├── downward       # Fast-Downward submodule code
 |   |   ├── domain.pddl    # Orchestrator PDDL domain
 |   |   └── problem.pddl   # Orchestrator PDDL problem
 |   ├── extractor_outputs  # outputs from the digital twin extractor

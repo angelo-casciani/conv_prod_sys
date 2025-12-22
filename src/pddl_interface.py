@@ -2,7 +2,7 @@ import subprocess
 import os
 
 DOMAIN_PATH = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
-PLANNER_PATH = os.path.join(os.path.dirname(__file__), 'pddl', 'downward', "fast-downward.py")
+PLANNER_PATH = os.path.join(os.path.dirname(__file__), 'downward', "fast-downward.py")
 #PROBLEM_PATH = os.path.join(os.path.dirname(__file__), 'pddl', 'problem.pddl')
 if DOMAIN_PATH and PLANNER_PATH:
     print("Domain and planner are set.\n")

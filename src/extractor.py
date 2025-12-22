@@ -213,10 +213,10 @@ class Extractor:
         model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times)
 
         if failure:
-            output_dir = "../models/digital_twin_with_failure.json"
+            output_dir = "../data/parameters/digital_twin_with_failure.json"
             model = self.add_failure_params(model)
         else:
-            output_dir = "../models/digital_twin.json"
+            output_dir = "../data/parameters/digital_twin.json"
 
         with open(output_dir, "w") as f:
             json.dump(model, f, indent=2)

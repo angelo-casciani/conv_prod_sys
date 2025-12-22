@@ -67,6 +67,6 @@ class FailureInterface:
         }
 
 if __name__ == "__main__":
-    sim = FailureInterface("lego_factory_with_failure.json")
+    sim = FailureInterface(os.path.join(os.path.dirname(__file__), '..', 'parameters', 'digital_twin_with_failure.json'))
     result = sim.simulate(150)
     print(json.dumps(result, indent=2))

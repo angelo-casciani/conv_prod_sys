@@ -7,7 +7,7 @@ from scipy import stats
 
 class FactorySimulator:
     def __init__(self, simulation_time=None, config_file=None):
-        config_file = os.path.join(os.path.dirname(__file__), '..', 'models', 'digital_twin.json')
+        config_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'parameters', 'digital_twin.json')
         with open(config_file, 'r') as f:
             self.config = json.load(f)
 

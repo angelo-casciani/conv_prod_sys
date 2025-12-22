@@ -4,6 +4,7 @@
     (:types
         input process output activity - object
     )
+    
     (:predicates
         ;; Simulation
         (deadlock_free ?x - process) 
@@ -105,7 +106,5 @@
         :parameters (?x - process)
         :precondition ()
         :effect (and (digital_twin ?x))
-    )
-    
-    
+    )   
 )

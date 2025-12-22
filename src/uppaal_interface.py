@@ -9,7 +9,7 @@ if platform == "linux" or platform == "linux2":
 elif platform == "darwin":
     UPPAAL_PATH = os.path.join(os.path.dirname(__file__), 'uppaal', 'bin_mac', 'verifyta')
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', 'lego_SKG_item-10_no_doubles.xml')
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'automaton', 'lego_SKG_item-10_no_doubles.xml')
 
 def interface_with_llm(llm_answer):
     json_request = extract_json(llm_answer)

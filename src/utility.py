@@ -69,7 +69,7 @@ def extract_json(llm_answer):
 
 
 def retrieve_automata():
-    model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'factory_automaton.json')
+    model_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'automaton', 'factory_automaton.json')
     with open(model_path, 'r') as file:
         data = json.load(file)
     
@@ -77,14 +77,14 @@ def retrieve_automata():
 
 
 def retrieve_factory():
-    model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'digital_twin.json')
+    model_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'parameters', 'digital_twin.json')
     with open(model_path, 'r') as file:
         data = json.load(file)
     
     return data
 
 def retrieve_factory_with_failure():
-    model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'digital_twin_with_failure.json')
+    model_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'parameters', 'digital_twin_with_failure.json')
     with open(model_path, 'r') as file:
         data = json.load(file)
         
