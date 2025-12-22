@@ -9,7 +9,7 @@ from extractor import Extractor
 
 class ProcessMiningModule:
     def __init__(self):
-        directory_path = os.path.join(os.path.dirname(__file__), 'log')
+        directory_path = os.path.join(os.path.dirname(__file__), '..', 'log')
         files = os.listdir(directory_path)
         files = [f for f in files if os.path.isfile(os.path.join(directory_path, f))]
 
