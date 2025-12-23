@@ -95,7 +95,8 @@ This script will:
 - Initialize and update all git submodules (Fast Downward and DTLogExtSim)
 - Build Fast Downward automatically
 - Create the necessary directories
-- Check for Docker installation (required for DTLogExtSim)
+- Check for Docker installation (required for DTLogExtSim and UPPAAL)
+- Set up DTLogExtSim and UPPAAL with Docker (if license key is available)
 
 Alternatively, you can manually initialize the submodules:
 
@@ -116,13 +117,17 @@ Run the following command to install the necessary packages along with their dep
 pip install -r requirements.txt
 ```
 
-Visit the [official Uppaal downloads page](https://uppaal.org/downloads/#downloads) and download the appropriate version for your OS.
-Run the installer and follow the instructions on the website.
-Upon first launch, request and register a valid license key when prompted.
-This step is needed to activate the Uppaal `verifyta` used in this project   
-
 Set up a [HuggingFace token](https://huggingface.co/) and/or an [OpenAI API key](https://platform.openai.com/overview) in a `.env` file in the root directory:
-```env HF_TOKEN=<your token, should start with hf_> DEEPSEEK_API_KEY=<your key, should start with sk-> OPENAI_API_KEY=<your key, should start with sk-> GOOGLE_API_KEY=<your Gemini API key>```
+```env
+HF_TOKEN=<your token, should start with hf_>
+DEEPSEEK_API_KEY=<your key, should start with sk->
+OPENAI_API_KEY=<your key, should start with sk->
+GOOGLE_API_KEY=<your Gemini API key>
+```
+
+Set up a license key for [Uppaal](https://uppaal.org/) in the env variable `UPPAAL_LICENSE_KEY`. You can get one from [uppaal.veriaal.dk](https://uppaal.veriaal.dk).
+This step is needed to activate the Uppaal `verifyta` used in this project.
+
 
 Create a folder named `extractor_outputs` inside `src` and insert the line `./../extractor_outputs:/app/extractor` in the file `src/DTLogExtSim/docker-compose.yml` as showed below:
 
@@ -131,6 +136,7 @@ extractor:
   volumes:
     - ./../extractor_outputs:/app/extractor
 ```
+
 
 ## LLMs Requirements
 

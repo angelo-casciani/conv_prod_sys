@@ -103,16 +103,90 @@ fi
 
 echo ""
 echo "============================================="
+echo "Setting up UPPAAL with Docker"
+echo "============================================="
+echo ""
+
+# Check if UPPAAL directory exists
+if [ -d "src/uppaal" ]; then
+    echo "UPPAAL installation found in src/uppaal"
+    
+    # Check if .env file exists
+    if [ ! -f ".env" ]; then
+        if [ -f ".env.example" ]; then
+            echo "Creating .env file from template..."
+            cp .env.example .env
+            echo "⚠️  Please edit .env file and add your UPPAAL_LICENSE_KEY"
+            echo "   Get your license from: https://uppaal.veriaal.dk"
+        fi
+    fi
+    
+    # Check if license key is set
+    if [ -f ".env" ] && grep -q "UPPAAL_LICENSE_KEY" ".env"; then
+        source .env
+        if [ -z "$UPPAAL_LICENSE_KEY" ] || [ "$UPPAAL_LICENSE_KEY" = "your_license_key_here" ]; then
+            echo "⚠️  Please set UPPAAL_LICENSE_KEY in .env file"
+            echo "   Get your license from: https://uppaal.veriaal.dk"
+        else
+            echo "UPPAAL license key found in .env"
+            
+            # Check if Docker is available
+            if command -v docker &> /dev/null; then
+                echo "Building UPPAAL Docker image..."
+                if sudo docker build --build-arg KEY=$UPPAAL_LICENSE_KEY -t uppaal-engine:latest -f Dockerfile.uppaal ./src/uppaal 2>&1 | grep -q "Successfully"; then
+                    echo "✓ UPPAAL Docker image built successfully"
+                    
+                    # Start the container
+                    echo "Starting UPPAAL container..."
+                    if sudo docker ps | grep -q uppaal-engine; then
+                        echo "UPPAAL container already running"
+                    else
+                        sudo docker run --rm -d --name uppaal-engine -p 2350:2350 \
+                            -v "$PWD/data/automaton:/home/uppaal/models:ro" \
+                            -e UPPAAL_LICENSE_KEY=$UPPAAL_LICENSE_KEY \
+                            uppaal-engine:latest
+                        sleep 2
+                        
+                        if sudo docker ps | grep -q uppaal-engine; then
+                            echo "✓ UPPAAL container is running"
+                        else
+                            echo "⚠️  Failed to start UPPAAL container"
+                        fi
+                    fi
+                else
+                    echo "⚠️  Failed to build UPPAAL Docker image"
+                fi
+            else
+                echo "⚠️  Docker not found. UPPAAL Docker setup requires Docker."
+                echo "   You can install UPPAAL manually or install Docker to use containerized UPPAAL"
+            fi
+        fi
+    fi
+else
+    echo "⚠️  UPPAAL installation not found in src/uppaal"
+    echo "   Please download UPPAAL for Linux from https://uppaal.org/downloads/"
+    echo "   and extract it to src/uppaal/"
+fi
+
+echo ""
+echo "============================================="
 echo "Setup Complete!"
 echo "============================================="
 echo ""
 echo "Submodules initialized:"
 echo "  ✓ Fast Downward (PDDL Planner) at src/pddl/downward"
 echo "  ✓ DTLogExtSim (Digital Twin Extractor) at src/DTLogExtSim"
+echo "  ✓ UPPAAL (Verification Engine) with Docker support"
 echo ""
 echo "Next steps:"
-echo "  1. Ensure UPPAAL is installed and activated (see README.md)"
-echo "  2. Set up your .env file with API keys"
-echo "  3. Run 'pip install -r requirements.txt' if not already done"
-echo "  4. Run 'python src/main.py' to start the framework"
+echo "  1. Set up your .env file with API keys and UPPAAL_LICENSE_KEY (if not done)"
+echo "  2. Run 'pip install -r requirements.txt' if not already done"
+echo "  3. Run 'python src/main.py' to start the framework"
+echo ""
+echo "UPPAAL Docker commands:"
+echo "  Stop:  sudo docker stop uppaal-engine"
+echo "  Start: sudo docker run --rm -d --name uppaal-engine -p 2350:2350 \\"
+echo "           -v \$PWD/data/automaton:/home/uppaal/models:ro \\"
+echo "           -e UPPAAL_LICENSE_KEY=\$UPPAAL_LICENSE_KEY uppaal-engine:latest"
+echo "  Test:  python src/uppaal_interface.py"
 echo ""

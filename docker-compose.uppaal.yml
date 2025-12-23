@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  uppaal:
+    build:
+      context: ./src/uppaal
+      dockerfile: ../../Dockerfile.uppaal
+      args:
+        - KEY=${UPPAAL_LICENSE_KEY}
+        - LEASE=1
+    container_name: uppaal-engine
+    ports:
+      - "2350:2350"
+    volumes:
+      - ./data/automaton:/home/uppaal/models:ro
+    restart: unless-stopped
+    environment:
+      - USER=uppaal

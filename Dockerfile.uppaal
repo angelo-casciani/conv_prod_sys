@@ -1,0 +1,33 @@
+FROM ubuntu:latest
+
+RUN useradd -ms /bin/bash uppaal
+RUN apt-get -qq update && apt-get -qq upgrade -y
+
+# Install required packages
+RUN apt-get -qq install -y wget unzip
+
+USER uppaal
+ENV USER=uppaal
+WORKDIR /home/uppaal
+
+# Copy UPPAAL from the build context
+COPY --chown=uppaal:uppaal . uppaal
+
+ENV PATH="/home/uppaal/uppaal/bin:$PATH"
+
+# Setup license key at runtime
+ARG KEY=""
+ARG LEASE="1"
+ENV UPPAAL_LICENSE_KEY=${KEY}
+ENV UPPAAL_LEASE=${LEASE}
+
+# Create directory for models
+RUN mkdir -p /home/uppaal/models
+
+EXPOSE 2350
+
+# Setup license and start server
+CMD if [ -n "$UPPAAL_LICENSE_KEY" ]; then \
+        verifyta.sh --key $UPPAAL_LICENSE_KEY --lease $UPPAAL_LEASE || true; \
+    fi && \
+    /home/uppaal/uppaal/bin/socketserver.sh /home/uppaal/uppaal/bin/server.sh
