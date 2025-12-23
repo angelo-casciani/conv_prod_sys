@@ -1,5 +1,5 @@
 (define (domain reasoners)
-    (:requirements :strips :typing :conditional-effects :action-costs) 
+    (:requirements :strips :typing)
 
     (:types
         input process output activity - object
