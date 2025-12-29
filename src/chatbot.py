@@ -1,4 +1,3 @@
-import time
 import gradio as gr
 from pipeline import LLMPipeline
 from argparse import ArgumentParser

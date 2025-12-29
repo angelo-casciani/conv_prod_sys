@@ -67,7 +67,7 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   |   ├── simulation_stats.txt
 |   |   ├── unrelated.csv
 |   |   └── verification.csv
-|   └── validation    # quantitative evaluation results for each run
+|   └── evaluation    # quantitative evaluation results for each run
 ├── .env              # environment variables (API keys)
 ├── .gitmodules       # git submodules configuration
 ├── setup_submodules.sh  # automated submodule setup script
@@ -219,7 +219,7 @@ cd src
 python3 main.py --llm_id_simulation Qwen/Qwen2.5-7B-Instruct --modality evaluation-simulation --max_new_tokens 512
 ```
 
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
 
 ### Verification experiments
 
@@ -230,7 +230,7 @@ cd src
 python3 main.py --llm_id_verification gpt-4o-mini --modality evaluation-verification --max_new_tokens 512
 ```
 
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
 
 ### Factory info experiments
 
@@ -241,7 +241,7 @@ cd src
 python3 main.py --llm_id_gateway gemini-2.0-flash --modality evaluation-factory_info --max_new_tokens 512
 ```
 
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
 
 ### Process mining experiments
 
@@ -252,7 +252,7 @@ cd src
 python3 main.py --llm_id_gateway mistralai/Mistral-Nemo-Instruct-2407 --modality evaluation-process_mining --max_new_tokens 512
 ```
 
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
 
 ### Hybrid experiments
 
@@ -263,7 +263,7 @@ cd src
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-hybrid --max_new_tokens 512
 ```
 
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
 
 ### Routing experiments
 
@@ -274,7 +274,7 @@ cd src
 python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.3 --modality evaluation-routing --max_new_tokens 512
 ```
 
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
 
 ### Qualitative Hybrid experiments
 
@@ -285,7 +285,7 @@ cd src
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-qualitative-hybrid --max_new_tokens 512
 ```
 
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [validation](tests/validation) folder.
+The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
 
 ### Generation of New Test Sets
 

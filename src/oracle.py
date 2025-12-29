@@ -397,7 +397,7 @@ class AnswerVerificationOracle:
 
 
     def write_results_to_file(self):
-        file_path = os.path.join(os.path.dirname(__file__), "..", "tests", "validation",
+        file_path = os.path.join(os.path.dirname(__file__), "..", "tests", "evaluation",
                                  f"results_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt")
         self.compute_stats()
 

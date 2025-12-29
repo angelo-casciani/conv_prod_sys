@@ -24,7 +24,7 @@ def parse_arguments():
     parser.add_argument('--llm_id_simulation', type=str, default='gpt-4o-mini', help='LLM model identifier for Simulation')
     parser.add_argument('--llm_id_verification', type=str, default='gpt-4o-mini', help='LLM model identifier for Verification')
     parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=512)
-    parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, evaluation-factory_info, evaluation-process_mining, evaluation-hybrid, evaluation-qualitative-hybrid, live')
+    parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, evaluation-factory_info, evaluation-process_mining, evaluation-hybrid, evaluation-qualitative-hybrid, evaluation-simulation-zeroshot, evaluation-verification-zeroshot, evaluation-routing-zeroshot, evaluation-factory_info-zeroshot, evaluation-process_mining-zeroshot, evaluation-hybrid-zeroshot, live')
     parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
     parser.add_argument('--extracted_model_failure', type=bool, default=False, help='True if already exists the file digital_twin_with_failure.json. Default False')
     args = parser.parse_args()
@@ -65,17 +65,17 @@ def main():
         'Interaction Modality': modality
     }
 
-    if 'evaluation-simulation' in modality:
+    if modality == 'evaluation-simulation' or modality == 'evaluation-simulation-zeroshot':
         chain.evaluate_performance('simulation.csv', run_data)
-    elif 'evaluation-verification' in modality:
+    elif modality == 'evaluation-verification' or modality == 'evaluation-verification-zeroshot':
         chain.evaluate_performance('verification.csv', run_data)
-    elif 'evaluation-routing' in modality:
+    elif modality == 'evaluation-routing' or modality == 'evaluation-routing-zeroshot':
         chain.evaluate_performance('routing.csv', run_data)
-    elif 'evaluation-factory_info' in modality:
+    elif modality == 'evaluation-factory_info' or modality == 'evaluation-factory_info-zeroshot':
         chain.evaluate_performance('factory_info.csv', run_data)
-    elif 'evaluation-process_mining' in modality:
+    elif modality == 'evaluation-process_mining' or modality == 'evaluation-process_mining-zeroshot':
         chain.evaluate_performance('process_mining.csv', run_data)
-    elif 'evaluation-hybrid' in modality:
+    elif modality == 'evaluation-hybrid' or modality == 'evaluation-hybrid-zeroshot':
         chain.evaluate_performance('hybrid.csv', run_data)
     elif 'evaluation-qualitative-hybrid' in modality:
         chain.evaluate_qualitative_hybrid('qualitative_hybrid_requests.txt', run_data)

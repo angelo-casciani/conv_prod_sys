@@ -64,20 +64,20 @@ def explicit_deadlock_free(qjson, plan):
 class LLMPipeline:
     MODELS = {
         'api': {
-            'openai': ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano'],
-            'google_genai': ['gemini-2.5-pro', 'gemini-2.5-flash'],
+            'openai': ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o', 'gpt-5', 'gpt-5.1', 'gpt-5-mini', 'gpt-5-nano'],
+            'google_genai': ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-3-pro-preview'],
             'deepseek': ['deepseek-chat', 'deepseek-reasoner'],
             'anthropic': [],
         },
         'local': {
             'metaai': ['meta-llama/Meta-Llama-3-8B-Instruct', 'meta-llama/Llama-3.1-8B-Instruct',
-                       'meta-llama/Llama-3.2-1B-Instruct', 'meta-llama/Llama-3.2-3B-Instruct'],
+                       'meta-llama/Llama-3.2-1B-Instruct', 'meta-llama/Llama-3.2-3B-Instruct', 'meta-llama/Llama-4-Scout-17B-16E-Instruct'],
             'mistral': ['mistralai/Mistral-7B-Instruct-v0.2','mistralai/Mistral-7B-Instruct-v0.3',
                         'mistralai/Mistral-Nemo-Instruct-2407', 'mistralai/Ministral-8B-Instruct-2410'],
-            'qwen': ['Qwen/Qwen2.5-7B-Instruct'],
-            'google_genai': ['google/gemma-2-9b-it'],
+            'qwen': ['Qwen/Qwen2.5-7B-Instruct', 'Qwen/Qwen3-30B-A3B-Instruct-2507'],
+            'google_genai': ['google/gemma-2-9b-it', 'google/gemma-3-12b-it'],
             'microsoft': ['microsoft/phi-4'],
-            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B'],
+            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B', 'deepseek-ai/DeepSeek-R1-0528-Qwen3-8B'],
             'openai': ['gpt-oss-20b'],
         }
     }
@@ -85,21 +85,24 @@ class LLMPipeline:
         'metaai': "<|eot_id|>",
         'mistral': "[/INST]]",
         'qwen': "<|im_end|>",
-        'microsoft': "<|im_sep|>"
+        'microsoft': "<|im_sep|>",
+        'deepseek': "｜end▁of▁sentence｜"
     }
     TEMPLATE_MAPPING = {
         'metaai': 'template-llama_instruct',
         'mistral': 'template-mistral',
         'qwen': 'template-qwen',
         'microsoft': 'template-phi',
-        'deepseek': 'template-deepseek'
+        'deepseek': 'template-deepseek',
+        'gemma': 'template-gemma'
     }
     RESPONSE_DELIMITERS = {
         'metaai': '<|start_header_id|>assistant<|end_header_id|>',
         'mistral': '[/INST]',
         'qwen': '<|im_start|>assistant',
         'microsoft': '<|im_start|>assistant<|im_sep|>',
-        'deepseek': 'Assistant: '
+        'deepseek': 'Assistant: ',
+        'gemma': 'model: '
     }
 
     def __init__(self, model_id_gateway, model_id_simulation, model_id_verification, hf_token, max_new_tokens, extracted_model, extracted_model_failure):
@@ -112,7 +115,6 @@ class LLMPipeline:
         self.hf_token = hf_token
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
-        #self.factory_model = os.path.join(os.path.dirname(__file__), '..', 'data', 'parameters', 'digital_twin.json')
         self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
         with open(self.pddl_domain, 'r') as f:
             self.pddl_domain = f.read()
@@ -229,7 +231,7 @@ class LLMPipeline:
         return chain
 
 
-    def _produce_answer_gateway(self, question, answer_phase):
+    def _produce_answer_gateway(self, question, answer_phase, modality=''):
         prompt, answer = ('', '')
         if answer_phase == 'routing':
             sys_mess = self.prompts.get('system_message_routing', '')
@@ -238,7 +240,9 @@ class LLMPipeline:
             sys_mess = self.prompts.get('system_message_negative', '')
             context = ''
         elif answer_phase == 'factory_info':
-            sys_mess = self.prompts.get('system_message_info', '') + self.prompts.get('shots_info', '')
+            sys_mess = self.prompts.get('system_message_info', '')
+            if 'zeroshot' not in modality:
+                sys_mess += self.prompts.get('shots_info', '')
             if not self.extracted:
                 self.process_mining_module.extract()
                 self.extracted = True
@@ -391,7 +395,9 @@ class LLMPipeline:
 
     def _produce_answer_verification(self, question, modality):
         automata_data = retrieve_automata()
-        sys_mess = self.prompts.get('system_message_verification', '') + self.prompts.get('shots_verification', '')
+        sys_mess = self.prompts.get('system_message_verification', '')
+        if 'zeroshot' not in modality:
+            sys_mess += self.prompts.get('shots_verification', '')
         context = self.prompts.get('context_verification', '').replace('STATES', str(list(automata_data['transitions'].keys())))
         invoke_payload = {"question": question,
                         "context": context,
@@ -418,12 +424,14 @@ class LLMPipeline:
                 answer = complete_answer.content
         return prompt, answer
     
-    def _produce_answer_failure(self, question, sim_time):
+    def _produce_answer_failure(self, question, sim_time, modality=''):
         if not self.extracted_failure:
             self.process_mining_module.extract(failure=True)
             self.extracted_failure = True
         factory_model_with_failure = retrieve_factory_with_failure()
-        sys_mess = self.prompts.get('system_message_failure', '') + self.prompts.get('shots_failure', '')
+        sys_mess = self.prompts.get('system_message_failure', '')
+        if 'zeroshot' not in modality:
+            sys_mess += self.prompts.get('shots_failure', '')
         context = factory_model_with_failure
         invoke_payload = {"question": question,
                         "context": context,
@@ -462,7 +470,9 @@ class LLMPipeline:
         return prompt, clean_result
     
     def _produce_answer_process_mining(self, question, modality):
-        sys_mess = self.prompts.get('system_message_process_mining', '') + self.prompts.get('shots_process_mining', '')
+        sys_mess = self.prompts.get('system_message_process_mining', '')
+        if 'zeroshot' not in modality:
+            sys_mess += self.prompts.get('shots_process_mining', '')
         context = ''
         invoke_payload = {"question": question,
                         "context": context,
@@ -549,7 +559,9 @@ class LLMPipeline:
         activities = [a for a in factory_model['activities'].keys()]
         activities_str = ", ".join(activities)
         activities_context = f"\n\nAvailable activities in the system: {activities_str}\n"
-        sys_mess = self.prompts.get('system_message_hybrid', '') + self.prompts.get('shots_hybrid', '')
+        sys_mess = self.prompts.get('system_message_hybrid', '')
+        if 'zeroshot' not in modality:
+            sys_mess += self.prompts.get('shots_hybrid', '')
         context = self.pddl_domain + activities_context
         #print(context)
         invoke_payload = {"question": question,
@@ -628,7 +640,7 @@ class LLMPipeline:
 
                 elif qtype == "failure":
                     last_sim_time = self.sim_time
-                    prompt, answer = self._produce_answer_failure(q_text, last_sim_time)
+                    prompt, answer = self._produce_answer_failure(q_text, last_sim_time, modality)
                     try:
                         delay = json.loads(answer).get("estimated_maintenance_delay", 0)
                         if isinstance(delay, (int, float)):
@@ -676,7 +688,7 @@ class LLMPipeline:
         elif 'factory_simulation' in answer.lower():
             complete_prompt, answer = self._produce_answer_simulation(question, 'live')
         elif 'factory_info' in answer.lower():
-            complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info')
+            complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info', info_run.get('Interaction Modality', ''))
             answer = clean_json_block(answer)
             parsed_json = json.loads(answer)
             answer = parsed_json["response"]
@@ -762,14 +774,14 @@ class LLMPipeline:
             count += 1
             print(f'Processing answer for question {count} of {len(questions)}...')
 
-        print('Validation process completed. Check the output file.')
+        print('Evaluation process completed. Check the output file.')
         oracle.write_results_to_file()
 
 
     def evaluate_qualitative_hybrid(self, test_filename, info_run):
         print(f"Starting hybrid qualitative evaluation from: {test_filename}")
         
-        log_dir = os.path.join(os.path.dirname(__file__), "..", "tests", "validation")
+        log_dir = os.path.join(os.path.dirname(__file__), "..", "tests", "evaluation")
         os.makedirs(log_dir, exist_ok=True)
         log_filename = f"qualitative_results_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
         log_path = os.path.join(log_dir, log_filename)
