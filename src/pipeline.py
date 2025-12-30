@@ -9,8 +9,13 @@ from contextlib import redirect_stdout
 from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFacePipeline
 from langchain_core.prompts import PromptTemplate
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoProcessor, pipeline, BitsAndBytesConfig, AutoConfig
 from torch import bfloat16
+try:
+    from transformers import Gemma3ForConditionalGeneration
+    GEMMA3_AVAILABLE = True
+except ImportError:
+    GEMMA3_AVAILABLE = False
 
 import llm_factory_interface as factory_interface
 from oracle import AnswerVerificationOracle
@@ -132,16 +137,19 @@ class LLMPipeline:
 
 
     def _initialize_local_model(self, model_id, model_family):
-        # Check if model is already quantized (e.g., with MXFP)
+        # Detect multimodal models (Gemma 3)
+        is_multimodal = 'gemma-3' in model_id.lower()
+        
+        # Check if model is already quantized
         model_config = AutoConfig.from_pretrained(
             model_id,
             token=self.hf_token
         )
         
-        # Detect if model is pre-quantized
+        # Detect if model is pre-quantized (MXFP, GPTQ, AWQ, etc.)
         is_pre_quantized = hasattr(model_config, 'quantization_config') and model_config.quantization_config is not None
         
-        # Only apply BitsAndBytes quantization if model is not already quantized
+        # Setup model loading kwargs
         model_kwargs = {
             "trust_remote_code": True,
             "config": model_config,
@@ -149,6 +157,7 @@ class LLMPipeline:
             "token": self.hf_token
         }
         
+        # Only apply BitsAndBytes quantization if model is not already quantized
         if not is_pre_quantized:
             bnb_config = BitsAndBytesConfig(
                 load_in_4bit=True,
@@ -158,16 +167,28 @@ class LLMPipeline:
             )
             model_kwargs["quantization_config"] = bnb_config
         
-        model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            **model_kwargs
-        )
+        # Load model with appropriate class
+        if is_multimodal and GEMMA3_AVAILABLE:
+            model = Gemma3ForConditionalGeneration.from_pretrained(
+                model_id,
+                **model_kwargs
+            )
+            # Use AutoProcessor for multimodal models
+            tokenizer = AutoProcessor.from_pretrained(
+                model_id,
+                token=self.hf_token
+            )
+        else:
+            model = AutoModelForCausalLM.from_pretrained(
+                model_id,
+                **model_kwargs
+            )
+            tokenizer = AutoTokenizer.from_pretrained(
+                model_id,
+                token=self.hf_token
+            )
+        
         model.eval()
-
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_id,
-            token=self.hf_token
-        )
 
         pipeline_params = {
             "model": model,
