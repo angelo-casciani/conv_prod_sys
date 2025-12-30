@@ -146,19 +146,26 @@ class LLMPipeline:
             token=self.hf_token
         )
         
-        # Detect if model is pre-quantized (MXFP, GPTQ, AWQ, etc.)
-        is_pre_quantized = hasattr(model_config, 'quantization_config') and model_config.quantization_config is not None
+        # Detect MXFP quantization (which may not work properly even with Triton installed)
+        is_mxfp_quantized = (hasattr(model_config, 'quantization_config') and 
+                            model_config.quantization_config is not None and
+                            'mxfp' in str(model_config.quantization_config).lower())
+        
+        # Detect other pre-quantization (GPTQ, AWQ, etc.)
+        is_other_quantized = (hasattr(model_config, 'quantization_config') and 
+                             model_config.quantization_config is not None and 
+                             not is_mxfp_quantized)
         
         # Setup model loading kwargs
         model_kwargs = {
             "trust_remote_code": True,
-            "config": model_config,
             "device_map": 'auto',
             "token": self.hf_token
         }
         
-        # Only apply BitsAndBytes quantization if model is not already quantized
-        if not is_pre_quantized:
+        # Apply BitsAndBytes for unquantized models OR for MXFP models
+        # (MXFP models fall back to bf16 when kernels aren't available, causing OOM)
+        if not is_other_quantized:
             bnb_config = BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_quant_type='nf4',
@@ -166,6 +173,9 @@ class LLMPipeline:
                 bnb_4bit_compute_dtype=bfloat16
             )
             model_kwargs["quantization_config"] = bnb_config
+        else:
+            # Keep original config for properly supported quantization (GPTQ, AWQ, etc.)
+            model_kwargs["config"] = model_config
         
         # Load model with appropriate class
         if is_multimodal and GEMMA3_AVAILABLE:
