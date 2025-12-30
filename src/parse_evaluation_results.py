@@ -33,8 +33,6 @@ def parse_results_file(file_path):
         'precision': None,
         'recall': None,
         'f1_score': None,
-        'mcc': None,
-        'auc': None,
         'elapsed_hours': None
     }
     
@@ -85,14 +83,6 @@ def parse_results_file(file_path):
         if f1_match:
             data['f1_score'] = float(f1_match.group(1))
         
-        mcc_match = re.search(r'Matthews Corr\. Coeff\. \(MCC\):\s*([\d.-]+)', content)
-        if mcc_match:
-            data['mcc'] = float(mcc_match.group(1))
-        
-        auc_match = re.search(r'Area Under Curve \(AUC\):\s*([\d.]+)', content)
-        if auc_match:
-            data['auc'] = float(auc_match.group(1))
-        
         elapsed_match = re.search(r'Elapsed:\s*(.+)', content)
         if elapsed_match:
             data['elapsed_hours'] = parse_time_to_hours(elapsed_match.group(1))
@@ -142,8 +132,6 @@ def main():
         'precision',
         'recall',
         'f1_score',
-        'mcc',
-        'auc',
         'elapsed_hours'
     ]
     
@@ -162,7 +150,7 @@ def main():
         print("="*80)
         
         # Calculate averages for numeric fields
-        numeric_fields = ['accuracy', 'precision', 'recall', 'f1_score', 'mcc', 'auc', 'elapsed_hours']
+        numeric_fields = ['accuracy', 'precision', 'recall', 'f1_score', 'elapsed_hours']
         for field in numeric_fields:
             values = [d[field] for d in all_data if d[field] is not None]
             if values:

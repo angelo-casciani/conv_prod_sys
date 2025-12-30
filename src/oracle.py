@@ -1,10 +1,7 @@
 import datetime
 import os
 import time
-from sklearn.metrics import (
-    precision_score, recall_score, f1_score, accuracy_score,
-    matthews_corrcoef, roc_auc_score
-)
+from sklearn.metrics import (precision_score, recall_score, f1_score, accuracy_score)
 from utility import load_csv_questions
 import json
 import re
@@ -366,17 +363,12 @@ class AnswerVerificationOracle:
                 self.precision = precision_score(binary_true, binary_pred, zero_division=0)
                 self.recall = recall_score(binary_true, binary_pred, zero_division=0)
                 self.f1score = f1_score(binary_true, binary_pred, zero_division=0)
-                self.mcc = matthews_corrcoef(binary_true, binary_pred)
-                # AUC requires at least two classes
-                if len(set(binary_true)) > 1:
-                    self.auc = roc_auc_score(binary_true, binary_pred)
-                else:
-                    self.auc = 0.5  # Undefined AUC fallback
+                # Note: MCC and AUC are not calculated for evaluation tasks
+                # because all ground truth labels are positive (single-class problem)
+                # These metrics require both positive and negative classes to be meaningful
             except Exception as e:
                 print(f"Error calculating sklearn metrics: {e}")
-                self.accuracy = basic_accuracy
-                self.mcc = 0.0
-                self.auc = 0.5    
+                self.accuracy = basic_accuracy    
 
 
     def write_results_to_file(self):
@@ -393,8 +385,6 @@ class AnswerVerificationOracle:
             file.write(f"Precision: {self.precision:.4f}\n")
             file.write(f"Recall: {self.recall:.4f}\n")
             file.write(f"F1-score: {self.f1score:.4f}\n")
-            file.write(f"Matthews Corr. Coeff. (MCC): {self.mcc:.4f}\n")
-            file.write(f"Area Under Curve (AUC): {self.auc:.4f}\n")
             file.write(f"Elapsed: {(self.elapsed_time / 3600):.2f} hours\n")
             file.write("-----------------------------------\n\n")
 
