@@ -22,7 +22,7 @@ python3 main.py --llm_id_simulation microsoft/phi-4 --modality evaluation-simula
 python3 main.py --llm_id_simulation deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-simulation --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_simulation deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-simulation --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_simulation deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-simulation --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_simulation gpt-oss-20b --modality evaluation-simulation --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_simulation openai/gpt-oss-20b --modality evaluation-simulation --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_simulation gpt-4o-mini --modality evaluation-simulation --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_simulation gpt-4o --modality evaluation-simulation --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -59,7 +59,7 @@ python3 main.py --llm_id_verification microsoft/phi-4 --modality evaluation-veri
 python3 main.py --llm_id_verification deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-verification --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_verification deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-verification --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_verification deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-verification --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_verification gpt-oss-20b --modality evaluation-verification --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_verification openai/gpt-oss-20b --modality evaluation-verification --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_verification gpt-4o-mini --modality evaluation-verification --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_verification gpt-4o --modality evaluation-verification --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -95,7 +95,7 @@ python3 main.py --llm_id_gateway microsoft/phi-4 --modality evaluation-routing -
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-routing --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-routing --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-routing --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_gateway gpt-oss-20b --modality evaluation-routing --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_gateway openai/gpt-oss-20b --modality evaluation-routing --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_gateway gpt-4o-mini --modality evaluation-routing --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway gpt-4o --modality evaluation-routing --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -131,7 +131,7 @@ python3 main.py --llm_id_gateway microsoft/phi-4 --modality evaluation-factory_i
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-factory_info --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-factory_info --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-factory_info --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_gateway gpt-oss-20b --modality evaluation-factory_info --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_gateway openai/gpt-oss-20b --modality evaluation-factory_info --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_gateway gpt-4o-mini --modality evaluation-factory_info --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway gpt-4o --modality evaluation-factory_info --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -167,7 +167,7 @@ python3 main.py --llm_id_gateway microsoft/phi-4 --modality evaluation-process_m
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-process_mining --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-process_mining --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-process_mining --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_gateway gpt-oss-20b --modality evaluation-process_mining --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_gateway openai/gpt-oss-20b --modality evaluation-process_mining --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_gateway gpt-4o-mini --modality evaluation-process_mining --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway gpt-4o --modality evaluation-process_mining --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -203,7 +203,7 @@ python3 main.py --llm_id_gateway microsoft/phi-4 --modality evaluation-hybrid --
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-hybrid --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-hybrid --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-hybrid --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_gateway gpt-oss-20b --modality evaluation-hybrid --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_gateway openai/gpt-oss-20b --modality evaluation-hybrid --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_gateway gpt-4o-mini --modality evaluation-hybrid --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway gpt-4o --modality evaluation-hybrid --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -239,7 +239,7 @@ python3 main.py --llm_id_simulation microsoft/phi-4 --modality evaluation-simula
 python3 main.py --llm_id_simulation deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-simulation-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_simulation deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-simulation-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_simulation deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-simulation-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_simulation gpt-oss-20b --modality evaluation-simulation-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_simulation openai/gpt-oss-20b --modality evaluation-simulation-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_simulation gpt-4o-mini --modality evaluation-simulation-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_simulation gpt-4o --modality evaluation-simulation-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -275,7 +275,7 @@ python3 main.py --llm_id_verification microsoft/phi-4 --modality evaluation-veri
 python3 main.py --llm_id_verification deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-verification-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_verification deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-verification-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_verification deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-verification-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_verification gpt-oss-20b --modality evaluation-verification-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_verification openai/gpt-oss-20b --modality evaluation-verification-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_verification gpt-4o-mini --modality evaluation-verification-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_verification gpt-4o --modality evaluation-verification-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -311,7 +311,7 @@ python3 main.py --llm_id_gateway microsoft/phi-4 --modality evaluation-routing-z
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-routing-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-routing-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-routing-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_gateway gpt-oss-20b --modality evaluation-routing-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_gateway openai/gpt-oss-20b --modality evaluation-routing-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_gateway gpt-4o-mini --modality evaluation-routing-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway gpt-4o --modality evaluation-routing-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -347,7 +347,7 @@ python3 main.py --llm_id_gateway microsoft/phi-4 --modality evaluation-factory_i
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-factory_info-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-factory_info-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-factory_info-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_gateway gpt-oss-20b --modality evaluation-factory_info-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_gateway openai/gpt-oss-20b --modality evaluation-factory_info-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_gateway gpt-4o-mini --modality evaluation-factory_info-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway gpt-4o --modality evaluation-factory_info-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -383,7 +383,7 @@ python3 main.py --llm_id_gateway microsoft/phi-4 --modality evaluation-process_m
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-process_mining-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-process_mining-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-process_mining-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_gateway gpt-oss-20b --modality evaluation-process_mining-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_gateway openai/gpt-oss-20b --modality evaluation-process_mining-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_gateway gpt-4o-mini --modality evaluation-process_mining-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway gpt-4o --modality evaluation-process_mining-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
@@ -419,7 +419,7 @@ python3 main.py --llm_id_gateway microsoft/phi-4 --modality evaluation-hybrid-ze
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-hybrid-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Llama-8B --modality evaluation-hybrid-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-0528-Qwen3-8B --modality evaluation-hybrid-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
-python3 main.py --llm_id_gateway gpt-oss-20b --modality evaluation-hybrid-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
+python3 main.py --llm_id_gateway openai/gpt-oss-20b --modality evaluation-hybrid-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 # API models
 python3 main.py --llm_id_gateway gpt-4o-mini --modality evaluation-hybrid-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True
 python3 main.py --llm_id_gateway gpt-4o --modality evaluation-hybrid-zeroshot --max_new_tokens 512 --extracted_model True  --extracted_model_failure True

@@ -78,7 +78,7 @@ class LLMPipeline:
             'google_genai': ['google/gemma-2-9b-it', 'google/gemma-3-12b-it'],
             'microsoft': ['microsoft/phi-4'],
             'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B', 'deepseek-ai/DeepSeek-R1-0528-Qwen3-8B'],
-            'openai': ['gpt-oss-20b'],
+            'openai': ['openai/gpt-oss-20b'],
         }
     }
     TERMINATOR_TOKENS = {
@@ -132,23 +132,35 @@ class LLMPipeline:
 
 
     def _initialize_local_model(self, model_id, model_family):
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type='nf4',
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=bfloat16
-        )
+        # Check if model is already quantized (e.g., with MXFP)
         model_config = AutoConfig.from_pretrained(
             model_id,
             token=self.hf_token
         )
+        
+        # Detect if model is pre-quantized
+        is_pre_quantized = hasattr(model_config, 'quantization_config') and model_config.quantization_config is not None
+        
+        # Only apply BitsAndBytes quantization if model is not already quantized
+        model_kwargs = {
+            "trust_remote_code": True,
+            "config": model_config,
+            "device_map": 'auto',
+            "token": self.hf_token
+        }
+        
+        if not is_pre_quantized:
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type='nf4',
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_compute_dtype=bfloat16
+            )
+            model_kwargs["quantization_config"] = bnb_config
+        
         model = AutoModelForCausalLM.from_pretrained(
             model_id,
-            trust_remote_code=True,
-            config=model_config,
-            quantization_config=bnb_config,
-            device_map='auto',
-            token=self.hf_token
+            **model_kwargs
         )
         model.eval()
 
@@ -165,7 +177,10 @@ class LLMPipeline:
             "do_sample": True, 
             "temperature": 0.1,
             "max_new_tokens": self.max_new_tokens,
-            "repetition_penalty": 1.1
+            "repetition_penalty": 1.1,
+            "top_p": 0.95,
+            "top_k": 50,
+            "min_p": 0.05
         }
     
         model_family_key = model_family.lower()
