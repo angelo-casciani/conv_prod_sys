@@ -156,6 +156,11 @@ class LLMPipeline:
                              model_config.quantization_config is not None and 
                              not is_mxfp_quantized)
         
+        # For MXFP models, remove the quantization config to avoid conflicts
+        # (MXFP models fall back to bf16 when kernels aren't available, causing OOM)
+        if is_mxfp_quantized:
+            model_config.quantization_config = None
+        
         # Setup model loading kwargs
         model_kwargs = {
             "trust_remote_code": True,
@@ -164,7 +169,6 @@ class LLMPipeline:
         }
         
         # Apply BitsAndBytes for unquantized models OR for MXFP models
-        # (MXFP models fall back to bf16 when kernels aren't available, causing OOM)
         if not is_other_quantized:
             bnb_config = BitsAndBytesConfig(
                 load_in_4bit=True,
@@ -173,6 +177,7 @@ class LLMPipeline:
                 bnb_4bit_compute_dtype=bfloat16
             )
             model_kwargs["quantization_config"] = bnb_config
+            model_kwargs["config"] = model_config
         else:
             # Keep original config for properly supported quantization (GPTQ, AWQ, etc.)
             model_kwargs["config"] = model_config
