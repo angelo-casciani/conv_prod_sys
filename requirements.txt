@@ -15,4 +15,3 @@ scikit_learn>=1.6.1
 simpy==4.1.1
 torch>=2.7.0
 transformers>=4.51.3
-triton>=3.5.0

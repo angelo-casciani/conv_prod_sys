@@ -9,13 +9,8 @@ from contextlib import redirect_stdout
 from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFacePipeline
 from langchain_core.prompts import PromptTemplate
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoProcessor, pipeline, BitsAndBytesConfig, AutoConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
 from torch import bfloat16
-try:
-    from transformers import Gemma3ForConditionalGeneration
-    GEMMA3_AVAILABLE = True
-except ImportError:
-    GEMMA3_AVAILABLE = False
 
 import llm_factory_interface as factory_interface
 from oracle import AnswerVerificationOracle
@@ -72,7 +67,6 @@ class LLMPipeline:
             'openai': ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o', 'gpt-5', 'gpt-5.1', 'gpt-5-mini', 'gpt-5-nano'],
             'google_genai': ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-3-pro-preview'],
             'deepseek': ['deepseek-chat', 'deepseek-reasoner'],
-            'anthropic': [],
         },
         'local': {
             'metaai': ['meta-llama/Meta-Llama-3-8B-Instruct', 'meta-llama/Llama-3.1-8B-Instruct',
@@ -80,10 +74,9 @@ class LLMPipeline:
             'mistral': ['mistralai/Mistral-7B-Instruct-v0.2','mistralai/Mistral-7B-Instruct-v0.3',
                         'mistralai/Mistral-Nemo-Instruct-2407', 'mistralai/Ministral-8B-Instruct-2410'],
             'qwen': ['Qwen/Qwen2.5-7B-Instruct', 'Qwen/Qwen3-30B-A3B-Instruct-2507'],
-            'google_genai': ['google/gemma-2-9b-it', 'google/gemma-3-12b-it'],
-            'microsoft': ['microsoft/phi-4'],
-            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B', 'deepseek-ai/DeepSeek-R1-0528-Qwen3-8B'],
-            'openai': ['openai/gpt-oss-20b'],
+            'google_genai': ['google/gemma-2-9b-it'],
+            'microsoft': ['microsoft/phi-4', 'microsoft/Phi-4-mini-instruct'],
+            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B'],
         }
     }
     TERMINATOR_TOKENS = {
@@ -137,73 +130,30 @@ class LLMPipeline:
 
 
     def _initialize_local_model(self, model_id, model_family):
-        # Detect multimodal models (Gemma 3)
-        is_multimodal = 'gemma-3' in model_id.lower()
-        
-        # Check if model is already quantized
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type='nf4',
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=bfloat16
+        )
         model_config = AutoConfig.from_pretrained(
             model_id,
             token=self.hf_token
         )
-        
-        # Detect MXFP quantization (which may not work properly even with Triton installed)
-        is_mxfp_quantized = (hasattr(model_config, 'quantization_config') and 
-                            model_config.quantization_config is not None and
-                            'mxfp' in str(model_config.quantization_config).lower())
-        
-        # Detect other pre-quantization (GPTQ, AWQ, etc.)
-        is_other_quantized = (hasattr(model_config, 'quantization_config') and 
-                             model_config.quantization_config is not None and 
-                             not is_mxfp_quantized)
-        
-        # For MXFP models, remove the quantization config to avoid conflicts
-        # (MXFP models fall back to bf16 when kernels aren't available, causing OOM)
-        if is_mxfp_quantized:
-            model_config.quantization_config = None
-        
-        # Setup model loading kwargs
-        model_kwargs = {
-            "trust_remote_code": True,
-            "device_map": 'auto',
-            "token": self.hf_token
-        }
-        
-        # Apply BitsAndBytes for unquantized models OR for MXFP models
-        if not is_other_quantized:
-            bnb_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_quant_type='nf4',
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_compute_dtype=bfloat16
-            )
-            model_kwargs["quantization_config"] = bnb_config
-            model_kwargs["config"] = model_config
-        else:
-            # Keep original config for properly supported quantization (GPTQ, AWQ, etc.)
-            model_kwargs["config"] = model_config
-        
-        # Load model with appropriate class
-        if is_multimodal and GEMMA3_AVAILABLE:
-            model = Gemma3ForConditionalGeneration.from_pretrained(
-                model_id,
-                **model_kwargs
-            )
-            # Use AutoProcessor for multimodal models
-            tokenizer = AutoProcessor.from_pretrained(
-                model_id,
-                token=self.hf_token
-            )
-        else:
-            model = AutoModelForCausalLM.from_pretrained(
-                model_id,
-                **model_kwargs
-            )
-            tokenizer = AutoTokenizer.from_pretrained(
-                model_id,
-                token=self.hf_token
-            )
-        
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            trust_remote_code=True,
+            config=model_config,
+            quantization_config=bnb_config,
+            device_map='auto',
+            token=self.hf_token
+        )
         model.eval()
+
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_id,
+            token=self.hf_token
+        )
 
         pipeline_params = {
             "model": model,
@@ -213,10 +163,7 @@ class LLMPipeline:
             "do_sample": True, 
             "temperature": 0.1,
             "max_new_tokens": self.max_new_tokens,
-            "repetition_penalty": 1.1,
-            "top_p": 0.95,
-            "top_k": 50,
-            "min_p": 0.05
+            "repetition_penalty": 1.1
         }
     
         model_family_key = model_family.lower()

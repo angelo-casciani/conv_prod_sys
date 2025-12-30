@@ -1,7 +1,10 @@
 import datetime
 import os
 import time
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from sklearn.metrics import (
+    precision_score, recall_score, f1_score, accuracy_score,
+    matthews_corrcoef, roc_auc_score
+)
 from utility import load_csv_questions
 import json
 import re
@@ -21,6 +24,8 @@ class AnswerVerificationOracle:
         self.precision = 0
         self.recall = 0
         self.f1score = 0
+        self.mcc = 0.0
+        self.auc = 0.0
         self.test_type = None
 
     
@@ -29,36 +34,6 @@ class AnswerVerificationOracle:
 
     def add_question_expected_answer_pair(self, question, expected_answer):
         self.question_with_expected_answer_pairs[question] = expected_answer
-
-
-    # def verify_answer(self, prompt, question, model_answer):
-    #     result = {
-    #         'prompt': prompt,
-    #         'question': question,
-    #         'model_answer': model_answer,
-    #         'expected_answer': None,
-    #         'verification_result': None
-    #     }
-    #     expected_answer = self.question_with_expected_answer_pairs.get(question)
-    #     if expected_answer is not None:
-    #         result['expected_answer'] = expected_answer
-    #         expected_answer_formatted = expected_answer.lower().replace(' ', '')
-    #         model_answer_formatted = model_answer.lower().replace('\n', ' ').replace(' ', '')
-    #         if expected_answer == "no_answer":
-    #             model_answer_formatted = model_answer.lower()
-    #             result['verification_result'] = False
-    #             if ('uppaal_verification' not in model_answer_formatted and 'factory_simulation' not in model_answer_formatted) or ('uppaal_verification' in model_answer_formatted and 'factory_simulation' in model_answer_formatted):
-    #                 result['verification_result'] = True
-    #         else:
-    #             result['verification_result'] = expected_answer_formatted in model_answer_formatted
-            
-    #         self.true_answers.append(expected_answer)
-    #         self.predicted_answers.append(model_answer)
-            
-    #         print(f"Answer: {model_answer}\nExpected_answer: {result['expected_answer']}\nResult: {result['verification_result']}")
-    #     self.results.append(result)
-
-    #     return result['verification_result']
 
     def verify_answer(self, prompt, question, model_answer):
         result = {
@@ -391,9 +366,17 @@ class AnswerVerificationOracle:
                 self.precision = precision_score(binary_true, binary_pred, zero_division=0)
                 self.recall = recall_score(binary_true, binary_pred, zero_division=0)
                 self.f1score = f1_score(binary_true, binary_pred, zero_division=0)
+                self.mcc = matthews_corrcoef(binary_true, binary_pred)
+                # AUC requires at least two classes
+                if len(set(binary_true)) > 1:
+                    self.auc = roc_auc_score(binary_true, binary_pred)
+                else:
+                    self.auc = 0.5  # Undefined AUC fallback
             except Exception as e:
                 print(f"Error calculating sklearn metrics: {e}")
-                self.accuracy = basic_accuracy    
+                self.accuracy = basic_accuracy
+                self.mcc = 0.0
+                self.auc = 0.5    
 
 
     def write_results_to_file(self):
@@ -410,6 +393,8 @@ class AnswerVerificationOracle:
             file.write(f"Precision: {self.precision:.4f}\n")
             file.write(f"Recall: {self.recall:.4f}\n")
             file.write(f"F1-score: {self.f1score:.4f}\n")
+            file.write(f"Matthews Corr. Coeff. (MCC): {self.mcc:.4f}\n")
+            file.write(f"Area Under Curve (AUC): {self.auc:.4f}\n")
             file.write(f"Elapsed: {(self.elapsed_time / 3600):.2f} hours\n")
             file.write("-----------------------------------\n\n")
 
@@ -419,8 +404,6 @@ class AnswerVerificationOracle:
                 file.write(f"Expected Answer: {result['expected_answer']}\n")
                 file.write(f"Verification Result: {result['verification_result']}\n")
                 file.write("\n#####################################################################################\n")
-
-
 
 
 if __name__ == "__main__":
@@ -437,11 +420,8 @@ if __name__ == "__main__":
     oracle.set_test_type('hybrid')
     
     prompt = """"""
-
     model_answer = """"""
-
     question = questions[2][0]
-
     expected_answer = questions[2][1]
 
     oracle.add_question_expected_answer_pair(question, expected_answer)
