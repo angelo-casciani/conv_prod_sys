@@ -168,12 +168,18 @@ class LLMPipeline:
     
         model_family_key = model_family.lower()
         if model_family_key in LLMPipeline.TERMINATOR_TOKENS:
-            terminators = [
-                tokenizer.eos_token_id,
-                tokenizer.convert_tokens_to_ids(LLMPipeline.TERMINATOR_TOKENS[model_family_key])
-            ]
+            custom_terminator = tokenizer.convert_tokens_to_ids(LLMPipeline.TERMINATOR_TOKENS[model_family_key])
+            
+            # Handle models where eos_token_id is None
+            if tokenizer.eos_token_id is not None:
+                terminators = [tokenizer.eos_token_id, custom_terminator]
+                pipeline_params["pad_token_id"] = tokenizer.eos_token_id
+            else:
+                # For models without eos_token_id, use custom terminator
+                terminators = [custom_terminator]
+                pipeline_params["pad_token_id"] = custom_terminator
+                
             pipeline_params["eos_token_id"] = terminators
-            pipeline_params["pad_token_id"] = tokenizer.eos_token_id
 
         generate_text = pipeline(**pipeline_params)
         return generate_text
