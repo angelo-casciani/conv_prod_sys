@@ -81,7 +81,7 @@ class LLMPipeline:
     }
     TERMINATOR_TOKENS = {
         'metaai': "<|eot_id|>",
-        'mistral': "[/INST]]",
+        'mistral': "[/INST]",
         'qwen': "<|im_end|>",
         'microsoft': "<|im_sep|>",
         'deepseek': "｜end▁of▁sentence｜"
@@ -91,16 +91,14 @@ class LLMPipeline:
         'mistral': 'template-mistral',
         'qwen': 'template-qwen',
         'microsoft': 'template-phi',
-        'deepseek': 'template-deepseek',
-        'gemma': 'template-gemma'
+        'deepseek': 'template-deepseek'
     }
     RESPONSE_DELIMITERS = {
         'metaai': '<|start_header_id|>assistant<|end_header_id|>',
         'mistral': '[/INST]',
         'qwen': '<|im_start|>assistant',
         'microsoft': '<|im_start|>assistant<|im_sep|>',
-        'deepseek': 'Assistant: ',
-        'gemma': 'model: '
+        'deepseek': '<｜Assistant｜><think>'
     }
 
     def __init__(self, model_id_gateway, model_id_simulation, model_id_verification, hf_token, max_new_tokens, extracted_model, extracted_model_failure):

@@ -24,6 +24,5 @@
   "template-qwen": "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\nHere is the context: {context}\nHere is the user question: {question}<|im_end|>\n<|im_start|>assistant\n",
   "template-generic": "{system_message}\nHere is the context: {context}\nHere is the user question: {question}\nAnswer: ",
   "template-phi": "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\nHere is the context: {context}\n{question}<|im_end|>\n<|im_start|>assistant<|im_sep|>",
-  "template-deepseek": "<｜begin▁of▁sentence｜>\nSystem: {system_message}\n\nUser: Here is the context: {context}\n{question}\nAssistant: ",
-  "template-gemma": "user\nSystem: {system_message}\n\nUser: Here is the context: {context}\n{question}\nmodel: "
+  "template-deepseek": "<｜begin▁of▁sentence｜>{system_message}<｜User｜>Here is the context: {context}\n{question}<｜Assistant｜><think>"
 }
