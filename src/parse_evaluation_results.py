@@ -22,12 +22,7 @@ def parse_time_to_hours(time_str):
 def parse_results_file(file_path):
     """Parse a single results file and extract metrics."""
     data = {
-        'filename': os.path.basename(file_path),
-        'timestamp': None,
-        'llm_id_gateway': None,
-        'llm_id_simulation': None,
-        'llm_id_verification': None,
-        'max_generated_tokens': None,
+        'llm_id': None,
         'interaction_modality': None,
         'accuracy': None,
         'precision': None,
@@ -36,10 +31,10 @@ def parse_results_file(file_path):
         'elapsed_hours': None
     }
     
-    # Extract timestamp from filename (results_YYYY-MM-DD_HH-MM-SS.txt)
-    timestamp_match = re.search(r'results_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.txt', data['filename'])
-    if timestamp_match:
-        data['timestamp'] = timestamp_match.group(1).replace('_', ' ')
+    # Temporary storage for all LLM IDs
+    llm_gateway = None
+    llm_simulation = None
+    llm_verification = None
     
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -48,23 +43,28 @@ def parse_results_file(file_path):
         # Parse run information
         llm_gateway_match = re.search(r'LLM ID Gateway:\s*(.+)', content)
         if llm_gateway_match:
-            data['llm_id_gateway'] = llm_gateway_match.group(1).strip()
+            llm_gateway = llm_gateway_match.group(1).strip()
         
         llm_simulation_match = re.search(r'LLM ID Simulation:\s*(.+)', content)
         if llm_simulation_match:
-            data['llm_id_simulation'] = llm_simulation_match.group(1).strip()
+            llm_simulation = llm_simulation_match.group(1).strip()
         
         llm_verification_match = re.search(r'LLM ID Verification:\s*(.+)', content)
         if llm_verification_match:
-            data['llm_id_verification'] = llm_verification_match.group(1).strip()
-        
-        max_tokens_match = re.search(r'Max Generated Tokens LLM:\s*(\d+)', content)
-        if max_tokens_match:
-            data['max_generated_tokens'] = int(max_tokens_match.group(1))
+            llm_verification = llm_verification_match.group(1).strip()
         
         interaction_match = re.search(r'Interaction Modality:\s*(.+)', content)
         if interaction_match:
             data['interaction_modality'] = interaction_match.group(1).strip()
+            
+            # Determine which LLM to use based on interaction modality
+            modality = data['interaction_modality'].lower()
+            if 'simulation' in modality:
+                data['llm_id'] = llm_simulation
+            elif 'verification' in modality:
+                data['llm_id'] = llm_verification
+            else:  # routing, hybrid, factory_info, process_mining
+                data['llm_id'] = llm_gateway
         
         # Parse metrics
         accuracy_match = re.search(r'Accuracy:\s*([\d.]+)', content)
@@ -121,12 +121,7 @@ def main():
     output_file = evaluation_dir / f"evaluation_summary_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
     
     fieldnames = [
-        'filename',
-        'timestamp',
-        'llm_id_gateway',
-        'llm_id_simulation',
-        'llm_id_verification',
-        'max_generated_tokens',
+        'llm_id',
         'interaction_modality',
         'accuracy',
         'precision',
