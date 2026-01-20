@@ -19,7 +19,11 @@ class ProcessMiningModule:
             if ".xes" not in self.path_to_log and ".csv" not in self.path_to_log:
                 raise ValueError(f"Unsupported file format: {self.extension}. Use '.csv' or '.xes'.")
         else:
-            raise ValueError(f"There is more than one file in the {directory_path} directory.") 
+            raise ValueError(f"There is more than one file in the {directory_path} directory.")
+        
+        # Create pmmOutputs directory if it doesn't exist
+        self.output_dir = "pmmOutputs"
+        os.makedirs(self.output_dir, exist_ok=True) 
         
 
     def conversion_from_csv_to_xes(self):
@@ -72,7 +76,7 @@ class ProcessMiningModule:
 
     def save_net_image(self, net, initial_marking, final_marking, file_path="pmmOutputs/petri_net_"):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_path = f"{file_path}{timestamp}.png"
+        file_path = os.path.join(self.output_dir, f"petri_net_{timestamp}.png")
         pm4py.save_vis_petri_net(net, initial_marking, final_marking, file_path=file_path)
         return file_path
 
@@ -141,7 +145,7 @@ class ProcessMiningModule:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         start_str = start_date.strftime("%Y%m%d")
         end_str = end_date.strftime("%Y%m%d")
-        output_path = f"pmmOutputs/filtered_log_{start_str}_to_{end_str}_{timestamp}.xes"
+        output_path = os.path.join(self.output_dir, f"filtered_log_{start_str}_to_{end_str}_{timestamp}.xes")
         pm4py.write.write_xes(filtered_log, output_path)
         return output_path
     

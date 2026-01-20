@@ -107,65 +107,63 @@ echo "Setting up UPPAAL with Docker"
 echo "============================================="
 echo ""
 
-# Check if UPPAAL directory exists
-if [ -d "src/uppaal" ]; then
-    echo "UPPAAL installation found in src/uppaal"
-    
-    # Check if .env file exists
-    if [ ! -f ".env" ]; then
-        if [ -f ".env.example" ]; then
-            echo "Creating .env file from template..."
-            cp .env.example .env
-            echo "⚠️  Please edit .env file and add your UPPAAL_LICENSE_KEY"
-            echo "   Get your license from: https://uppaal.veriaal.dk"
-        fi
+# Check if .env file exists
+if [ ! -f ".env" ]; then
+    if [ -f ".env.example" ]; then
+        echo "Creating .env file from template..."
+        cp .env.example .env
+        echo "⚠️  Please edit .env file and add your UPPAAL_LICENSE_KEY"
+        echo "   Get your license from: https://uppaal.veriaal.dk"
+    else
+        echo "⚠️  No .env file found. Please create one with UPPAAL_LICENSE_KEY"
+        echo "   Get your license from: https://uppaal.veriaal.dk"
     fi
-    
-    # Check if license key is set
-    if [ -f ".env" ] && grep -q "UPPAAL_LICENSE_KEY" ".env"; then
-        source .env
-        if [ -z "$UPPAAL_LICENSE_KEY" ] || [ "$UPPAAL_LICENSE_KEY" = "your_license_key_here" ]; then
-            echo "⚠️  Please set UPPAAL_LICENSE_KEY in .env file"
-            echo "   Get your license from: https://uppaal.veriaal.dk"
-        else
-            echo "UPPAAL license key found in .env"
+fi
+
+# Check if license key is set
+if [ -f ".env" ] && grep -q "UPPAAL_LICENSE_KEY" ".env"; then
+    source .env
+    if [ -z "$UPPAAL_LICENSE_KEY" ] || [ "$UPPAAL_LICENSE_KEY" = "your_license_key_here" ]; then
+        echo "⚠️  Please set UPPAAL_LICENSE_KEY in .env file"
+        echo "   Get your license from: https://uppaal.veriaal.dk"
+    else
+        echo "✓ UPPAAL license key found in .env"
+        
+        # Check if Docker is available
+        if command -v docker &> /dev/null; then
+            echo "✓ Docker found"
             
-            # Check if Docker is available
-            if command -v docker &> /dev/null; then
-                echo "Building UPPAAL Docker image..."
-                if sudo docker build --build-arg KEY=$UPPAAL_LICENSE_KEY -t uppaal-engine:latest -f Dockerfile.uppaal ./src/uppaal 2>&1 | grep -q "Successfully"; then
-                    echo "✓ UPPAAL Docker image built successfully"
-                    
-                    # Start the container
-                    echo "Starting UPPAAL container..."
-                    if sudo docker ps | grep -q uppaal-engine; then
-                        echo "UPPAAL container already running"
-                    else
-                        sudo docker run --rm -d --name uppaal-engine -p 2350:2350 \
-                            -v "$PWD/data/automaton:/home/uppaal/models:ro" \
-                            -e UPPAAL_LICENSE_KEY=$UPPAAL_LICENSE_KEY \
-                            uppaal-engine:latest
-                        sleep 2
-                        
-                        if sudo docker ps | grep -q uppaal-engine; then
-                            echo "✓ UPPAAL container is running"
-                        else
-                            echo "⚠️  Failed to start UPPAAL container"
-                        fi
-                    fi
+            # Check if uppaal-engine image exists
+            if docker images | grep -q uppaal-engine; then
+                echo "✓ UPPAAL Docker image already exists"
+            else
+                echo "⚠️  UPPAAL Docker image not found"
+                echo "   You need to build it first from the UPPAAL installation"
+                echo "   See README for instructions"
+            fi
+            
+            # Start/restart using docker-compose
+            if [ -f "docker-compose.uppaal.yml" ]; then
+                echo "Starting UPPAAL container using docker-compose..."
+                sudo docker compose -f docker-compose.uppaal.yml up -d
+                
+                sleep 2
+                if sudo docker ps | grep -q uppaal-engine; then
+                    echo "✓ UPPAAL container is running on port 2350"
                 else
-                    echo "⚠️  Failed to build UPPAAL Docker image"
+                    echo "⚠️  UPPAAL container failed to start. Check logs with:"
+                    echo "   sudo docker logs uppaal-engine"
                 fi
             else
-                echo "⚠️  Docker not found. UPPAAL Docker setup requires Docker."
-                echo "   You can install UPPAAL manually or install Docker to use containerized UPPAAL"
+                echo "⚠️  docker-compose.uppaal.yml not found"
             fi
+        else
+            echo "⚠️  Docker not found. UPPAAL Docker setup requires Docker."
+            echo "   Install Docker from https://www.docker.com"
         fi
     fi
 else
-    echo "⚠️  UPPAAL installation not found in src/uppaal"
-    echo "   Please download UPPAAL for Linux from https://uppaal.org/downloads/"
-    echo "   and extract it to src/uppaal/"
+    echo "⚠️  No UPPAAL_LICENSE_KEY found in .env file"
 fi
 
 echo ""
@@ -181,12 +179,18 @@ echo ""
 echo "Next steps:"
 echo "  1. Set up your .env file with API keys and UPPAAL_LICENSE_KEY (if not done)"
 echo "  2. Run 'pip install -r requirements.txt' if not already done"
-echo "  3. Run 'python src/main.py' to start the framework"
+echo "  3. Start DTLogExtSim: cd src/DTLogExtSim && sudo docker compose up -d && cd ../.."
+echo "  4. Start UPPAAL: sudo docker compose -f docker-compose.uppaal.yml up -d"
+echo "  5. Run 'python src/main.py' to start the framework"
 echo ""
-echo "UPPAAL Docker commands:"
-echo "  Stop:  sudo docker stop uppaal-engine"
-echo "  Start: sudo docker run --rm -d --name uppaal-engine -p 2350:2350 \\"
-echo "           -v \$PWD/data/automaton:/home/uppaal/models:ro \\"
-echo "           -e UPPAAL_LICENSE_KEY=\$UPPAAL_LICENSE_KEY uppaal-engine:latest"
-echo "  Test:  python src/uppaal_interface.py"
+echo "Docker management commands:"
+echo "  Start all containers:"
+echo "    cd src/DTLogExtSim && sudo docker compose up -d && cd ../.."
+echo "    sudo docker compose -f docker-compose.uppaal.yml up -d"
+echo "  Stop all containers:"
+echo "    cd src/DTLogExtSim && sudo docker compose down && cd ../.."
+echo "    sudo docker compose -f docker-compose.uppaal.yml down"
+echo "  View logs:"
+echo "    sudo docker logs uppaal-engine"
+echo "    sudo docker logs dtlogextsim-interface-1"
 echo ""

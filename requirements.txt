@@ -1,5 +1,6 @@
 accelerate>=1.6.0
 bitsandbytes>=0.45.5
+gradio>=5.45.0
 langchain>=0.3.25
 langchain_core>=0.3.58
 langchain-deepseek>=0.1.3

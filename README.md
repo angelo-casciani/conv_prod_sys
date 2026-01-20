@@ -137,37 +137,30 @@ extractor:
     - ./../extractor_outputs:/app/extractor
 ```
 
-
-## LLMs Requirements
-
-Please note that this software leverages the open-source and closed-source LLMs reported in the table:
-
-| Model | HuggingFace Link |
-| ----- | ---------------- |
-| meta-llama/Meta-Llama-3-8B-Instruct | [HF link](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) |
-| meta-llama/Meta-Llama-3.1-8B-Instruct | [HF link](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct) |
-| meta-llama/Llama-3.2-1B-Instruct | [HF Link](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct) |
-| meta-llama/Llama-3.2-3B-Instruct | [HF link](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) |
-| mistralai/Mistral-7B-Instruct-v0.2 | [HF link](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2) |
-| mistralai/Mistral-7B-Instruct-v0.3 | [HF link](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) |
-| mistralai/Mistral-Nemo-Instruct-2407 | [HF link](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) |
-| mistralai/Ministral-8B-Instruct-2410 | [HF link](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410) |
-| Qwen/Qwen2.5-7B-Instruct | [HF link](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct) |
-| google/gemma-2-9b-it | [HF link](https://huggingface.co/google/gemma-2-9b-it) |
-| microsoft/phi-4 | [HF link](https://huggingface.co/microsoft/phi-4) |
-| gpt-4o-mini | [OpenAI link](https://platform.openai.com/docs/models) |
-| deepseek-ai/DeepSeek-R1-Distill-Qwen-7B | [HF link](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B) |
-| deepseek-ai/DeepSeek-R1-Distill-Llama-8B | [HF link](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B) |
-
-Request in advance the permission to use each Llama model for your HuggingFace account.
-Retrive your OpenAI API key to use the supported GPT model.
-
-Please note that each of the selected models have specific requirements in terms of GPU availability.
-It is recommended to have access to a GPU-enabled environment meeting at least the minimum requirements for these models to run the software effectively.
-
 ## Usage
 
-Run the conversational framework:
+Before running the conversational framework, you need to start the required Docker containers:
+
+**Start DTLogExtSim containers:**
+``` bash
+cd src/DTLogExtSim
+sudo docker compose up -d
+cd ../..
+```
+
+**Start UPPAAL container:**
+``` bash
+sudo docker compose -f docker-compose.uppaal.yml up -d
+```
+
+**Verify containers are running:**
+``` bash
+sudo docker ps
+```
+
+You should see containers for `uppaal-engine`, `dtlogextsim-interface-1`, `dtlogextsim-simulator-1`, and `dtlogextsim-extractor-1` running.
+
+Once the containers are running, you can start the conversational framework:
 
 ``` bash
 cd src
@@ -207,6 +200,34 @@ To customize these settings, modify the corresponding arguments when executing `
 * Use `--extracted_model_failure` to specify if the model with failure data has already been extracted (True or False).
 
 A comprehensive list of commands can be found in `src/cmd4tests.sh`.
+
+## LLMs Requirements
+
+Please note that this software leverages the open-source and closed-source LLMs reported in the table:
+
+| Model | HuggingFace Link |
+| ----- | ---------------- |
+| meta-llama/Meta-Llama-3-8B-Instruct | [HF link](https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct) |
+| meta-llama/Meta-Llama-3.1-8B-Instruct | [HF link](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct) |
+| meta-llama/Llama-3.2-1B-Instruct | [HF Link](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct) |
+| meta-llama/Llama-3.2-3B-Instruct | [HF link](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) |
+| mistralai/Mistral-7B-Instruct-v0.2 | [HF link](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2) |
+| mistralai/Mistral-7B-Instruct-v0.3 | [HF link](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) |
+| mistralai/Mistral-Nemo-Instruct-2407 | [HF link](https://huggingface.co/mistralai/Mistral-Nemo-Instruct-2407) |
+| mistralai/Ministral-8B-Instruct-2410 | [HF link](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410) |
+| Qwen/Qwen2.5-7B-Instruct | [HF link](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct) |
+| google/gemma-2-9b-it | [HF link](https://huggingface.co/google/gemma-2-9b-it) |
+| microsoft/phi-4 | [HF link](https://huggingface.co/microsoft/phi-4) |
+| gpt-4o-mini | [OpenAI link](https://platform.openai.com/docs/models) |
+| deepseek-ai/DeepSeek-R1-Distill-Qwen-7B | [HF link](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B) |
+| deepseek-ai/DeepSeek-R1-Distill-Llama-8B | [HF link](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B) |
+
+Request in advance the permission to use each Llama model for your HuggingFace account.
+Retrive your OpenAI API key to use the supported GPT model.
+
+Please note that each of the selected models have specific requirements in terms of GPU availability.
+It is recommended to have access to a GPU-enabled environment meeting at least the minimum requirements for these models to run the software effectively.
+
 
 ## Experiments
 
