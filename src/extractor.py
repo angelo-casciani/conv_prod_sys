@@ -23,33 +23,46 @@ class Extractor:
         with open(params_path, "r") as f:
             params = json.load(f)
         activities = {}
-        for element in params['elements']:
+
+        if 'elements' in params:
+            elements = params['elements']
+        elif '0' in params and 'elements' in params['0']:
+            elements = params['0']['elements']
+        else:
+            raise KeyError(f"Cannot find 'elements' in parameters file. Available top-level keys: {list(params.keys())}")
+        
+        for element in elements:
             activities[element['elementId']] = element['durationDistribution']
         return activities
     
     def extract_inter_arrival(self, inter_arrival_path):
         with open(inter_arrival_path, "r") as f:
-            lines = f.readlines()
-
-        for line in lines:
-            if line.strip().startswith("["):
-                vector = ast.literal_eval(line.strip())
-                break
+            content = f.read().strip()
+            
+            if inter_arrival_path.endswith('.json'):
+                vector = json.loads(content)
+            else:
+                for line in content.split('\n'):
+                    if line.strip().startswith("["):
+                        vector = ast.literal_eval(line.strip())
+                        break
+        
         inter_arrival_time = {"type": vector[0], "mean": vector[1]['mean'], "arg1": vector[1]['arg1'], "arg2": vector[1]['arg2']}
-
         return inter_arrival_time
     
     def extract_branch_prob(self, branch_prob_path):
         with open(branch_prob_path, "r") as f:
-            lines = f.readlines()
+            content = f.read().strip()
         
-        for line in lines:
-            if line.strip().startswith("{"):
-                # Match any unquoted key (word chars, hyphens, @) before a colon
-                quoted_line = re.sub(r'\{([^{\'"][\w\-@]+):', r'{"\1":', line.strip())
-                quoted_line = re.sub(r',\s*([^{\'"][\w\-@]+):', r', "\1":', quoted_line)
-                data = eval(quoted_line)
-                break
+        if branch_prob_path.endswith('.json'):
+            data = json.loads(content)
+        else:
+            for line in content.split('\n'):
+                if line.strip().startswith("{"):
+                    quoted_line = re.sub(r'\{([^{\'"][\w\-@]+):', r'{"\1":', line.strip())
+                    quoted_line = re.sub(r',\s*([^{\'"][\w\-@]+):', r', "\1":', quoted_line)
+                    data = eval(quoted_line)
+                    break
         
         next_activities = {}
         for gateway, flows in data.items():
@@ -61,8 +74,7 @@ class Extractor:
                 if src not in next_activities:
                     next_activities[src] = {}
                 
-                #if destination already exists we sum the probability
-                if dst in next_activities[src]:
+                if dst in next_activities[src]: # if destination already exists, we sum the probability
                     next_activities[src][dst]["probability"] += prob
                 else:
                     next_activities[src][dst] = {"probability": prob}
@@ -99,33 +111,74 @@ class Extractor:
             successors[act] = self.get_real_successors(t)
         return successors
     
+    def extract_label_to_id_mapping(self, bpmn_model):
+        label_to_id = {}
+        id_to_label = {}
+        
+        for node in bpmn_model.get_nodes():
+            if hasattr(node, 'get_name') and hasattr(node, 'get_id'):
+                label = node.get_name()  # e.g., 'A1', 'A2'
+                node_id = node.get_id()  # e.g., 'node_17a40054-...'
+                
+                if label and node_id:
+                    label_to_id[label] = node_id
+                    id_to_label[node_id] = label
+        
+        return label_to_id, id_to_label
+    
     def extract_transfer_times(self, transfer_times_path):
         with open(transfer_times_path, "r") as f:
-            lines = f.readlines()
+            content = f.read().strip()
         
         transfer_times = {}
-        for line in lines:
-            line = ast.literal_eval(line.strip())
-            transfer_times[line[0]] = {"type": line[1], "mean": line[2]['mean'], "arg1": line[2]['arg1'], "arg2": line[2]['arg2']}
+        
+        if transfer_times_path.endswith('.json'):
+            data = json.loads(content)
+            if not data:     # If empty JSON object, return empty dict
+                return transfer_times
+            
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    transfer_times[key] = {
+                        "type": value.get("type", ""),
+                        "mean": value.get("mean", 0),
+                        "arg1": value.get("arg1", 0),
+                        "arg2": value.get("arg2", 0)
+                    }
+        else:
+            # Old text format
+            lines = f.readlines() if hasattr(f, 'readlines') else content.split('\n')
+            for line in lines:
+                if line.strip():
+                    line_data = ast.literal_eval(line.strip())
+                    transfer_times[line_data[0]] = {
+                        "type": line_data[1],
+                        "mean": line_data[2]['mean'],
+                        "arg1": line_data[2]['arg1'],
+                        "arg2": line_data[2]['arg2']
+                    }
         
         return transfer_times
     
-    def create_model(self, activities, inter_arrival_time, branch_prob, transfer_times):
+    def create_model(self, activities, inter_arrival_time, branch_prob, transfer_times, id_to_label, label_to_id):
         model = {}
 
         model["inter_arrival_time"] = inter_arrival_time
 
         model["activities"] = {}
+        # Convert from UUID-keyed activities to label-keyed activities
         for activity_id, activity_data in activities.items():
-            model["activities"][activity_id] = {
+            activity_label = id_to_label.get(activity_id, activity_id)
+            
+            model["activities"][activity_label] = {
                 "capacity": 1, 
                 "processing_time": activity_data,
                 "next_activities": {}
             }
-
-            if activity_id in branch_prob:
-                for next_activity, prob_data in branch_prob[activity_id].items():
-                    model["activities"][activity_id]["next_activities"][next_activity] = {
+            
+            if activity_label in branch_prob:
+                for next_label, prob_data in branch_prob[activity_label].items():
+                    model["activities"][activity_label]["next_activities"][next_label] = {
                         "probability": prob_data["probability"]
                     }
             
@@ -166,12 +219,30 @@ class Extractor:
         response = requests.post(self.url, files=files, data=self.data)
         parsed_response = response.json()
 
-        output_dir = parsed_response["result"]["output_directory"]
+        if "result" in parsed_response: # Check if extraction was successful
+            result = parsed_response["result"]
+            if isinstance(result, dict):
+                if "success" in result and not result["success"]:
+                    error_msg = result.get("error", "Unknown error")
+                    raise RuntimeError(f"DTLogExtSim extraction failed: {error_msg}")
+                if "output_directory" not in result:
+                    raise KeyError(f"Response missing 'output_directory'. Full response: {parsed_response}")
+                output_dir = result["output_directory"]
+            else:
+                raise ValueError(f"Unexpected result structure: {parsed_response}")
+        else:
+            raise ValueError(f"Response missing 'result' field: {parsed_response}")
+
         local_output_dir = os.path.join(os.path.dirname(__file__), "extractor_outputs", os.path.basename(output_dir.strip("/")), "output_data", "output_file")
-        #print("Local directory:", local_output_dir)
+        params_file = None
+        inter_arrival_file = None
+        branch_prob_file = None
+        transfer_times_file = None
+        bpmn_file = None
+        
         files = os.listdir(local_output_dir)
         for file in files:
-            if "parameters" in file and "txt" in file:
+            if "parameters" in file and "json" in file:
                 params_file = file
             if "interarrival" in file:
                 inter_arrival_file = file
@@ -181,15 +252,24 @@ class Extractor:
                 transfer_times_file = file
             if "bpmn" in file:
                 bpmn_file = file
-            
+        
+        if not params_file:
+            raise FileNotFoundError(f"Parameters file not found in {local_output_dir}")
+        if not inter_arrival_file:
+            raise FileNotFoundError(f"Inter-arrival file not found in {local_output_dir}")
+        if not branch_prob_file:
+            raise FileNotFoundError(f"Branch probability file not found in {local_output_dir}")
+        if not bpmn_file:
+            raise FileNotFoundError(f"BPMN file not found in {local_output_dir}")
 
         params_path = os.path.join(local_output_dir, params_file)
         inter_arrival_path = os.path.join(local_output_dir, inter_arrival_file)
         branch_prob_path = os.path.join(local_output_dir, branch_prob_file)
-        transfer_times_path = os.path.join(local_output_dir, transfer_times_file)
         bpmn_path = os.path.join(local_output_dir, bpmn_file)
         bpmn_model = bpmn_importer.apply(bpmn_path)
         net, initial_marking, final_marking = pm4py.convert.convert_to_petri_net(bpmn_model)
+
+        label_to_id, id_to_label = self.extract_label_to_id_mapping(bpmn_model)
 
         #ACTIVITIES IDs EXTRACTION
         activities = self.extract_parameters(params_path)
@@ -208,17 +288,25 @@ class Extractor:
                     branch_prob[act][only_succ] = {"probability": 1.0}
         
         #TRANSFER TIMES EXTRACTION
-        transfer_times = self.extract_transfer_times(transfer_times_path)
+        if transfer_times_file:
+            transfer_times_path = os.path.join(local_output_dir, transfer_times_file)
+            transfer_times = self.extract_transfer_times(transfer_times_path)
+        else:
+            # No transfer times file found, use empty dict (equivalent to 0)
+            transfer_times = {}
             
-        model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times)
+        model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times, id_to_label, label_to_id)
 
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))        
         if failure:
-            output_dir = "../data/parameters/digital_twin_with_failure.json"
+            output_path = os.path.join(base_dir, "data", "parameters", "digital_twin_with_failure.json")
             model = self.add_failure_params(model)
         else:
-            output_dir = "../data/parameters/digital_twin.json"
+            output_path = os.path.join(base_dir, "data", "parameters", "digital_twin.json")
 
-        with open(output_dir, "w") as f:
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        
+        with open(output_path, "w") as f:
             json.dump(model, f, indent=2)
 
         return net, initial_marking, final_marking
