@@ -29,7 +29,7 @@ if [ -f "src/pddl/downward/fast-downward.py" ]; then
         cd src/pddl/downward
         
         if [ -f "./build.py" ]; then
-            ./build.py
+            ./build.py release
             echo "Fast Downward built successfully"
         else
             echo "Error: build.py not found in src/pddl/downward"
@@ -44,66 +44,19 @@ else
     exit 1
 fi
 
-echo "============================================="
-echo "Setting up DTLogExtSim (Digital Twin Extractor)"
-echo "============================================="
-echo ""
-
-# Check if DTLogExtSim is properly initialized
-if [ -f "src/DTLogExtSim/docker-compose.yml" ]; then
-    echo "DTLogExtSim found"
-    
-    # Check if Docker is installed
-    if ! command -v docker &> /dev/null; then
-        echo "Warning: Docker not found. DTLogExtSim requires Docker to run."
-        echo "Please install Docker from https://www.docker.com"
-        echo ""
-    else
-        echo "Docker found"
-        
-        # Check if docker compose is available
-        if docker compose version &> /dev/null; then
-            echo "Docker Compose found"
-            echo ""
-            echo "DTLogExtSim is ready to use!"
-            echo "To run DTLogExtSim:"
-            echo "  cd src/DTLogExtSim"
-            echo "  docker compose up --build"
-            echo "Then access the UI at http://127.0.0.1:6660"
-        else
-            echo "Warning: Docker Compose not found or not working"
-            echo "Please ensure Docker Compose is properly installed"
-        fi
-    fi
-    echo ""
-    
-    # Create extractor_outputs directory if it doesn't exist
-    if [ ! -d "src/extractor_outputs" ]; then
-        echo "Creating extractor_outputs directory..."
-        mkdir -p src/extractor_outputs
-        echo "Created src/extractor_outputs"
-    else
-        echo "extractor_outputs directory already exists"
-    fi
-    echo ""
-    
-    # Check if the volume mount is configured in docker-compose.yml
-    if grep -q "extractor_outputs:/app/extractor" "src/DTLogExtSim/docker-compose.yml"; then
-        echo "Volume mount for extractor_outputs is already configured"
-    else
-        echo "Note: You may need to add the volume mount to src/DTLogExtSim/docker-compose.yml"
-        echo "Add this line under the extractor service volumes section:"
-        echo "  - ./../extractor_outputs:/app/extractor"
-    fi
+# Create extractor_outputs directory if it doesn't exist
+if [ ! -d "src/extractor_outputs" ]; then
+    echo "Creating extractor_outputs directory..."
+    mkdir -p src/extractor_outputs
+    echo "Created src/extractor_outputs"
 else
-    echo "Error: DTLogExtSim submodule not properly initialized"
-    echo "Please check the .gitmodules file and ensure the repository is cloned correctly"
-    exit 1
+    echo "extractor_outputs directory already exists"
 fi
-
 echo ""
+
+
 echo "============================================="
-echo "Setting up UPPAAL with Docker"
+echo "Setting up Docker Services"
 echo "============================================="
 echo ""
 
@@ -143,9 +96,9 @@ if [ -f ".env" ] && grep -q "UPPAAL_LICENSE_KEY" ".env"; then
             fi
             
             # Start/restart using docker-compose
-            if [ -f "docker-compose.uppaal.yml" ]; then
-                echo "Starting UPPAAL container using docker-compose..."
-                sudo docker compose -f docker-compose.uppaal.yml up -d
+            if [ -f "docker-compose.yml" ]; then
+                echo "Starting containers using docker-compose..."
+                sudo docker compose up -d
                 
                 sleep 2
                 if sudo docker ps | grep -q uppaal-engine; then
@@ -154,8 +107,15 @@ if [ -f ".env" ] && grep -q "UPPAAL_LICENSE_KEY" ".env"; then
                     echo "⚠️  UPPAAL container failed to start. Check logs with:"
                     echo "   sudo docker logs uppaal-engine"
                 fi
+                
+                if sudo docker ps | grep -q extractor; then
+                    echo "✓ Extractor container is running on port 6662"
+                else
+                    echo "⚠️  Extractor container failed to start. Check logs with:"
+                    echo "   sudo docker logs <extractor-container-name>"
+                fi
             else
-                echo "⚠️  docker-compose.uppaal.yml not found"
+                echo "⚠️  docker-compose.yml not found"
             fi
         else
             echo "⚠️  Docker not found. UPPAAL Docker setup requires Docker."
@@ -173,24 +133,25 @@ echo "============================================="
 echo ""
 echo "Submodules initialized:"
 echo "  ✓ Fast Downward (PDDL Planner) at src/pddl/downward"
-echo "  ✓ DTLogExtSim (Digital Twin Extractor) at src/DTLogExtSim"
+echo ""
+echo "Components:"
+echo "  ✓ DTLogExtSim Extractor at src/DTLogExtSim/Extractor"
 echo "  ✓ UPPAAL (Verification Engine) with Docker support"
 echo ""
 echo "Next steps:"
 echo "  1. Set up your .env file with API keys and UPPAAL_LICENSE_KEY (if not done)"
 echo "  2. Run 'pip install -r requirements.txt' if not already done"
-echo "  3. Start DTLogExtSim: cd src/DTLogExtSim && sudo docker compose up -d && cd ../.."
-echo "  4. Start UPPAAL: sudo docker compose -f docker-compose.uppaal.yml up -d"
-echo "  5. Run 'python src/main.py' to start the framework"
+echo "  3. Start all containers: sudo docker compose up -d"
+echo "  4. Run 'python src/main.py' to start the framework"
 echo ""
 echo "Docker management commands:"
 echo "  Start all containers:"
-echo "    cd src/DTLogExtSim && sudo docker compose up -d && cd ../.."
-echo "    sudo docker compose -f docker-compose.uppaal.yml up -d"
+echo "    sudo docker compose up -d"
 echo "  Stop all containers:"
-echo "    cd src/DTLogExtSim && sudo docker compose down && cd ../.."
-echo "    sudo docker compose -f docker-compose.uppaal.yml down"
+echo "    sudo docker compose down"
 echo "  View logs:"
 echo "    sudo docker logs uppaal-engine"
-echo "    sudo docker logs dtlogextsim-interface-1"
+echo "    sudo docker logs <extractor-container-name>"
+echo "  Rebuild containers:"
+echo "    sudo docker compose up -d --build"
 echo ""

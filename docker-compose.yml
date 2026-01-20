@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  uppaal:
+    image: uppaal-engine:latest
+    container_name: uppaal-engine
+    ports:
+      - "2350:2350"
+    volumes:
+      - ./data/automaton:/home/uppaal/models:ro
+    restart: unless-stopped
+    environment:
+      - USER=uppaal
+      - UPPAAL_LICENSE_KEY=${UPPAAL_LICENSE_KEY}
+      - UPPAAL_LEASE=1
+
+  extractor:
+    build:
+      context: ./src/DTLogExtSim/Extractor
+    volumes:   
+      - uploads:/app/uploads
+      - download:/app/download
+      - extractor:/app/extractor
+      - ./src/extractor_outputs:/app/extractor
+    ports:
+      - "6662:6662"
+    networks:
+      - my_network
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  download:
+  extractor:
+
+networks:
+  my_network:
+    driver: bridge
