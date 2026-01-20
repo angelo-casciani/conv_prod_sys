@@ -1,146 +1,189 @@
 {
   "inter_arrival_time": {
-    "type": "fixed",
-    "mean": 300.0,
-    "arg1": 0,
+    "type": "lognorm",
+    "mean": 11.38,
+    "arg1": 54.74,
     "arg2": 0
   },
   "activities": {
-    "A1": {
+    "corner2": {
       "capacity": 1,
       "processing_time": {
-        "type": "UNIFORM",
-        "mean": "2.02",
-        "arg1": "0.09",
-        "arg2": "3.94",
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A2": {
-          "probability": 0.7
+        "station11": {
+          "probability": 1.0
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.009,
+        "repair_time": {
+          "mean": 21.1,
+          "std": 5.0
         },
-        "A3": {
-          "probability": 0.3
+        "degradation_factor": 0.0003
+      }
+    },
+    "station11": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station21": {
+          "probability": 1.0
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.009,
+        "repair_time": {
+          "mean": 34.8,
+          "std": 4.0
+        },
+        "degradation_factor": 0.0007
+      }
+    },
+    "station21": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station22": {
+          "probability": 1.0
         }
       },
       "failure_parameters": {
         "failure_rate": 0.002,
         "repair_time": {
-          "mean": 28.8,
-          "std": 6.7
-        },
-        "degradation_factor": 0.0011
-      }
-    },
-    "A2": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "GAMMA",
-        "mean": "38.67",
-        "arg1": "1041.5",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A4": {
-          "probability": 1.0
-        }
-      },
-      "failure_parameters": {
-        "failure_rate": 0.008,
-        "repair_time": {
-          "mean": 34.0,
-          "std": 5.6
+          "mean": 24.0,
+          "std": 2.3
         },
         "degradation_factor": 0.0004
       }
     },
-    "A5": {
+    "station22": {
       "capacity": 1,
       "processing_time": {
-        "type": "LOGNORMAL",
-        "mean": "96.85",
-        "arg1": "4684.24",
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A6": {
+        "splitter1": {
           "probability": 1.0
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.002,
+        "failure_rate": 0.005,
         "repair_time": {
-          "mean": 25.4,
-          "std": 4.1
+          "mean": 18.8,
+          "std": 4.6
         },
-        "degradation_factor": 0.0009
+        "degradation_factor": 0.0007
       }
     },
-    "A4": {
+    "splitter1": {
       "capacity": 1,
       "processing_time": {
-        "type": "LOGNORMAL",
-        "mean": "41.22",
-        "arg1": "15.6",
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "A6": {
+        "station31": {
           "probability": 1.0
         }
       },
       "failure_parameters": {
-        "failure_rate": 0.004,
+        "failure_rate": 0.009,
         "repair_time": {
-          "mean": 30.9,
-          "std": 5.8
+          "mean": 23.7,
+          "std": 3.3
         },
-        "degradation_factor": 0.001
+        "degradation_factor": 0.0006
       }
     },
-    "A6": {
+    "station31": {
       "capacity": 1,
       "processing_time": {
-        "type": "TRIANGULAR",
-        "mean": "51.76",
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "corner1": {
+          "probability": 1.0
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.006,
+        "repair_time": {
+          "mean": 33.5,
+          "std": 6.6
+        },
+        "degradation_factor": 0.0012
+      }
+    },
+    "corner1": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "splitter2": {
+          "probability": 1.0
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.006,
+        "repair_time": {
+          "mean": 15.2,
+          "std": 5.9
+        },
+        "degradation_factor": 0.0008
+      }
+    },
+    "splitter2": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
         "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {},
       "failure_parameters": {
-        "failure_rate": 0.009,
-        "repair_time": {
-          "mean": 17.2,
-          "std": 4.4
-        },
-        "degradation_factor": 0.0003
-      }
-    },
-    "A3": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "GAMMA",
-        "mean": "25.4",
-        "arg1": "118.45",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A4": {
-          "probability": 1.0
-        }
-      },
-      "failure_parameters": {
         "failure_rate": 0.004,
         "repair_time": {
-          "mean": 28.3,
-          "std": 4.1
+          "mean": 17.9,
+          "std": 4.0
         },
-        "degradation_factor": 0.0005
+        "degradation_factor": 0.0006
       }
     }
   },

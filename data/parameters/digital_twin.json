@@ -1,99 +1,98 @@
 {
   "inter_arrival_time": {
-    "type": "fixed",
-    "mean": 300.0,
-    "arg1": 0,
+    "type": "lognorm",
+    "mean": 11.38,
+    "arg1": 54.74,
     "arg2": 0
   },
   "activities": {
-    "A1": {
+    "node_a9848f8f-af86-4d1f-bff6-a802d4e2ddda": {
       "capacity": 1,
       "processing_time": {
-        "type": "UNIFORM",
-        "mean": "2.02",
-        "arg1": "0.09",
-        "arg2": "3.94",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A3": {
-          "probability": 0.3
-        },
-        "A2": {
-          "probability": 0.7
-        }
-      }
-    },
-    "A2": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "GAMMA",
-        "mean": "38.67",
-        "arg1": "1041.5",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A4": {
-          "probability": 1.0
-        }
-      }
-    },
-    "A5": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "LOGNORMAL",
-        "mean": "96.85",
-        "arg1": "4684.24",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A6": {
-          "probability": 1.0
-        }
-      }
-    },
-    "A4": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "LOGNORMAL",
-        "mean": "41.22",
-        "arg1": "15.6",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "A6": {
-          "probability": 1.0
-        }
-      }
-    },
-    "A6": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "TRIANGULAR",
-        "mean": "51.76",
+        "type": "FIXED",
+        "mean": "1",
         "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {}
     },
-    "A3": {
+    "node_fa21d11c-743a-46b2-84f1-04a95cb3d702": {
       "capacity": 1,
       "processing_time": {
-        "type": "GAMMA",
-        "mean": "25.4",
-        "arg1": "118.45",
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {
-        "A4": {
-          "probability": 1.0
-        }
-      }
+      "next_activities": {}
+    },
+    "node_c8984a93-6bb6-49f0-bd72-21f9c58dbb10": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "node_1b40f4e9-e0bd-4f75-bfb8-3fc27b9764e1": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "node_60136c8f-5c6d-4616-9d51-fc7ed6778711": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "node_8b8fcab8-5e56-4b65-9d03-6e648d39fa4d": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "node_0c2d5783-ae40-45fa-a367-b3f1ba421a38": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
+    },
+    "node_28485ad8-3497-4656-bfaf-90180f990c6a": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {}
     }
   },
   "transfer_times": {}

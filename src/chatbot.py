@@ -7,6 +7,7 @@ import warnings
 from utility import *
 import os
 import re
+from docker_manager import setup_docker_lifecycle
 
 DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 load_dotenv()
@@ -108,4 +109,7 @@ demo = gr.ChatInterface(
 )
 
 if __name__ == "__main__":
+    # Setup Docker containers lifecycle
+    setup_docker_lifecycle()
+    
     demo.launch(favicon_path="favicon.ico")

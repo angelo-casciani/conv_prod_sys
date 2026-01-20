@@ -33,14 +33,15 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |       └── lego_factory.json
 ├── log               # folder where to insert the event log
 ├── src               # source code of proposed approach
-|   ├── uppaal        # source code of the Uppaal verifier
-|   ├── DTLogExtSim   # submodule code for the digital twin extractor 
 |   ├── downward      # Fast-Downward submodule code
-|   ├── pddl          # source code for the PDDL orchestrator
+|   ├── DTLogExtSim   # Digital twin extractor code
+|   |   └── Extractor # Extractor component
+|   ├── pddl          # PDDL files for orchestration
 |   |   ├── domain.pddl    # Orchestrator PDDL domain
 |   |   └── problem.pddl   # Orchestrator PDDL problem
 |   ├── extractor_outputs  # outputs from the digital twin extractor
 |   ├── chatbot.py         # GUI-based conversational interface
+|   ├── docker_manager.py  # Docker container lifecycle management
 |   ├── main.py            # main entry point for the framework
 |   ├── pipeline.py        # orchestration pipeline
 |   ├── llm_factory_interface.py  # LLM-Factory interface
@@ -85,24 +86,17 @@ git clone --recurse-submodules https://github.com/angelo-casciani/conv_prod_sys
 cd conv_prod_sys
 ```
 
-If you've already cloned the repository without submodules, you can initialize them by running the automated setup script:
+Initialize submodules and containers within the repository by running the automated setup script:
 
 ``` bash
 ./setup_submodules.sh
 ```
 
 This script will:
-- Initialize and update all git submodules (Fast Downward and DTLogExtSim)
-- Build Fast Downward automatically
-- Create the necessary directories
-- Check for Docker installation (required for DTLogExtSim and UPPAAL)
-- Set up DTLogExtSim and UPPAAL with Docker (if license key is available)
-
-Alternatively, you can manually initialize the submodules:
-
-``` bash
-git submodule update --init --recursive
-```
+- initialize and update git submodules (Fast Downward);
+- build Fast Downward automatically;
+- Check for Docker installation (required for Extractor and UPPAAL);
+- Set up and start Docker containers (if Docker and UPPAAL license key are available).
 
 Assuming a working version of Python (v.3.10.12) installed on the machine, create a virtual environment in the root folder of the project.
 
@@ -128,54 +122,21 @@ GOOGLE_API_KEY=<your Gemini API key>
 Set up a license key for [Uppaal](https://uppaal.org/) in the env variable `UPPAAL_LICENSE_KEY`. You can get one from [uppaal.veriaal.dk](https://uppaal.veriaal.dk).
 This step is needed to activate the Uppaal `verifyta` used in this project.
 
-
-Create a folder named `extractor_outputs` inside `src` and insert the line `./../extractor_outputs:/app/extractor` in the file `src/DTLogExtSim/docker-compose.yml` as showed below:
-
-``` yml
-extractor:
-  volumes:
-    - ./../extractor_outputs:/app/extractor
-```
-
 ## Usage
 
-Before running the conversational framework, you need to start the required Docker containers:
-
-**Start DTLogExtSim containers:**
-``` bash
-cd src/DTLogExtSim
-sudo docker compose up -d
-cd ../..
-```
-
-**Start UPPAAL container:**
-``` bash
-sudo docker compose -f docker-compose.uppaal.yml up -d
-```
-
-**Verify containers are running:**
-``` bash
-sudo docker ps
-```
-
-You should see containers for `uppaal-engine`, `dtlogextsim-interface-1`, `dtlogextsim-simulator-1`, and `dtlogextsim-extractor-1` running.
-
-Once the containers are running, you can start the conversational framework:
+Start the conversational framework and interact with it through CLI:
 
 ``` bash
-cd src
-python3 main.py
+python src/main.py
 ```
 
-or
+or for the GUI version:
 
 ``` bash
-cd src
-python3 chatbot.py
+python src/chatbot.py
 ```
 
-The first run allows to interact with the conversational agent through the terminal.
-Runnin `chatbot.py` you're launching a local web application that provides a graphical user interface (GUI) for the conversational agent. Once the script is launched, your terminal will provide a local link, typically something like `http://127.0.0.1:7860`. This address acts as a local server that you can access directly from your web browser, so when you open this link, you'll see the chatbot's GUI.
+Running `chatbot.py` launches a local web application that provides a GUI for the chatbot. Once the script is launched, your terminal will provide a local link, typically something like `http://127.0.0.1:7860`. This address acts as a local server that you can access directly from your web browser.
 
 The complete conversation will be stored in a `.txt` file in the [outputs](tests/outputs) folder.
 
@@ -186,8 +147,8 @@ The default parameters are:
 * Verification LLM: `'gpt-4o-mini'`;
 * Number of generated tokens: `512`;
 * Interaction Modality: `'live'`, i.e., the live chat with the conversational framework.;
-* Extracted model: `False`;
-* Extracted model with failure data: `False`.
+* Extracted model: `False`, i.e., the digital twin for simulation will be extracted from scratch;
+* Extracted model with failure data: `False`, i.e., the digital twin for predictive maintenance will be extracted from scratch.
 
 To customize these settings, modify the corresponding arguments when executing `main.py`:
 
@@ -236,8 +197,7 @@ It is recommended to have access to a GPU-enabled environment meeting at least t
 To reproduce the experiments for the *simulation* evaluation, for example:
 
 ``` bash
-cd src
-python3 main.py --llm_id_simulation Qwen/Qwen2.5-7B-Instruct --modality evaluation-simulation --max_new_tokens 512
+python src/main.py --llm_id_simulation Qwen/Qwen2.5-7B-Instruct --modality evaluation-simulation --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
@@ -247,8 +207,7 @@ The results will be stored in a `.txt` file reporting all the information for th
 To reproduce the experiments for the *verification* evaluation, for example:
 
 ``` bash
-cd src
-python3 main.py --llm_id_verification gpt-4o-mini --modality evaluation-verification --max_new_tokens 512
+python src/main.py --llm_id_verification gpt-4o-mini --modality evaluation-verification --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
@@ -258,8 +217,7 @@ The results will be stored in a `.txt` file reporting all the information for th
 To reproduce the experiments for the *factory\_info* evaluation, for example:
 
 ``` bash
-cd src
-python3 main.py --llm_id_gateway gemini-2.0-flash --modality evaluation-factory_info --max_new_tokens 512
+python src/main.py --llm_id_gateway gemini-2.0-flash --modality evaluation-factory_info --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
@@ -269,8 +227,7 @@ The results will be stored in a `.txt` file reporting all the information for th
 To reproduce the experiments for the *process\_mining* evaluation, for example:
 
 ``` bash
-cd src
-python3 main.py --llm_id_gateway mistralai/Mistral-Nemo-Instruct-2407 --modality evaluation-process_mining --max_new_tokens 512
+python src/main.py --llm_id_gateway mistralai/Mistral-Nemo-Instruct-2407 --modality evaluation-process_mining --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
@@ -280,8 +237,7 @@ The results will be stored in a `.txt` file reporting all the information for th
 To reproduce the experiments for the *hybrid* evaluation, for example:
 
 ``` bash
-cd src
-python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-hybrid --max_new_tokens 512
+python src/main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-hybrid --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
@@ -291,8 +247,7 @@ The results will be stored in a `.txt` file reporting all the information for th
 To reproduce the experiments for the *routing* evaluation, for example:
 
 ``` bash
-cd src
-python3 main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.3 --modality evaluation-routing --max_new_tokens 512
+python src/main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.3 --modality evaluation-routing --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
@@ -302,8 +257,7 @@ The results will be stored in a `.txt` file reporting all the information for th
 To reproduce the experiments for the *hybrid* qualitative evaluation, for example:
 
 ``` bash
-cd src
-python3 main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-qualitative-hybrid --max_new_tokens 512
+python src/main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-qualitative-hybrid --max_new_tokens 512
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
@@ -313,7 +267,7 @@ The results will be stored in a `.txt` file reporting all the information for th
 To generate new test sets for the three supported evaluation, run the script `test_sets_generation.py` before running an evaluation.
 
 ``` bash
-python3 test_sets_generation.py
+python src/test_sets_generation.py
 ```
 
 ## License

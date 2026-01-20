@@ -5,6 +5,7 @@ import warnings
 
 from pipeline import *
 from utility import *
+from docker_manager import setup_docker_lifecycle
 
 
 DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
@@ -33,6 +34,9 @@ def parse_arguments():
 
 
 def main():
+    # Setup Docker containers lifecycle
+    setup_docker_lifecycle()
+    
     print("""Welcome! Make sure you inserted the event log in the "log" folder. The tasks that are possible on the extracted Digital Twin are:
           - Simulation:
             - Discrete simulation of the production in a specified time interval in units of time (SimPy);
