@@ -1,12 +1,150 @@
 {
   "inter_arrival_time": {
     "type": "lognorm",
-    "mean": 11.38,
-    "arg1": 54.74,
+    "mean": 39.17,
+    "arg1": 1493.12,
     "arg2": 0
   },
   "activities": {
-    "node_a9848f8f-af86-4d1f-bff6-a802d4e2ddda": {
+    "corner2": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station11": {
+          "probability": 1.0
+        }
+      }
+    },
+    "station11": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station21": {
+          "probability": 1.0
+        }
+      }
+    },
+    "station21": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "splitter1": {
+          "probability": 0.0
+        },
+        "station22": {
+          "probability": 1.0
+        },
+        "splitter2": {
+          "probability": 0.0
+        }
+      }
+    },
+    "station22": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station31": {
+          "probability": 0.67
+        },
+        "station41": {
+          "probability": 0.33
+        }
+      }
+    },
+    "splitter1": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station31": {
+          "probability": 0.43
+        },
+        "splitter2": {
+          "probability": 0.57
+        }
+      }
+    },
+    "station31": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station22": {
+          "probability": 0.02
+        },
+        "station41": {
+          "probability": 0.98
+        }
+      }
+    },
+    "station41": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station51": {
+          "probability": 1.0
+        }
+      }
+    },
+    "station51": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station41": {
+          "probability": 1.0
+        },
+        "splitter3": {
+          "probability": 0.0
+        }
+      }
+    },
+    "station52": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -17,7 +155,7 @@
       },
       "next_activities": {}
     },
-    "node_fa21d11c-743a-46b2-84f1-04a95cb3d702": {
+    "splitter3": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -26,9 +164,19 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {}
+      "next_activities": {
+        "station51": {
+          "probability": 0.0
+        },
+        "station61": {
+          "probability": 0.27
+        },
+        "splitter4": {
+          "probability": 0.73
+        }
+      }
     },
-    "node_c8984a93-6bb6-49f0-bd72-21f9c58dbb10": {
+    "splitter4": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -37,9 +185,16 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {}
+      "next_activities": {
+        "splitter2": {
+          "probability": 0.25
+        },
+        "station41": {
+          "probability": 0.75
+        }
+      }
     },
-    "node_1b40f4e9-e0bd-4f75-bfb8-3fc27b9764e1": {
+    "station61": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -48,9 +203,13 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {}
+      "next_activities": {
+        "station71": {
+          "probability": 1.0
+        }
+      }
     },
-    "node_60136c8f-5c6d-4616-9d51-fc7ed6778711": {
+    "station71": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -59,9 +218,13 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {}
+      "next_activities": {
+        "corner1": {
+          "probability": 1.0
+        }
+      }
     },
-    "node_8b8fcab8-5e56-4b65-9d03-6e648d39fa4d": {
+    "corner1": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -70,9 +233,16 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {}
+      "next_activities": {
+        "station71": {
+          "probability": 0.38
+        },
+        "splitter5": {
+          "probability": 0.62
+        }
+      }
     },
-    "node_0c2d5783-ae40-45fa-a367-b3f1ba421a38": {
+    "splitter5": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -81,9 +251,16 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {}
+      "next_activities": {
+        "splitter4": {
+          "probability": 0.61
+        },
+        "station71": {
+          "probability": 0.39
+        }
+      }
     },
-    "node_28485ad8-3497-4656-bfaf-90180f990c6a": {
+    "splitter2": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -92,7 +269,14 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {}
+      "next_activities": {
+        "station21": {
+          "probability": 0.59
+        },
+        "corner2": {
+          "probability": 0.41
+        }
+      }
     }
   },
   "transfer_times": {}
