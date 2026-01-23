@@ -28,9 +28,7 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   |   └── lego_SKG_item-10_no_doubles.xml
 |   └── parameters    # digital twin parameters
 |       ├── digital_twin_with_failure.json
-|       ├── digital_twin.json
-|       ├── lego_factory_with_failure.json
-|       └── lego_factory.json
+|       └── digital_twin.json
 ├── log               # folder where to insert the event log
 ├── src               # source code of proposed approach
 |   ├── downward      # Fast-Downward submodule code
