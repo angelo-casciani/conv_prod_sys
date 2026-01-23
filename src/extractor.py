@@ -118,7 +118,10 @@ class Extractor:
         for node in bpmn_model.get_nodes():
             if hasattr(node, 'get_name') and hasattr(node, 'get_id'):
                 label = node.get_name()  # e.g., 'A1', 'A2'
-                node_id = node.get_id()  # e.g., 'node_17a40054-...'
+                node_id = node.get_id()  # e.g., 'node_17a40054-...' or 'idnode_...'
+                # Normalize node IDs: remove 'id' prefix if present
+                if node_id.startswith('idnode_'):
+                    node_id = node_id[2:]  # Remove 'id' prefix to get 'node_...'
                 
                 if label and node_id:
                     label_to_id[label] = node_id
@@ -160,6 +163,60 @@ class Extractor:
         
         return transfer_times
     
+    def rebalance_zero_probabilities(self, branch_prob, min_prob=0.1):
+        for source_activity, destinations in branch_prob.items():
+            zero_probs = []
+            nonzero_probs = []
+            
+            for dest, prob_data in destinations.items():
+                prob = prob_data.get("probability", 0.0)
+                if prob == 0.0:
+                    zero_probs.append(dest)
+                else:
+                    nonzero_probs.append(dest)
+            
+            if zero_probs and nonzero_probs:
+                num_zeros = len(zero_probs)
+                total_to_subtract = num_zeros * min_prob
+                current_nonzero_sum = sum(destinations[dest]["probability"] for dest in nonzero_probs)
+                
+                if current_nonzero_sum > total_to_subtract:
+                    # Assign min_prob to zero probabilities
+                    for dest in zero_probs:
+                        destinations[dest]["probability"] = min_prob
+                    
+                    remaining_prob = 1.0 - total_to_subtract
+                    for dest in nonzero_probs:
+                        original_prob = destinations[dest]["probability"]
+                        new_prob = (original_prob / current_nonzero_sum) * remaining_prob
+                        destinations[dest]["probability"] = round(new_prob, 2)
+                    
+                    total = sum(destinations[dest]["probability"] for dest in destinations.keys())
+                    if abs(total - 1.0) > 0.001:
+                        max_dest = max(nonzero_probs, key=lambda d: destinations[d]["probability"])
+                        destinations[max_dest]["probability"] = round(
+                            destinations[max_dest]["probability"] + (1.0 - total), 2
+                        )
+        
+        return branch_prob
+    
+    def generate_random_transfer_times(self, branch_prob, seed=42):
+        random.seed(seed)
+        transfer_times = {}
+        
+        for source_activity in branch_prob.keys():
+            mean_transfer = round(random.uniform(2.0, 5.0), 2)
+            std_transfer = round(random.uniform(0.3, 1.0), 2)
+            
+            transfer_times[source_activity] = {
+                "type": "normal",
+                "mean": mean_transfer,
+                "arg1": std_transfer,
+                "arg2": 0
+            }
+        
+        return transfer_times
+    
     def create_model(self, activities, inter_arrival_time, branch_prob, transfer_times, id_to_label, label_to_id):
         model = {}
 
@@ -167,8 +224,9 @@ class Extractor:
 
         model["activities"] = {}
         # Convert from UUID-keyed activities to label-keyed activities
-        for activity_id, activity_data in activities.items():
-            activity_label = id_to_label.get(activity_id, activity_id)
+        for activity_id, activity_data in activities.items():            # Normalize activity_id: remove 'id' prefix if present
+            normalized_id = activity_id[2:] if activity_id.startswith('idnode_') else activity_id
+            activity_label = id_to_label.get(normalized_id, activity_id)
             
             model["activities"][activity_label] = {
                 "capacity": 1, 
@@ -287,13 +345,16 @@ class Extractor:
                     only_succ = list(succs)[0]
                     branch_prob[act][only_succ] = {"probability": 1.0}
         
+        branch_prob = self.rebalance_zero_probabilities(branch_prob)
+        
         #TRANSFER TIMES EXTRACTION
         if transfer_times_file:
             transfer_times_path = os.path.join(local_output_dir, transfer_times_file)
             transfer_times = self.extract_transfer_times(transfer_times_path)
         else:
-            # No transfer times file found, use empty dict (equivalent to 0)
-            transfer_times = {}
+            # No transfer times file found, generate random plausible values
+            print("Warning: No transfer times file found. Generating random transfer times.")
+            transfer_times = self.generate_random_transfer_times(branch_prob)
             
         model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times, id_to_label, label_to_id)
 

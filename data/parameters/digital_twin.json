@@ -15,11 +15,7 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {
-        "station11": {
-          "probability": 1.0
-        }
-      }
+      "next_activities": {}
     },
     "station11": {
       "capacity": 1,
@@ -46,14 +42,14 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
+        "splitter2": {
+          "probability": 0.1
+        },
         "splitter1": {
-          "probability": 0.0
+          "probability": 0.1
         },
         "station22": {
-          "probability": 1.0
-        },
-        "splitter2": {
-          "probability": 0.0
+          "probability": 0.8
         }
       }
     },
@@ -68,10 +64,10 @@
       },
       "next_activities": {
         "station31": {
-          "probability": 0.67
+          "probability": 0.01
         },
-        "station41": {
-          "probability": 0.33
+        "splitter1": {
+          "probability": 0.99
         }
       }
     },
@@ -85,11 +81,11 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station31": {
-          "probability": 0.43
-        },
         "splitter2": {
           "probability": 0.57
+        },
+        "station31": {
+          "probability": 0.43
         }
       }
     },
@@ -136,11 +132,11 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station41": {
-          "probability": 1.0
+        "station52": {
+          "probability": 0.79
         },
-        "splitter3": {
-          "probability": 0.0
+        "station41": {
+          "probability": 0.21
         }
       }
     },
@@ -165,14 +161,14 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station51": {
-          "probability": 0.0
-        },
         "station61": {
-          "probability": 0.27
+          "probability": 0.24
         },
         "splitter4": {
-          "probability": 0.73
+          "probability": 0.66
+        },
+        "station51": {
+          "probability": 0.1
         }
       }
     },
@@ -186,11 +182,11 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "splitter2": {
-          "probability": 0.25
-        },
         "station41": {
           "probability": 0.75
+        },
+        "splitter2": {
+          "probability": 0.25
         }
       }
     },
@@ -234,11 +230,11 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station71": {
-          "probability": 0.38
-        },
         "splitter5": {
           "probability": 0.62
+        },
+        "station71": {
+          "probability": 0.38
         }
       }
     },
@@ -252,11 +248,11 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "splitter4": {
-          "probability": 0.61
-        },
         "station71": {
           "probability": 0.39
+        },
+        "splitter4": {
+          "probability": 0.61
         }
       }
     },
@@ -270,14 +266,239 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station21": {
-          "probability": 0.59
-        },
         "corner2": {
           "probability": 0.41
+        },
+        "station21": {
+          "probability": 0.59
         }
       }
     }
   },
-  "transfer_times": {}
+  "transfer_times": {
+    "splitter1": {
+      "splitter2": {
+        "type": "normal",
+        "mean": 3.92,
+        "arg1": 0.32,
+        "arg2": 0
+      },
+      "station31": {
+        "type": "normal",
+        "mean": 3.92,
+        "arg1": 0.32,
+        "arg2": 0
+      }
+    },
+    "event": {
+      "splitter2": {
+        "type": "normal",
+        "mean": 2.83,
+        "arg1": 0.46,
+        "arg2": 0
+      },
+      "station22": {
+        "type": "normal",
+        "mean": 2.83,
+        "arg1": 0.46,
+        "arg2": 0
+      },
+      "event": {
+        "type": "normal",
+        "mean": 2.83,
+        "arg1": 0.46,
+        "arg2": 0
+      },
+      "station52": {
+        "type": "normal",
+        "mean": 2.83,
+        "arg1": 0.46,
+        "arg2": 0
+      },
+      "splitter1": {
+        "type": "normal",
+        "mean": 2.83,
+        "arg1": 0.46,
+        "arg2": 0
+      },
+      "station41": {
+        "type": "normal",
+        "mean": 2.83,
+        "arg1": 0.46,
+        "arg2": 0
+      }
+    },
+    "station61": {
+      "station71": {
+        "type": "normal",
+        "mean": 4.21,
+        "arg1": 0.77,
+        "arg2": 0
+      }
+    },
+    "splitter5": {
+      "station71": {
+        "type": "normal",
+        "mean": 4.68,
+        "arg1": 0.36,
+        "arg2": 0
+      },
+      "splitter4": {
+        "type": "normal",
+        "mean": 4.68,
+        "arg1": 0.36,
+        "arg2": 0
+      }
+    },
+    "splitter4": {
+      "station41": {
+        "type": "normal",
+        "mean": 3.27,
+        "arg1": 0.32,
+        "arg2": 0
+      },
+      "splitter2": {
+        "type": "normal",
+        "mean": 3.27,
+        "arg1": 0.32,
+        "arg2": 0
+      }
+    },
+    "station21": {
+      "splitter2": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.65,
+        "arg2": 0
+      },
+      "splitter1": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.65,
+        "arg2": 0
+      },
+      "station22": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.65,
+        "arg2": 0
+      }
+    },
+    "station31": {
+      "station22": {
+        "type": "normal",
+        "mean": 2.08,
+        "arg1": 0.44,
+        "arg2": 0
+      },
+      "station41": {
+        "type": "normal",
+        "mean": 2.08,
+        "arg1": 0.44,
+        "arg2": 0
+      }
+    },
+    "splitter2": {
+      "corner2": {
+        "type": "normal",
+        "mean": 3.95,
+        "arg1": 0.68,
+        "arg2": 0
+      },
+      "station21": {
+        "type": "normal",
+        "mean": 3.95,
+        "arg1": 0.68,
+        "arg2": 0
+      }
+    },
+    "station41": {
+      "station51": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.71,
+        "arg2": 0
+      }
+    },
+    "station22": {
+      "station31": {
+        "type": "normal",
+        "mean": 4.43,
+        "arg1": 0.3,
+        "arg2": 0
+      },
+      "splitter1": {
+        "type": "normal",
+        "mean": 4.43,
+        "arg1": 0.3,
+        "arg2": 0
+      }
+    },
+    "corner1": {
+      "splitter5": {
+        "type": "normal",
+        "mean": 4.42,
+        "arg1": 0.79,
+        "arg2": 0
+      },
+      "station71": {
+        "type": "normal",
+        "mean": 4.42,
+        "arg1": 0.79,
+        "arg2": 0
+      }
+    },
+    "station71": {
+      "corner1": {
+        "type": "normal",
+        "mean": 3.02,
+        "arg1": 0.41,
+        "arg2": 0
+      }
+    },
+    "splitter3": {
+      "station61": {
+        "type": "normal",
+        "mean": 4.87,
+        "arg1": 0.54,
+        "arg2": 0
+      },
+      "splitter4": {
+        "type": "normal",
+        "mean": 4.87,
+        "arg1": 0.54,
+        "arg2": 0
+      },
+      "station51": {
+        "type": "normal",
+        "mean": 4.87,
+        "arg1": 0.54,
+        "arg2": 0
+      }
+    },
+    "station51": {
+      "station52": {
+        "type": "normal",
+        "mean": 2.28,
+        "arg1": 0.37,
+        "arg2": 0
+      },
+      "station41": {
+        "type": "normal",
+        "mean": 2.28,
+        "arg1": 0.37,
+        "arg2": 0
+      }
+    },
+    "station11": {
+      "station21": {
+        "type": "normal",
+        "mean": 4.54,
+        "arg1": 0.72,
+        "arg2": 0
+      }
+    },
+    "station52": {},
+    "corner2": {}
+  }
 }

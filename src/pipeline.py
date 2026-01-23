@@ -12,7 +12,7 @@ from langchain_core.prompts import PromptTemplate
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
 from torch import bfloat16
 
-import llm_factory_interface as factory_interface
+import simulation_interface as factory_interface
 from oracle import AnswerVerificationOracle
 import uppaal_interface
 from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions, retrieve_factory_with_failure, load_txt_questions

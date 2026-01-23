@@ -193,11 +193,11 @@ class FactorySimulator:
 
     def get_statistics(self):
         """Calculate and return statistics, including the input simulation time."""
-        mean_waiting_times = {s: np.mean(times) for s, times in self.stats["waiting_times"].items()}
-        mean_processing_times = {s: np.mean(times) for s, times in self.stats["processing_times"].items()}
-        total_mean_waiting_time = np.mean(self.stats["total_waiting_time"])
-        total_mean_processing_time = np.mean(self.stats["total_processing_time"])
-        total_mean_transfer_time = np.mean(self.stats["total_transfer_time"])
+        mean_waiting_times = {s: np.mean(times) if times else 0 for s, times in self.stats["waiting_times"].items()}
+        mean_processing_times = {s: np.mean(times) if times else 0 for s, times in self.stats["processing_times"].items()}
+        total_mean_waiting_time = np.mean(self.stats["total_waiting_time"]) if self.stats["total_waiting_time"] else 0
+        total_mean_processing_time = np.mean(self.stats["total_processing_time"]) if self.stats["total_processing_time"] else 0
+        total_mean_transfer_time = np.mean(self.stats["total_transfer_time"]) if self.stats["total_transfer_time"] else 0
 
         return {
             "total_pieces_produced": self.stats["total_pieces_produced"],

@@ -3,9 +3,22 @@ import sys
 import signal
 import atexit
 import time
+import os
 
 
 _containers_stopped = False
+
+def cleanup_parameters():
+    params_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'parameters')
+    if os.path.exists(params_dir):
+        for filename in os.listdir(params_dir):
+            if filename.endswith('.json'):
+                file_path = os.path.join(params_dir, filename)
+                try:
+                    os.remove(file_path)
+                    print(f"Cleaned up: {file_path}")
+                except Exception as e:
+                    print(f"Error removing {file_path}: {e}")
 
 def start_docker_containers():
     try:
@@ -80,6 +93,7 @@ def check_docker_status():
 
 def signal_handler(sig, frame):
     print("\n\n🛑 Received interrupt signal. Shutting down gracefully...")
+    cleanup_parameters()
     stop_docker_containers()
     sys.exit(0)
 
@@ -89,6 +103,7 @@ def setup_docker_lifecycle():
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+    atexit.register(cleanup_parameters)
     atexit.register(stop_docker_containers)
     
     print("✓ Docker lifecycle management initialized\n")

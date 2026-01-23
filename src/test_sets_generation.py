@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import random
 
-import llm_factory_interface as fa
+import simulation_interface as fa
 import uppaal_interface as up
 import json
 from datetime import datetime, timedelta

@@ -42,7 +42,7 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   ├── docker_manager.py  # Docker container lifecycle management
 |   ├── main.py            # main entry point for the framework
 |   ├── pipeline.py        # orchestration pipeline
-|   ├── llm_factory_interface.py  # LLM-Factory interface
+|   ├── simulation_interface.py   # LLM-Simulation interface
 |   ├── uppaal_interface.py       # UPPAAL verification interface
 |   ├── pddl_interface.py         # Planning interface
 |   ├── process_mining.py         # Process Mining module
@@ -50,7 +50,7 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   ├── failure_maintenance.py    # failure maintenance logic
 |   ├── extractor.py              # digital twin extraction logic
 |   ├── oracle.py                 # evaluation oracle
-|   ├── lego_factory.py           # factory-specific implementation
+|   ├── simulation.py             # simulation implementation
 |   ├── test_sets_generation.py   # test set generation script
 |   ├── prompts.json              # LLM prompts configuration
 |   └── utility.py                # utility functions

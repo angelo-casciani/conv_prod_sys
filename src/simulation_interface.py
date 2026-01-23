@@ -1,4 +1,4 @@
-from lego_factory import FactorySimulator
+from simulation import FactorySimulator
 from utility import extract_json
 
 
