@@ -413,7 +413,7 @@ class LLMPipeline:
 
         if 'evaluation' not in modality:
             results = uppaal_interface.interface_with_llm(answer)
-            sys_mess = self.prompts.get('system_message_results', '')
+            sys_mess = self.prompts.get('system_message_results_ver', '')
             context = f'Results from Uppaal: {results}'
             invoke_payload = {"question": question,
                         "context": context,
@@ -523,10 +523,11 @@ class LLMPipeline:
                 metric = parsed_json.get("metric")
                 log = self.process_mining_module.load_log()    
                 result = self.process_mining_module.performance_analysis(log, metric, parsed_json)
-                if metric == "throughput_time":
-                    nl_output = f"I computed the {metric} metric. Result: {result} seconds."
+
+                if isinstance(result, dict) and 'interpretation' in result:
+                    nl_output = result['interpretation']
                 else:
-                    nl_output = f"I computed the {metric} metric. Result: {result}."
+                    nl_output = f"I computed the {metric} metric. Result: {result}"
             elif action == "filter_by_time_range":
                 log = self.process_mining_module.load_log()
                 start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 
@@ -560,7 +561,7 @@ class LLMPipeline:
         factory_model = retrieve_factory()
         activities = [a for a in factory_model['activities'].keys()]
         activities_str = ", ".join(activities)
-        activities_context = f"\n\nAvailable activities in the system: {activities_str}\n"
+        activities_context = f"\n\nAvailable activities in the system: {activities_str}\nNote: When generating PDDL problems, use these exact activity names as activity objects (e.g., station41, corner2, splitter3), not generic names like A1, A2, etc.\n"
         sys_mess = self.prompts.get('system_message_hybrid', '')
         if 'zeroshot' not in modality:
             sys_mess += self.prompts.get('shots_hybrid', '')

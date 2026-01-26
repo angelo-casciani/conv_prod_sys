@@ -157,17 +157,109 @@ class ProcessMiningModule:
     
     def performance_analysis(self, log, metric, json_question=None):
         if metric == "throughput_time":
-            return self.get_avg_throughput_time(log)
+            result = self.get_avg_throughput_time(log)
+            return {
+                "metric": metric,
+                "value": result,
+                "interpretation": f"The average throughput time is {result:.2f} time units. This represents the mean time it takes for a case to complete from start to finish."
+            }
         elif metric == "activity_frequency":
-            return self.get_activity_frequencies(log)
+            result = self.get_activity_frequencies(log)
+            total = sum(result.values())
+            sorted_activities = sorted(result.items(), key=lambda x: x[1], reverse=True)
+            top_activity = sorted_activities[0] if sorted_activities else None
+            least_activity = sorted_activities[-1] if sorted_activities else None
+            
+            interpretation = f"Activity frequency analysis:\n"
+            interpretation += f"- Total activity occurrences: {total}\n"
+            if top_activity:
+                interpretation += f"- Most frequent activity: '{top_activity[0]}' with {top_activity[1]} occurrences ({top_activity[1]/total*100:.1f}%)\n"
+            if least_activity:
+                interpretation += f"- Least frequent activity: '{least_activity[0]}' with {least_activity[1]} occurrences ({least_activity[1]/total*100:.1f}%)\n"
+            interpretation += f"- Total unique activities: {len(result)}"
+            
+            return {
+                "metric": metric,
+                "data": result,
+                "interpretation": interpretation
+            }
         elif metric == "top_variants":
-            k = json_question.get("k")
-            return self.get_process_variants(log, k)
+            k = json_question.get("k") if json_question else 5
+            result = self.get_process_variants(log, k)
+            variants = pm4py.stats.get_variants(log)
+            total_cases = sum(variants.values())
+            
+            interpretation = f"Top {k} process variants analysis:\n"
+            for i, (variant_tuple, count) in enumerate(result, 1):
+                path = " → ".join(variant_tuple)
+                percentage = round((count / total_cases) * 100, 2)
+                interpretation += f"{i}. {path}\n   ({count} cases, {percentage}%)\n"
+            
+            interpretation += f"\nThese {k} variants represent {sum(v[1] for v in result)/total_cases*100:.1f}% of all cases."
+            
+            return {
+                "metric": metric,
+                "data": result,
+                "interpretation": interpretation
+            }
         elif metric == "start_end_activities":
             start_end = self.get_start_end_activities(log)
-            return f"\nStart activities with frequencies: {start_end[0]}. \nEnd activities with frequencies: {start_end[1]}"
+            start_acts, end_acts = start_end
+            
+            interpretation = f"Start and End Activities Analysis:\n\n"
+            interpretation += f"Start Activities (entry points):\n"
+            for act, freq in sorted(start_acts.items(), key=lambda x: x[1], reverse=True):
+                interpretation += f"  - '{act}': {freq} cases\n"
+            
+            interpretation += f"\nEnd Activities (exit points):\n"
+            for act, freq in sorted(end_acts.items(), key=lambda x: x[1], reverse=True):
+                interpretation += f"  - '{act}': {freq} cases\n"
+            
+            interpretation += f"\nThe process has {len(start_acts)} entry point(s) and {len(end_acts)} exit point(s)."
+            
+            return {
+                "metric": metric,
+                "data": {"start_activities": start_acts, "end_activities": end_acts},
+                "interpretation": interpretation
+            }
         elif metric == "resource_analysis":
-            return self.get_resource_analysis(log)
+            result = self.get_resource_analysis(log)
+            sorted_resources = sorted(result.items(), key=lambda x: x[1], reverse=True)
+            most_used = sorted_resources[0] if sorted_resources else None
+            least_used = sorted_resources[-1] if sorted_resources else None
+            total_events = sum(result.values())
+            avg_events = total_events / len(result) if result else 0
+            
+            interpretation = f"Resource Utilization Analysis:\n"
+            interpretation += f"- Total events across all resources: {total_events}\n"
+            interpretation += f"- Number of unique resources: {len(result)}\n"
+            interpretation += f"- Average events per resource: {avg_events:.1f}\n\n"
+            
+            if most_used:
+                interpretation += f"Most Utilized Resources:\n"
+                for i, (resource, count) in enumerate(sorted_resources[:3], 1):
+                    percentage = (count/total_events*100)
+                    deviation = ((count - avg_events) / avg_events * 100) if avg_events > 0 else 0
+                    interpretation += f"  {i}. '{resource}': {count} events ({percentage:.1f}%, {deviation:+.1f}% vs avg)\n"
+            
+            if least_used and len(sorted_resources) > 3:
+                interpretation += f"\nLeast Utilized Resources:\n"
+                for i, (resource, count) in enumerate(sorted_resources[-3:][::-1], 1):
+                    percentage = (count/total_events*100)
+                    deviation = ((count - avg_events) / avg_events * 100) if avg_events > 0 else 0
+                    interpretation += f"  {i}. '{resource}': {count} events ({percentage:.1f}%, {deviation:+.1f}% vs avg)\n"
+            
+            # Check for potential bottlenecks or imbalances
+            if most_used and least_used:
+                ratio = most_used[1] / least_used[1] if least_used[1] > 0 else float('inf')
+                if ratio > 3:
+                    interpretation += f"\n⚠️  Significant imbalance detected: The most utilized resource handles {ratio:.1f}x more events than the least utilized."
+            
+            return {
+                "metric": metric,
+                "data": result,
+                "interpretation": interpretation
+            }
         else:
             raise ValueError(f"Unknown metric: {metric}") 
         
