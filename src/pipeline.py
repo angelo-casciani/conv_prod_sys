@@ -515,7 +515,7 @@ class LLMPipeline:
                 nl_output = f"I discovered the process model. The Petri net has been saved at: {net_path}."
             elif action == 'conformance_checking':
                 log = self.process_mining_module.load_log()
-                net, initial_marking, final_marking, net_path = self.process_mining_module.discovery_from_csv()
+                net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
                 trace_is_fit, trace_fitness = self.process_mining_module.conformal_checking(net, initial_marking, final_marking, log)
                 fit_text = "fits" if trace_is_fit else "does not fit"
                 nl_output = f"The event log {fit_text} the discovered model, with a fitness score of {trace_fitness:.2f}."
