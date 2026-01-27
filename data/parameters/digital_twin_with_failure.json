@@ -6,7 +6,7 @@
     "arg2": 0
   },
   "activities": {
-    "node_d2c2cc5e-9e32-418c-8750-7888f8e83d8d": {
+    "corner2": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -15,17 +15,73 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {},
+      "next_activities": {
+        "station11": {
+          "probability": 1.0
+        }
+      },
       "failure_parameters": {
-        "failure_rate": 0.006,
+        "failure_rate": 0.004,
         "repair_time": {
-          "mean": 23.6,
-          "std": 4.9
+          "mean": 26.0,
+          "std": 6.1
+        },
+        "degradation_factor": 0.0009
+      }
+    },
+    "station11": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station21": {
+          "probability": 1.0
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.009,
+        "repair_time": {
+          "mean": 26.5,
+          "std": 5.5
+        },
+        "degradation_factor": 0.0003
+      }
+    },
+    "station21": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "splitter1": {
+          "probability": 0.1
+        },
+        "splitter2": {
+          "probability": 0.1
+        },
+        "station22": {
+          "probability": 0.8
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.003,
+        "repair_time": {
+          "mean": 20.8,
+          "std": 2.4
         },
         "degradation_factor": 0.0005
       }
     },
-    "node_74b31a45-fe05-436b-bafe-747315acc48f": {
+    "station22": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -34,131 +90,24 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.008,
-        "repair_time": {
-          "mean": 31.5,
-          "std": 5.3
+      "next_activities": {
+        "station31": {
+          "probability": 0.01
         },
-        "degradation_factor": 0.0004
-      }
-    },
-    "node_728fa66d-92ac-43ab-a5e6-9928b221ade4": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
+        "splitter1": {
+          "probability": 0.99
+        }
       },
-      "next_activities": {},
       "failure_parameters": {
-        "failure_rate": 0.006,
+        "failure_rate": 0.002,
         "repair_time": {
-          "mean": 21.6,
-          "std": 3.2
-        },
-        "degradation_factor": 0.0012
-      }
-    },
-    "node_92825077-2408-4fb0-806e-a50167e0dae6": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.01,
-        "repair_time": {
-          "mean": 15.9,
-          "std": 6.3
-        },
-        "degradation_factor": 0.0008
-      }
-    },
-    "node_999ceb45-0f4d-4b92-ad89-fda0cea7bf20": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.004,
-        "repair_time": {
-          "mean": 20.7,
-          "std": 5.4
-        },
-        "degradation_factor": 0.0007
-      }
-    },
-    "node_65da623e-856b-475e-b64a-eccaa82feb16": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.007,
-        "repair_time": {
-          "mean": 28.2,
-          "std": 2.7
-        },
-        "degradation_factor": 0.001
-      }
-    },
-    "node_c70d8dcd-7ad6-477a-855b-f654670f1f8f": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.01,
-        "repair_time": {
-          "mean": 34.4,
-          "std": 5.1
-        },
-        "degradation_factor": 0.0003
-      }
-    },
-    "node_c6064f22-84be-47b8-a8ef-f622960cd8f3": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.001,
-        "repair_time": {
-          "mean": 17.7,
-          "std": 6.7
+          "mean": 20.6,
+          "std": 5.2
         },
         "degradation_factor": 0.0006
       }
     },
-    "node_b2df43d2-d5d8-4810-9a68-9d91eeec4de7": {
+    "splitter1": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -167,36 +116,27 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {},
+      "next_activities": {
+        "splitter2": {
+          "probability": 1.5299999999999998
+        },
+        "station22": {
+          "probability": 0.04
+        },
+        "station31": {
+          "probability": 0.43
+        }
+      },
       "failure_parameters": {
         "failure_rate": 0.004,
         "repair_time": {
-          "mean": 33.0,
-          "std": 3.6
-        },
-        "degradation_factor": 0.0008
-      }
-    },
-    "node_2c36fbf7-bd2f-4ac0-847a-57432456dff8": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.005,
-        "repair_time": {
-          "mean": 16.3,
-          "std": 4.9
+          "mean": 19.2,
+          "std": 3.3
         },
         "degradation_factor": 0.0011
       }
     },
-    "node_24bf28e3-94e8-4804-a70d-be6229024eeb": {
+    "station31": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -205,17 +145,73 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {},
+      "next_activities": {
+        "station41": {
+          "probability": 0.98
+        },
+        "station22": {
+          "probability": 0.02
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.007,
+        "repair_time": {
+          "mean": 27.2,
+          "std": 2.9
+        },
+        "degradation_factor": 0.001
+      }
+    },
+    "station41": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station51": {
+          "probability": 1.0
+        }
+      },
       "failure_parameters": {
         "failure_rate": 0.002,
         "repair_time": {
-          "mean": 19.5,
-          "std": 4.1
+          "mean": 22.6,
+          "std": 6.9
         },
-        "degradation_factor": 0.0003
+        "degradation_factor": 0.0009
       }
     },
-    "node_b0d39f60-83d9-455d-be89-4a9c4630a401": {
+    "station51": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station52": {
+          "probability": 0.79
+        },
+        "station41": {
+          "probability": 0.21
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.006,
+        "repair_time": {
+          "mean": 28.7,
+          "std": 6.2
+        },
+        "degradation_factor": 0.001
+      }
+    },
+    "station52": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -226,15 +222,15 @@
       },
       "next_activities": {},
       "failure_parameters": {
-        "failure_rate": 0.005,
+        "failure_rate": 0.003,
         "repair_time": {
-          "mean": 31.4,
-          "std": 5.3
+          "mean": 15.6,
+          "std": 3.6
         },
-        "degradation_factor": 0.0008
+        "degradation_factor": 0.0005
       }
     },
-    "node_5020774c-7aaa-4e9d-92a4-14f3bb4749c8": {
+    "splitter3": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -243,17 +239,27 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {},
+      "next_activities": {
+        "station61": {
+          "probability": 0.24
+        },
+        "splitter4": {
+          "probability": 0.66
+        },
+        "station51": {
+          "probability": 0.1
+        }
+      },
       "failure_parameters": {
-        "failure_rate": 0.009,
+        "failure_rate": 0.003,
         "repair_time": {
-          "mean": 18.0,
-          "std": 4.8
+          "mean": 33.9,
+          "std": 6.4
         },
         "degradation_factor": 0.0006
       }
     },
-    "node_01974ac3-291c-4cda-9d80-f1ec4b4d9962": {
+    "splitter4": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -262,36 +268,24 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {},
-      "failure_parameters": {
-        "failure_rate": 0.006,
-        "repair_time": {
-          "mean": 17.3,
-          "std": 5.9
+      "next_activities": {
+        "splitter2": {
+          "probability": 0.25
         },
-        "degradation_factor": 0.0004
-      }
-    },
-    "node_40fccfd2-ada5-49b9-8c05-78fd632ddd8d": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
+        "station41": {
+          "probability": 0.75
+        }
       },
-      "next_activities": {},
       "failure_parameters": {
-        "failure_rate": 0.002,
+        "failure_rate": 0.007,
         "repair_time": {
-          "mean": 31.1,
-          "std": 6.7
+          "mean": 22.9,
+          "std": 6.6
         },
         "degradation_factor": 0.0007
       }
     },
-    "node_22df1ef0-7d9e-48a2-a882-6a6e7868cebd": {
+    "station61": {
       "capacity": 1,
       "processing_time": {
         "type": "FIXED",
@@ -300,16 +294,347 @@
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {},
+      "next_activities": {
+        "station71": {
+          "probability": 1.0
+        }
+      },
       "failure_parameters": {
-        "failure_rate": 0.005,
+        "failure_rate": 0.003,
         "repair_time": {
           "mean": 19.9,
-          "std": 3.4
+          "std": 4.8
         },
-        "degradation_factor": 0.0009
+        "degradation_factor": 0.0005
+      }
+    },
+    "station71": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "corner1": {
+          "probability": 1.0
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.006,
+        "repair_time": {
+          "mean": 33.0,
+          "std": 4.0
+        },
+        "degradation_factor": 0.0005
+      }
+    },
+    "corner1": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station71": {
+          "probability": 0.38
+        },
+        "splitter5": {
+          "probability": 0.62
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.01,
+        "repair_time": {
+          "mean": 25.2,
+          "std": 2.5
+        },
+        "degradation_factor": 0.0003
+      }
+    },
+    "splitter5": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station71": {
+          "probability": 0.39
+        },
+        "splitter4": {
+          "probability": 0.61
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.002,
+        "repair_time": {
+          "mean": 27.5,
+          "std": 6.0
+        },
+        "degradation_factor": 0.0007
+      }
+    },
+    "splitter2": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "FIXED",
+        "mean": "1",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "corner2": {
+          "probability": 0.41
+        },
+        "station21": {
+          "probability": 0.59
+        }
+      },
+      "failure_parameters": {
+        "failure_rate": 0.002,
+        "repair_time": {
+          "mean": 22.6,
+          "std": 7.0
+        },
+        "degradation_factor": 0.0008
       }
     }
   },
-  "transfer_times": {}
+  "transfer_times": {
+    "splitter1": {
+      "splitter2": {
+        "type": "normal",
+        "mean": 3.92,
+        "arg1": 0.32,
+        "arg2": 0
+      },
+      "station22": {
+        "type": "normal",
+        "mean": 3.92,
+        "arg1": 0.32,
+        "arg2": 0
+      },
+      "station31": {
+        "type": "normal",
+        "mean": 3.92,
+        "arg1": 0.32,
+        "arg2": 0
+      }
+    },
+    "splitter5": {
+      "station71": {
+        "type": "normal",
+        "mean": 2.83,
+        "arg1": 0.46,
+        "arg2": 0
+      },
+      "splitter4": {
+        "type": "normal",
+        "mean": 2.83,
+        "arg1": 0.46,
+        "arg2": 0
+      }
+    },
+    "station71": {
+      "corner1": {
+        "type": "normal",
+        "mean": 4.21,
+        "arg1": 0.77,
+        "arg2": 0
+      }
+    },
+    "splitter2": {
+      "corner2": {
+        "type": "normal",
+        "mean": 4.68,
+        "arg1": 0.36,
+        "arg2": 0
+      },
+      "station21": {
+        "type": "normal",
+        "mean": 4.68,
+        "arg1": 0.36,
+        "arg2": 0
+      }
+    },
+    "station41": {
+      "station51": {
+        "type": "normal",
+        "mean": 3.27,
+        "arg1": 0.32,
+        "arg2": 0
+      }
+    },
+    "station61": {
+      "station71": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.65,
+        "arg2": 0
+      }
+    },
+    "splitter3": {
+      "station61": {
+        "type": "normal",
+        "mean": 2.08,
+        "arg1": 0.44,
+        "arg2": 0
+      },
+      "splitter4": {
+        "type": "normal",
+        "mean": 2.08,
+        "arg1": 0.44,
+        "arg2": 0
+      },
+      "station51": {
+        "type": "normal",
+        "mean": 2.08,
+        "arg1": 0.44,
+        "arg2": 0
+      }
+    },
+    "corner1": {
+      "station71": {
+        "type": "normal",
+        "mean": 3.95,
+        "arg1": 0.68,
+        "arg2": 0
+      },
+      "splitter5": {
+        "type": "normal",
+        "mean": 3.95,
+        "arg1": 0.68,
+        "arg2": 0
+      }
+    },
+    "event": {
+      "splitter1": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.71,
+        "arg2": 0
+      },
+      "station41": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.71,
+        "arg2": 0
+      },
+      "event": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.71,
+        "arg2": 0
+      },
+      "station52": {
+        "type": "normal",
+        "mean": 2.66,
+        "arg1": 0.71,
+        "arg2": 0
+      }
+    },
+    "station21": {
+      "splitter1": {
+        "type": "normal",
+        "mean": 4.43,
+        "arg1": 0.3,
+        "arg2": 0
+      },
+      "splitter2": {
+        "type": "normal",
+        "mean": 4.43,
+        "arg1": 0.3,
+        "arg2": 0
+      },
+      "station22": {
+        "type": "normal",
+        "mean": 4.43,
+        "arg1": 0.3,
+        "arg2": 0
+      }
+    },
+    "splitter4": {
+      "splitter2": {
+        "type": "normal",
+        "mean": 4.42,
+        "arg1": 0.79,
+        "arg2": 0
+      },
+      "station41": {
+        "type": "normal",
+        "mean": 4.42,
+        "arg1": 0.79,
+        "arg2": 0
+      }
+    },
+    "station31": {
+      "station41": {
+        "type": "normal",
+        "mean": 3.02,
+        "arg1": 0.41,
+        "arg2": 0
+      },
+      "station22": {
+        "type": "normal",
+        "mean": 3.02,
+        "arg1": 0.41,
+        "arg2": 0
+      }
+    },
+    "station22": {
+      "station31": {
+        "type": "normal",
+        "mean": 4.87,
+        "arg1": 0.54,
+        "arg2": 0
+      },
+      "splitter1": {
+        "type": "normal",
+        "mean": 4.87,
+        "arg1": 0.54,
+        "arg2": 0
+      }
+    },
+    "station51": {
+      "station52": {
+        "type": "normal",
+        "mean": 2.28,
+        "arg1": 0.37,
+        "arg2": 0
+      },
+      "station41": {
+        "type": "normal",
+        "mean": 2.28,
+        "arg1": 0.37,
+        "arg2": 0
+      }
+    },
+    "corner2": {
+      "station11": {
+        "type": "normal",
+        "mean": 4.54,
+        "arg1": 0.72,
+        "arg2": 0
+      }
+    },
+    "station11": {
+      "station21": {
+        "type": "normal",
+        "mean": 4.42,
+        "arg1": 0.81,
+        "arg2": 0
+      }
+    },
+    "station52": {}
+  }
 }

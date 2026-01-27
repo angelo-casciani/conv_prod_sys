@@ -123,10 +123,10 @@ def run_with_fallback():
         try:
             if attempt > 0:
                 logger.info(f"Restart attempt {attempt}/{MAX_RESTART_ATTEMPTS}")
-                print(f"\n🔄 Attempting restart ({attempt}/{MAX_RESTART_ATTEMPTS})...")
-                print("⏸️  Stopping existing containers...")
+                print(f"\n Attempting restart ({attempt}/{MAX_RESTART_ATTEMPTS})...")
+                print("  Stopping existing containers...")
                 stop_containers()
-                print(f"⏳ Waiting {RESTART_DELAY} seconds before restart...")
+                print(f" Waiting {RESTART_DELAY} seconds before restart...")
                 time.sleep(RESTART_DELAY)
             logger.info(f"Starting main application (attempt {attempt + 1}/{MAX_RESTART_ATTEMPTS})")
             seed_everything(SEED)

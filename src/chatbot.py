@@ -170,10 +170,10 @@ def launch_chatbot_with_fallback():
         try:
             if attempt > 0:
                 logger.info(f"Restart attempt {attempt}/{MAX_RESTART_ATTEMPTS}")
-                print(f"\n🔄 Attempting restart ({attempt}/{MAX_RESTART_ATTEMPTS})...")
-                print("⏸️  Stopping existing containers...")
+                print(f"\n Attempting restart ({attempt}/{MAX_RESTART_ATTEMPTS})...")
+                print("  Stopping existing containers...")
                 stop_containers()
-                print(f"⏳ Waiting {RESTART_DELAY} seconds before restart...")
+                print(f" Waiting {RESTART_DELAY} seconds before restart...")
                 time.sleep(RESTART_DELAY)
                 handler.reset_state()
             logger.info(f"Starting chatbot (attempt {attempt + 1}/{MAX_RESTART_ATTEMPTS})")

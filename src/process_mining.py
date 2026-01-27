@@ -12,16 +12,18 @@ class ProcessMiningModule:
         directory_path = os.path.join(os.path.dirname(__file__), '..', 'log')
         files = os.listdir(directory_path)
         files = [f for f in files if os.path.isfile(os.path.join(directory_path, f))]
-
-        if len(files) == 1:
-            self.path_to_log = os.path.join(directory_path, files[0])
+        
+        event_log_files = [f for f in files if f.endswith('.xes') or f.endswith('.csv')]
+        if len(event_log_files) == 1:
+            self.path_to_log = os.path.join(directory_path, event_log_files[0])
             self.extension = os.path.splitext(self.path_to_log)[1].lower()
             if ".xes" not in self.path_to_log and ".csv" not in self.path_to_log:
                 raise ValueError(f"Unsupported file format: {self.extension}. Use '.csv' or '.xes'.")
+        elif len(event_log_files) == 0:
+            raise ValueError(f"No event log file (.xes or .csv) found in the {directory_path} directory.")
         else:
-            raise ValueError(f"There is more than one file in the {directory_path} directory.")
+            raise ValueError(f"There is more than one event log file in the {directory_path} directory. Found: {', '.join(event_log_files)}")
         
-        # Create pmmOutputs directory if it doesn't exist
         self.output_dir = "pmmOutputs"
         os.makedirs(self.output_dir, exist_ok=True) 
         
