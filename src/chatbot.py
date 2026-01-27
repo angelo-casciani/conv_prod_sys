@@ -7,24 +7,49 @@ import warnings
 from utility import *
 import os
 import re
-from docker_manager import setup_docker_lifecycle
+import sys
+import time
+import traceback
+import logging
+from docker_manager import setup_docker_lifecycle, stop_docker_containers
 
 DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 load_dotenv()
 HF_AUTH = os.getenv('HF_TOKEN')
-ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 SEED = 10
+MAX_RESTART_ATTEMPTS = 3
+RESTART_DELAY = 5  # seconds
 warnings.filterwarnings('ignore')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('log/chatbot_errors.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
+
+def stop_containers():
+    try:
+        logger.info("Stopping Docker containers...")
+        stop_docker_containers()
+        return True
+    except Exception as e:
+        logger.error(f"Error stopping containers: {str(e)}")
+        return False
+
 
 def parse_arguments():
     parser = ArgumentParser(description="Run LLM Generation.")
-    parser.add_argument('--llm_id_gateway', type=str, default='gpt-4o-mini', help='LLM model identifier for Gateway')
-    parser.add_argument('--llm_id_simulation', type=str, default='gpt-4o-mini', help='LLM model identifier for Simulation')
-    parser.add_argument('--llm_id_verification', type=str, default='gpt-4o-mini', help='LLM model identifier for Verification')
-    parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=512)
+    parser.add_argument('--llm_id_gateway', type=str, default='gemini-2.5-flash', help='LLM model identifier for Gateway')
+    parser.add_argument('--llm_id_simulation', type=str, default='gemini-2.5-flash', help='LLM model identifier for Simulation')
+    parser.add_argument('--llm_id_verification', type=str, default='gemini-2.5-flash', help='LLM model identifier for Verification')
+    parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=32768)
     parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, live')
     parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
     parser.add_argument('--extracted_model_failure', type=bool, default=False, help='True if already exists the file digital_twin_with_failure.json. Default False')
@@ -37,36 +62,53 @@ class GradioHandler:
         self.initialized = False
         self.chain = None
         self.initialization_message = None
+        self.initialization_attempts = 0
         
     def initialize(self):
         if not self.initialized:
-            args = parse_arguments()
-            model_id_gateway = args.llm_id_gateway
-            model_id_simulation = args.llm_id_simulation
-            model_id_verification = args.llm_id_verification
-            modality = args.modality
-            max_new_tokens = args.max_new_tokens
-            extracted_model = args.extracted_model
-            extracted_model_failure = args.extracted_model_failure
-            self.initialization_message = "Initializing system and digital twins..."
-            self.chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens, extracted_model, extracted_model_failure)
-            self.initialization_message = None
+            try:
+                args = parse_arguments()
+                model_id_gateway = args.llm_id_gateway
+                model_id_simulation = args.llm_id_simulation
+                model_id_verification = args.llm_id_verification
+                modality = args.modality
+                max_new_tokens = args.max_new_tokens
+                extracted_model = args.extracted_model
+                extracted_model_failure = args.extracted_model_failure
+                self.initialization_message = "Initializing system and digital twins..."
+                logger.info("Starting chatbot initialization")
+                self.chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens, extracted_model, extracted_model_failure)
+                self.initialization_message = None
 
-            self.initialized = True
-            self.run_data = {
-                'LLM ID Gateway': model_id_gateway,
-                'LLM ID Simulation': model_id_simulation,
-                'LLM ID Verification': model_id_verification,
-                'Max Generated Tokens LLM': max_new_tokens,
-                'Interaction Modality': modality
-            }
+                self.initialized = True
+                self.run_data = {
+                    'LLM ID Gateway': model_id_gateway,
+                    'LLM ID Simulation': model_id_simulation,
+                    'LLM ID Verification': model_id_verification,
+                    'Max Generated Tokens LLM': max_new_tokens,
+                    'Interaction Modality': modality
+                }
+                logger.info("Chatbot initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize chatbot: {str(e)}")
+                logger.error(f"Traceback:\n{traceback.format_exc()}")
+                raise
+    
+    def reset_state(self):
+        logger.info("Resetting chatbot state")
+        self.initialized = False
+        self.chain = None
+        self.initialization_message = None
     
     def process_message(self, message, history):
         try:
             if not self.initialized:
-                yield {"role": "assistant", "content": "System not initialized. Please restart the chatbot."}
+                error_msg = "System not initialized. Please restart the chatbot."
+                logger.warning(error_msg)
+                yield {"role": "assistant", "content": error_msg}
                 return
                 
+            logger.info(f"Processing user message: {message[:100]}...")  # Log first 100 chars
             yield {"role": "assistant", "content": f"Processing: {message}"}
             
             for result in self.chain.live_prompting(query=message, info_run=self.run_data, chatbot=True):
@@ -79,33 +121,28 @@ class GradioHandler:
                         yield {"role": "assistant", "content": result}
                 else:
                     yield {"role": "assistant", "content": result}
+                    
+            logger.info("Message processed successfully")
+            
+        except KeyboardInterrupt:
+            logger.info("Processing interrupted by user")
+            yield {"role": "assistant", "content": "Processing interrupted by user."}
+            
         except Exception as e:
-            yield {"role": "assistant", "content": f"Error occurred: {str(e)}"}
+            error_msg = f"An error occurred while processing your request: {str(e)}"
+            logger.error(f"Error processing message: {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
+            logger.info("Attempting to recover by resetting state")
+            self.reset_state()
+            yield {
+                "role": "assistant", 
+                "content": f"{error_msg}\n\nThe system has been reset. Please try your request again, or restart the chatbot if the problem persists."
+            }
 
 handler = GradioHandler()
 
-welcome_msg = """Welcome! Make sure you inserted the event log in the "log" folder. The tasks that are possible on the LEGO factory are:
-                            - Simulation:
-                                - Discrete simulation of the production in a specified time interval in units of time;
-                                - Discrete simulation of the production of a specified number of pieces;
-                                - Prediction of the next activity in the production line;
-                                - Discrete simulation considering the potential maintenance time of a station;
-                            - Verification of temporal properties on the automaton representing the factory.
-                            - Process Mining:
-                                - Discover a process model (i.e., Petri Net) from an event log through the Inductive Miner;
-                                - Conformance checking (via token-based replay) to verify if the observed executions in the log match a given process model;
-                                - Performance analysis to compute performance indicators such as throughput time or station frequencies;
-                                - Filter the log between a specific time range;
-                            - Hybrid Reasoning:
-                                - Combine simulation, verification, and failure analysis in multi-step workflows;
-                                - Predict failure patterns, maintenance needs, and reliability for specific stations;
-                                - Estimate maintenance delays and their impact on production;
-                                - Answer complex queries involving multiple reasoning tasks.
-                            
-                            Note: You can refer to stations using their actual names (e.g., station11, station21, station41, corner2, splitter1).
-
-                            Please tell me what you'd like to do!
-                            """
+welcome_msg = """Hello! I am your assistant for the LEGO Factory production system. 
+                 How can I help you today?"""
 demo = gr.ChatInterface(
     handler.process_message,
     type="messages",
@@ -117,13 +154,63 @@ demo = gr.ChatInterface(
     flagging_options=["Like", "Spam", "Inappropriate", "Other"],
     save_history=True,
     title="LEGO Factory Production System Assistant",
-    description="Ask me about simulations, verifications and process mining for the extracted Digital Twin!",
+    description="""Welcome! Make sure you inserted the event log in the "log" folder.<br><br>
+**Available Tasks:**<br>
+• **Simulation:** Production simulation over time, by piece count, next activity prediction, maintenance scenarios<br>
+• **Verification:** Temporal property checking on factory automaton<br>
+• **Process Mining:** Process discovery (Petri nets), conformance checking, performance analysis, log filtering<br>
+• **Hybrid Reasoning:** Multi-step workflows combining simulation, verification, and failure analysis<br><br>
+*Note: Use actual station names (e.g., station11, station21, station41, ...)*<br><br>""",
     theme="ocean"
 )
 
+def launch_chatbot_with_fallback():
+    attempt = 0
+    while attempt < MAX_RESTART_ATTEMPTS:
+        try:
+            if attempt > 0:
+                logger.info(f"Restart attempt {attempt}/{MAX_RESTART_ATTEMPTS}")
+                print(f"\n🔄 Attempting restart ({attempt}/{MAX_RESTART_ATTEMPTS})...")
+                print("⏸️  Stopping existing containers...")
+                stop_containers()
+                print(f"⏳ Waiting {RESTART_DELAY} seconds before restart...")
+                time.sleep(RESTART_DELAY)
+                handler.reset_state()
+            logger.info(f"Starting chatbot (attempt {attempt + 1}/{MAX_RESTART_ATTEMPTS})")
+            setup_docker_lifecycle()
+            print("Initializing chatbot and digital twins...")
+            handler.initialize()
+            print("Chatbot ready!")
+            
+            demo.launch()
+            logger.info("Chatbot exited normally")
+            break
+            
+        except KeyboardInterrupt:
+            logger.info("Chatbot interrupted by user (Ctrl+C)")
+            print("\n\nShutting down chatbot gracefully...")
+            stop_containers()
+            sys.exit(0)
+            
+        except Exception as e:
+            attempt += 1
+            logger.error(f"Exception occurred in chatbot (attempt {attempt}/{MAX_RESTART_ATTEMPTS}): {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
+            
+            if attempt < MAX_RESTART_ATTEMPTS:
+                print(f"\n{'='*60}")
+                print(f"ERROR: An exception occurred: {str(e)}")
+                print(f"{'='*60}\n")
+            else:
+                print(f"\n{'='*60}")
+                print(f"FATAL ERROR: Maximum restart attempts ({MAX_RESTART_ATTEMPTS}) reached.")
+                print(f"Last error: {str(e)}")
+                print(f"Please check the log file at 'log/chatbot_errors.log' for details.")
+                print(f"{'='*60}\n")
+                logger.critical("Maximum restart attempts reached. Chatbot terminating.")
+                stop_containers()
+                sys.exit(1)
+
+
 if __name__ == "__main__":
-    setup_docker_lifecycle()
-    print("Initializing chatbot and digital twins...")
-    handler.initialize()
-    print("Chatbot ready!")
-    demo.launch()
+    launch_chatbot_with_fallback()

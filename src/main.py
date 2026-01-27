@@ -2,29 +2,53 @@ from argparse import ArgumentParser
 from dotenv import load_dotenv
 from torch import cuda
 import warnings
+import sys
+import time
+import traceback
+import logging
 
 from pipeline import *
 from utility import *
-from docker_manager import setup_docker_lifecycle
+from docker_manager import setup_docker_lifecycle, stop_docker_containers
 
 
 DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 load_dotenv()
 HF_AUTH = os.getenv('HF_TOKEN')
-ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 SEED = 10
+MAX_RESTART_ATTEMPTS = 3
+RESTART_DELAY = 5  # seconds
 warnings.filterwarnings('ignore')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('log/main_errors.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
+
+def stop_containers():
+    try:
+        logger.info("Stopping Docker containers...")
+        stop_docker_containers()
+        return True
+    except Exception as e:
+        logger.error(f"Error stopping containers: {str(e)}")
+        return False
 
 
 def parse_arguments():
     parser = ArgumentParser(description="Run LLM Generation.")
-    parser.add_argument('--llm_id_gateway', type=str, default='gpt-4o-mini', help='LLM model identifier for Gateway')
-    parser.add_argument('--llm_id_simulation', type=str, default='gpt-4o-mini', help='LLM model identifier for Simulation')
-    parser.add_argument('--llm_id_verification', type=str, default='gpt-4o-mini', help='LLM model identifier for Verification')
-    parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=512)
+    parser.add_argument('--llm_id_gateway', type=str, default='gemini-2.5-flash', help='LLM model identifier for Gateway')
+    parser.add_argument('--llm_id_simulation', type=str, default='gemini-2.5-flash', help='LLM model identifier for Simulation')
+    parser.add_argument('--llm_id_verification', type=str, default='gemini-2.5-flash', help='LLM model identifier for Verification')
+    parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=32768)
     parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, evaluation-factory_info, evaluation-process_mining, evaluation-hybrid, evaluation-qualitative-hybrid, evaluation-simulation-zeroshot, evaluation-verification-zeroshot, evaluation-routing-zeroshot, evaluation-factory_info-zeroshot, evaluation-process_mining-zeroshot, evaluation-hybrid-zeroshot, live')
     parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
     parser.add_argument('--extracted_model_failure', type=bool, default=False, help='True if already exists the file digital_twin_with_failure.json. Default False')
@@ -71,7 +95,7 @@ def main():
             - Estimate maintenance delays and their impact on production;
             - Answer complex queries involving multiple reasoning tasks.
           
-          Note: You can refer to stations using their actual names (e.g., station11, station21, station41, corner2, splitter1).\n""")
+          Note: You can refer to stations using their actual names (e.g., station11, station21, station41, ...).\n""")
 
 
     if modality == 'evaluation-simulation' or modality == 'evaluation-simulation-zeroshot':
@@ -93,6 +117,48 @@ def main():
             pass
 
 
+def run_with_fallback():
+    attempt = 0
+    while attempt < MAX_RESTART_ATTEMPTS:
+        try:
+            if attempt > 0:
+                logger.info(f"Restart attempt {attempt}/{MAX_RESTART_ATTEMPTS}")
+                print(f"\n🔄 Attempting restart ({attempt}/{MAX_RESTART_ATTEMPTS})...")
+                print("⏸️  Stopping existing containers...")
+                stop_containers()
+                print(f"⏳ Waiting {RESTART_DELAY} seconds before restart...")
+                time.sleep(RESTART_DELAY)
+            logger.info(f"Starting main application (attempt {attempt + 1}/{MAX_RESTART_ATTEMPTS})")
+            seed_everything(SEED)
+            main()
+            logger.info("Application exited normally")
+            break
+            
+        except KeyboardInterrupt:
+            logger.info("Application interrupted by user (Ctrl+C)")
+            print("\n\nShutting down gracefully...")
+            stop_containers()
+            sys.exit(0)
+            
+        except Exception as e:
+            attempt += 1
+            logger.error(f"Exception occurred in main (attempt {attempt}/{MAX_RESTART_ATTEMPTS}): {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
+            
+            if attempt < MAX_RESTART_ATTEMPTS:
+                print(f"\n{'='*60}")
+                print(f"ERROR: An exception occurred: {str(e)}")
+                print(f"{'='*60}\n")
+            else:
+                print(f"\n{'='*60}")
+                print(f"FATAL ERROR: Maximum restart attempts ({MAX_RESTART_ATTEMPTS}) reached.")
+                print(f"Last error: {str(e)}")
+                print(f"Please check the log file at 'log/main_errors.log' for details.")
+                print(f"{'='*60}\n")
+                logger.critical("Maximum restart attempts reached. Application terminating.")
+                stop_containers()
+                sys.exit(1)
+
+
 if __name__ == "__main__":
-    seed_everything(SEED)
-    main()
+    run_with_fallback()
