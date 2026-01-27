@@ -36,6 +36,7 @@ class GradioHandler:
     def __init__(self):
         self.initialized = False
         self.chain = None
+        self.initialization_message = None
         
     def initialize(self):
         if not self.initialized:
@@ -47,7 +48,9 @@ class GradioHandler:
             max_new_tokens = args.max_new_tokens
             extracted_model = args.extracted_model
             extracted_model_failure = args.extracted_model_failure
+            self.initialization_message = "Initializing system and digital twins..."
             self.chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens, extracted_model, extracted_model_failure)
+            self.initialization_message = None
 
             self.initialized = True
             self.run_data = {
@@ -60,7 +63,10 @@ class GradioHandler:
     
     def process_message(self, message, history):
         try:
-            self.initialize()
+            if not self.initialized:
+                yield {"role": "assistant", "content": "System not initialized. Please restart the chatbot."}
+                return
+                
             yield {"role": "assistant", "content": f"Processing: {message}"}
             
             for result in self.chain.live_prompting(query=message, info_run=self.run_data, chatbot=True):
@@ -78,16 +84,16 @@ class GradioHandler:
 
 handler = GradioHandler()
 
-welcome_msg = """Welcome! Make sure you inserted the event log in the "log" folder. The tasks that are possible on the extracted Digital Twin are:
+welcome_msg = """Welcome! Make sure you inserted the event log in the "log" folder. The tasks that are possible on the LEGO factory are:
                             - Simulation:
-                                - Discrete simulation of the production in a specified time interval in units of time (SimPy);
-                                - Discrete simulation of the production of a specified number of pieces (SimPy);
-                                - Prediction of the next activity in the production line (SimPy);
-                                - Discrete simulation considering the potential maintenance time of a station (SimPy);
-                            - Verification of temporal properties on the automaton representing the factory (Uppaal).
+                                - Discrete simulation of the production in a specified time interval in units of time;
+                                - Discrete simulation of the production of a specified number of pieces;
+                                - Prediction of the next activity in the production line;
+                                - Discrete simulation considering the potential maintenance time of a station;
+                            - Verification of temporal properties on the automaton representing the factory.
                             - Process Mining:
-                                - Extract a process model (e.g., Petri Net) from an event log;
-                                - Conformance checking to verify if the observed executions in the log match a given process model;
+                                - Discover a process model (i.e., Petri Net) from an event log through the Inductive Miner;
+                                - Conformance checking (via token-based replay) to verify if the observed executions in the log match a given process model;
                                 - Performance analysis to compute performance indicators such as throughput time or station frequencies;
                                 - Filter the log between a specific time range;
                             - Hybrid Reasoning:
@@ -110,13 +116,14 @@ demo = gr.ChatInterface(
     flagging_mode="manual",
     flagging_options=["Like", "Spam", "Inappropriate", "Other"],
     save_history=True,
-    title="Digital Twin Production System Assistant",
+    title="LEGO Factory Production System Assistant",
     description="Ask me about simulations, verifications and process mining for the extracted Digital Twin!",
     theme="ocean"
 )
 
 if __name__ == "__main__":
-    # Setup Docker containers lifecycle
     setup_docker_lifecycle()
-    
-    demo.launch(favicon_path="favicon.ico")
+    print("Initializing chatbot and digital twins...")
+    handler.initialize()
+    print("Chatbot ready!")
+    demo.launch()

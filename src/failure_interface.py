@@ -1,9 +1,9 @@
 import json, os, random
 import numpy as np
+import time
 
 class FailureInterface:
     def __init__(self):
-        #self.maintenance_cost = 0.0
         self.time = 0
         self.activity_results = {}
 
@@ -12,8 +12,6 @@ class FailureInterface:
             np.random.seed(seed)
             random.seed(seed)
         else:
-            # Use current time-based seed for true randomness
-            import time
             current_seed = int(time.time() * 1000000) % 2**32
             np.random.seed(current_seed)
             random.seed(current_seed)

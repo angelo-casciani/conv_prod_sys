@@ -4,6 +4,7 @@ import signal
 import atexit
 import time
 import os
+import requests
 
 
 _containers_stopped = False
@@ -20,6 +21,26 @@ def cleanup_parameters():
                 except Exception as e:
                     print(f"Error removing {file_path}: {e}")
 
+def wait_for_dtlogextsim(url="http://127.0.0.1:6662/", max_attempts=30, delay=1):
+    print("Waiting for DTLogExtSim service to be ready...")
+    for attempt in range(max_attempts):
+        try:
+            response = requests.get(url, timeout=2)
+            if response.status_code in [200, 404, 405]:  # Any response means it's alive
+                print(f"DTLogExtSim service is ready (attempt {attempt + 1})")
+                return True
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt < max_attempts - 1:
+                time.sleep(delay)
+            else:
+                print(f"DTLogExtSim service not responding after {max_attempts} attempts")
+                return False
+        except Exception as e:
+            print(f"Unexpected error checking DTLogExtSim: {e}")
+            return False
+    return False
+
+
 def start_docker_containers():
     try:
         print("Starting Docker containers...")
@@ -31,8 +52,8 @@ def start_docker_containers():
         )
         if result.returncode == 0:
             print("Docker containers started successfully")
-            # Give containers a moment to initialize
-            time.sleep(2)
+            # Wait for DTLogExtSim to be ready
+            wait_for_dtlogextsim()
             return True
         else:
             print(f"Warning: Docker containers may not have started properly")
@@ -92,7 +113,7 @@ def check_docker_status():
 
 
 def signal_handler(sig, frame):
-    print("\n\n🛑 Received interrupt signal. Shutting down gracefully...")
+    print("\n\nReceived interrupt signal. Shutting down gracefully...")
     cleanup_parameters()
     stop_docker_containers()
     sys.exit(0)
@@ -106,7 +127,7 @@ def setup_docker_lifecycle():
     atexit.register(cleanup_parameters)
     atexit.register(stop_docker_containers)
     
-    print("✓ Docker lifecycle management initialized\n")
+    print("Docker lifecycle management initialized\n")
 
 
 if __name__ == "__main__":

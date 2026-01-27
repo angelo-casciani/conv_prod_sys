@@ -35,29 +35,7 @@ def parse_arguments():
 
 def main():
     setup_docker_lifecycle()
-    
-    print("""Welcome! Make sure you inserted the event log in the "log" folder. The tasks that are possible on the extracted Digital Twin are:
-          - Simulation:
-            - Discrete simulation of the production in a specified time interval in units of time (SimPy);
-            - Discrete simulation of the production of a specified number of pieces (SimPy);
-            - Prediction of the next activity in the production line (SimPy);
-            - Discrete simulation considering the potential maintenance time of a station (SimPy);
-          - Verification of temporal properties on the automaton representing the factory (Uppaal).
-          - Process Mining:
-            - Extract a process model (e.g., Petri Net) from an event log;
-            - Conformance checking to verify if the observed executions in the log match a given process model;
-            - Performance analysis to compute performance indicators such as throughput time or station frequencies;
-            - Filter the log between a specific time range;
-          - Hybrid Reasoning:
-            - Combine simulation, verification, and failure analysis in multi-step workflows;
-            - Predict failure patterns, maintenance needs, and reliability for specific stations;
-            - Estimate maintenance delays and their impact on production;
-            - Answer complex queries involving multiple reasoning tasks.
-          
-          Note: You can refer to stations using their actual names (e.g., station11, station21, station41, corner2, splitter1).\n""")
-
     args = parse_arguments()
-
     model_id_gateway = args.llm_id_gateway
     model_id_simulation = args.llm_id_simulation
     model_id_verification = args.llm_id_verification
@@ -74,6 +52,27 @@ def main():
         'Max Generated Tokens LLM': max_new_tokens,
         'Interaction Modality': modality
     }
+
+    print("""Welcome! Make sure you inserted the event log in the "log" folder. The tasks that are possible on the LEGO factory are:
+          - Simulation:
+            - Discrete simulation of the production in a specified time interval in units of time;
+            - Discrete simulation of the production of a specified number of pieces;
+            - Prediction of the next activity in the production line;
+            - Discrete simulation considering the potential maintenance time of a station;
+          - Verification of temporal properties on the automaton representing the factory.
+          - Process Mining:
+            - Discover a process model (i.e., Petri Net) from an event log through the Inductive Miner;
+            - Conformance checking (via token-based replay) to verify if the observed executions in the log match a given process model;            
+            - Performance analysis to compute performance indicators such as throughput time or station frequencies;
+            - Filter the log between a specific time range;
+          - Hybrid Reasoning:
+            - Combine simulation, verification, and failure analysis in multi-step workflows;
+            - Predict failure patterns, maintenance needs, and reliability for specific stations;
+            - Estimate maintenance delays and their impact on production;
+            - Answer complex queries involving multiple reasoning tasks.
+          
+          Note: You can refer to stations using their actual names (e.g., station11, station21, station41, corner2, splitter1).\n""")
+
 
     if modality == 'evaluation-simulation' or modality == 'evaluation-simulation-zeroshot':
         chain.evaluate_performance('simulation.csv', run_data)

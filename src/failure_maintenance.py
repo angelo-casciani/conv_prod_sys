@@ -1,9 +1,6 @@
-import os
-import json
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any
 import numpy as np
-import matplotlib.pyplot as plt
 from failure_interface import FailureInterface
 from utility import retrieve_factory_with_failure
 
@@ -92,7 +89,7 @@ if __name__ == "__main__":
     failure_module = FailureMaintenanceModule()
     model = retrieve_factory_with_failure()
 
-    prediction = failure_module.predict_activity_failures(model, "A2", 1000)
-    print("Predicting failures for activity2...")
+    prediction = failure_module.predict_activity_failures(model, "station11", 1000)
+    print("Predicting failures for station11...")
     print(clean_output(prediction))
 

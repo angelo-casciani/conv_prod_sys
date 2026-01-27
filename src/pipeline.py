@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-from typing import Dict, Tuple
 import re
 import io
 from contextlib import redirect_stdout
@@ -123,8 +122,27 @@ class LLMPipeline:
         self.chain_process_mining = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.failure_module = failure_maintenance.FailureMaintenanceModule()
         self.process_mining_module = process_mining.ProcessMiningModule()
-        self.extracted = extracted_model
-        self.extracted_failure = extracted_model_failure
+        print("Initializing digital twins...")
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        digital_twin_path = os.path.join(base_dir, "data", "parameters", "digital_twin.json")
+        digital_twin_failure_path = os.path.join(base_dir, "data", "parameters", "digital_twin_with_failure.json")
+        
+        if not os.path.exists(digital_twin_path):
+            print("Extracting standard digital twin...")
+            self.process_mining_module.extract(failure=False)
+            self.extracted = True
+        else:
+            print("Standard digital twin found on disk.")
+            self.extracted = True
+            
+        if not os.path.exists(digital_twin_failure_path):
+            print("Extracting digital twin with failure parameters...")
+            self.process_mining_module.extract(failure=True)
+            self.extracted_failure = True
+        else:
+            print("Digital twin with failure parameters found on disk.")
+            self.extracted_failure = True
+        print("Digital twins for simulation and predictive maintenance ready!")
 
 
     def _initialize_local_model(self, model_id, model_family):
@@ -245,9 +263,6 @@ class LLMPipeline:
             sys_mess = self.prompts.get('system_message_info', '')
             if 'zeroshot' not in modality:
                 sys_mess += self.prompts.get('shots_info', '')
-            if not self.extracted:
-                self.process_mining_module.extract()
-                self.extracted = True
             factory_model = os.path.join(os.path.dirname(__file__), '..', 'data', 'parameters', 'digital_twin.json')
             with open(factory_model, 'r') as factory_file:
                 factory_model = json.load(factory_file)
@@ -339,9 +354,6 @@ class LLMPipeline:
         return follow_up_results
         
     def _produce_answer_simulation(self, question, modality):
-        if self.request_type == "factory_simulation" and not self.extracted:
-            self.process_mining_module.extract()
-            self.extracted = True
         factory_data = retrieve_factory()
         activity_names = ', '.join([activity for activity in factory_data['activities']])
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
@@ -427,9 +439,6 @@ class LLMPipeline:
         return prompt, answer
     
     def _produce_answer_failure(self, question, sim_time, modality=''):
-        if not self.extracted_failure:
-            self.process_mining_module.extract(failure=True)
-            self.extracted_failure = True
         factory_model_with_failure = retrieve_factory_with_failure()
         sys_mess = self.prompts.get('system_message_failure', '')
         if 'zeroshot' not in modality:
@@ -555,9 +564,6 @@ class LLMPipeline:
 
 
     def _produce_answer_hybrid(self, question, modality):
-        if not self.extracted:
-            self.process_mining_module.extract()
-            self.extracted = True
         factory_model = retrieve_factory()
         activities = [a for a in factory_model['activities'].keys()]
         activities_str = ", ".join(activities)
@@ -566,10 +572,9 @@ class LLMPipeline:
         if 'zeroshot' not in modality:
             sys_mess += self.prompts.get('shots_hybrid', '')
         context = self.pddl_domain + activities_context
-        #print(context)
         invoke_payload = {"question": question,
-                    "context": context,
-                    "system_message": sys_mess}
+                        "context": context,
+                        "system_message": sys_mess}
         prompt_gateway = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_gateway.invoke(invoke_payload)
         if self.model_type_gateway == 'local':

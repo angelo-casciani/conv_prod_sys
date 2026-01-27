@@ -65,11 +65,17 @@ class Extractor:
                     break
         
         next_activities = {}
+        node_to_label = {}
         for gateway, flows in data.items():
+            node_uuid = gateway.rstrip('@') # extract node UUID from gateway key
+            
             for flow in flows:
-                src = list(flow["source"])[0]       # e.g. 'A1'
-                dst = list(flow["destination"])[0]  # e.g. 'A2'
+                src = list(flow["source"])[0]       # e.g. 'station11'
+                dst = list(flow["destination"])[0]  # e.g. 'station21'
                 prob = flow["total_probability"]
+                
+                if node_uuid and src: # map node UUID to its label
+                    node_to_label[node_uuid] = src
 
                 if src not in next_activities:
                     next_activities[src] = {}
@@ -78,6 +84,7 @@ class Extractor:
                     next_activities[src][dst]["probability"] += prob
                 else:
                     next_activities[src][dst] = {"probability": prob}
+        self.node_to_label_from_branch = node_to_label
 
         return next_activities
     
@@ -223,10 +230,16 @@ class Extractor:
         model["inter_arrival_time"] = inter_arrival_time
 
         model["activities"] = {}
-        # Convert from UUID-keyed activities to label-keyed activities
-        for activity_id, activity_data in activities.items():            # Normalize activity_id: remove 'id' prefix if present
+        # convert UUID-keyed activities into label-keyed activities
+        for activity_id, activity_data in activities.items():
             normalized_id = activity_id[2:] if activity_id.startswith('idnode_') else activity_id
-            activity_label = id_to_label.get(normalized_id, activity_id)
+            activity_label = getattr(self, 'node_to_label_from_resources', {}).get(activity_id) # from resources file
+            if not activity_label:
+                activity_label = getattr(self, 'node_to_label_from_branch', {}).get(normalized_id)
+            if not activity_label:
+                activity_label = id_to_label.get(normalized_id)
+            if not activity_label:
+                activity_label = activity_id
             
             model["activities"][activity_label] = {
                 "capacity": 1, 
@@ -324,18 +337,44 @@ class Extractor:
         inter_arrival_path = os.path.join(local_output_dir, inter_arrival_file)
         branch_prob_path = os.path.join(local_output_dir, branch_prob_file)
         bpmn_path = os.path.join(local_output_dir, bpmn_file)
+        resources_files = [f for f in os.listdir(local_output_dir) if 'resources_of_activities' in f and f.endswith('.json')]
+        node_to_label_from_resources = {}
+        if resources_files:
+            resources_path = os.path.join(local_output_dir, resources_files[0])
+            with open(resources_path, 'r') as f:
+                resources_data = json.load(f)
+            with open(params_path, 'r') as f:
+                params_data = json.load(f)
+            
+            if 'elements' in params_data:
+                elements = params_data['elements']
+            elif '0' in params_data and 'elements' in params_data['0']:
+                elements = params_data['0']['elements']
+            else:
+                elements = []
+            
+            resource_to_label = {} # resource_group -> activity_label
+            for activity_label, resource_groups in resources_data.items():
+                if resource_groups and resource_groups[0]:
+                    resource_group = resource_groups[0][0]
+                    resource_to_label[resource_group] = activity_label
+            
+            for elem in elements: # Map node UUIDs to labels via resource groups
+                node_uuid = elem['elementId']
+                if elem.get('resourceIds') and elem['resourceIds']:
+                    resource_group = elem['resourceIds'][0]['resourceName']
+                    if resource_group in resource_to_label:
+                        activity_label = resource_to_label[resource_group]
+                        node_to_label_from_resources[node_uuid] = activity_label
+            
+            self.node_to_label_from_resources = node_to_label_from_resources
+        
         bpmn_model = bpmn_importer.apply(bpmn_path)
         net, initial_marking, final_marking = pm4py.convert.convert_to_petri_net(bpmn_model)
 
         label_to_id, id_to_label = self.extract_label_to_id_mapping(bpmn_model)
-
-        #ACTIVITIES IDs EXTRACTION
         activities = self.extract_parameters(params_path)
-        
-        #INTER ARRIVAL TIME EXTRACTION
         inter_arrival_time = self.extract_inter_arrival(inter_arrival_path)
-        
-        #BRANCH PROBABILITIES EXTRACTION
         branch_prob = self.extract_branch_prob(branch_prob_path)
         successors = self.extract_successors_from_petri(net)
         for act, succs in successors.items():
@@ -346,13 +385,10 @@ class Extractor:
                     branch_prob[act][only_succ] = {"probability": 1.0}
         
         branch_prob = self.rebalance_zero_probabilities(branch_prob)
-        
-        #TRANSFER TIMES EXTRACTION
         if transfer_times_file:
             transfer_times_path = os.path.join(local_output_dir, transfer_times_file)
             transfer_times = self.extract_transfer_times(transfer_times_path)
         else:
-            # No transfer times file found, generate random plausible values
             print("Warning: No transfer times file found. Generating random transfer times.")
             transfer_times = self.generate_random_transfer_times(branch_prob)
             
