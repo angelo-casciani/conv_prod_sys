@@ -6,10 +6,15 @@ import io
 from contextlib import redirect_stdout
 
 from langchain.chat_models import init_chat_model
-from langchain_huggingface import HuggingFacePipeline
 from langchain_core.prompts import PromptTemplate
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
-from torch import bfloat16
+
+try: # (Optional) imports for local LLMs (not needed for API-only)
+    from langchain_huggingface import HuggingFacePipeline
+    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
+    from torch import bfloat16
+    LOCAL_MODEL_SUPPORT = True
+except ImportError:
+    LOCAL_MODEL_SUPPORT = False
 
 import simulation_interface as factory_interface
 from oracle import AnswerVerificationOracle
@@ -234,6 +239,11 @@ class LLMPipeline:
     def _initialize_chain(self, model_id, model_family, model_type):
         prompt_template_structure = self._generate_prompt_template(model_family)
         if model_type == 'local':
+            if not LOCAL_MODEL_SUPPORT:
+                raise RuntimeError(
+                    "Local model support not available. Install langchain_huggingface, "
+                    "transformers, and torch to use local models."
+                )
             generate_text = self._initialize_local_model(model_id, model_family) 
             model = HuggingFacePipeline(pipeline=generate_text)
         elif model_type == 'api':

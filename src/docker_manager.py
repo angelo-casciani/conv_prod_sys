@@ -4,10 +4,39 @@ import signal
 import atexit
 import time
 import os
+import shutil
 import requests
 
 
 _containers_stopped = False
+_docker_cmd = None
+
+def get_docker_command():
+    global _docker_cmd
+    if _docker_cmd is not None:
+        return _docker_cmd
+    
+    docker_path = shutil.which('docker')
+    if not docker_path:
+        return None
+    
+    try:
+        result = subprocess.run(['docker', 'info'], capture_output=True, timeout=5)
+        if result.returncode == 0:
+            _docker_cmd = ['docker']
+            return _docker_cmd
+    except (subprocess.TimeoutExpired, Exception):
+        pass
+    try:
+        result = subprocess.run(['sudo', 'docker', 'info'], capture_output=True, timeout=5)
+        if result.returncode == 0:
+            _docker_cmd = ['sudo', 'docker']
+            return _docker_cmd
+    except (subprocess.TimeoutExpired, Exception):
+        pass
+    
+    _docker_cmd = ['docker']
+    return _docker_cmd
 
 def cleanup_parameters():
     params_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'parameters')
@@ -43,9 +72,14 @@ def wait_for_dtlogextsim(url="http://127.0.0.1:6662/", max_attempts=30, delay=1)
 
 def start_docker_containers():
     try:
+        docker_cmd = get_docker_command()
+        if not docker_cmd:
+            print("Warning: docker command not found, skipping container startup")
+            return False
+        
         print("Starting Docker containers...")
         result = subprocess.run(
-            ['sudo', 'docker', 'compose', 'up', '-d'],
+            docker_cmd + ['compose', 'up', '-d'],
             capture_output=True,
             text=True,
             timeout=60
@@ -78,9 +112,14 @@ def stop_docker_containers():
     
     _containers_stopped = True
     try:
+        docker_cmd = get_docker_command()
+        if not docker_cmd:
+            print("Warning: docker command not found, skipping container shutdown")
+            return
+        
         print("\nStopping Docker containers...")
         result = subprocess.run(
-            ['sudo', 'docker', 'compose', 'down'],
+            docker_cmd + ['compose', 'down'],
             capture_output=True,
             text=True,
             timeout=30
@@ -101,8 +140,12 @@ def stop_docker_containers():
 
 def check_docker_status():
     try:
+        docker_cmd = get_docker_command()
+        if not docker_cmd:
+            return False
+        
         result = subprocess.run(
-            ['sudo', 'docker', 'compose', 'ps', '--format', 'json'],
+            docker_cmd + ['compose', 'ps', '--format', 'json'],
             capture_output=True,
             text=True,
             timeout=10

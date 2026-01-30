@@ -1,6 +1,7 @@
 import os
 import subprocess
 from utility import extract_json
+from docker_manager import get_docker_command
 
 DOCKER_CONTAINER_NAME = "uppaal-engine"
 MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'automaton', 'lego_SKG_item-10_no_doubles.xml')
@@ -20,8 +21,12 @@ def interface_with_llm(llm_answer):
 
 def execute_query(query):
     try:
-        exec_cmd = [
-            'sudo', 'docker', 'exec', '-i',
+        docker_cmd = get_docker_command()
+        if not docker_cmd:
+            return "Error: UPPAAL verification not available (Docker not found in container environment)"
+        
+        exec_cmd = docker_cmd + [
+            'exec', '-i',
             DOCKER_CONTAINER_NAME,
             'bash', '-c',
             f'echo "{query}" > /tmp/query.q && verifyta {MODEL_PATH_IN_CONTAINER} /tmp/query.q'

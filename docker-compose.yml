@@ -1,4 +1,14 @@
+# ============================================================
+# LOCAL/DEVELOPMENT DOCKER COMPOSE
+# ============================================================
+# For server deployment, use: server/docker-compose.server.yml
+# ============================================================
+
+version: '2.4'
+
 services:
+  # UPPAAL Verification Engine
+  # Build: cd src/uppaal && docker build --build-arg KEY=$UPPAAL_LICENSE_KEY --tag uppaal-engine -f res/Dockerfile .
   uppaal:
     image: uppaal-engine:latest
     container_name: uppaal-engine
@@ -11,26 +21,28 @@ services:
       - USER=uppaal
       - UPPAAL_LICENSE_KEY=${UPPAAL_LICENSE_KEY}
       - UPPAAL_LEASE=1
+    networks:
+      - chatbot_network
 
+  # Digital Twin Extractor Service
   extractor:
     build:
       context: ./src/DTLogExtSim/Extractor
+    container_name: extractor-service
     volumes:   
       - uploads:/app/uploads
       - download:/app/download
-      - extractor:/app/extractor
       - ./src/extractor_outputs:/app/extractor
     ports:
       - "6662:6662"
     networks:
-      - my_network
+      - chatbot_network
     restart: unless-stopped
 
 volumes:
   uploads:
   download:
-  extractor:
 
 networks:
-  my_network:
+  chatbot_network:
     driver: bridge

@@ -2,7 +2,6 @@ import gradio as gr
 from pipeline import LLMPipeline
 from argparse import ArgumentParser
 from dotenv import load_dotenv
-from torch import cuda
 import warnings
 from utility import *
 import os
@@ -13,7 +12,12 @@ import traceback
 import logging
 from docker_manager import setup_docker_lifecycle, stop_docker_containers
 
-DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
+try:
+    from torch import cuda
+    DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
+except ImportError:
+    DEVICE = 'cpu' # CPU for API-only
+
 load_dotenv()
 HF_AUTH = os.getenv('HF_TOKEN')
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
@@ -23,11 +27,14 @@ SEED = 10
 MAX_RESTART_ATTEMPTS = 3
 RESTART_DELAY = 5  # seconds
 warnings.filterwarnings('ignore')
+LOG_DIR = '/app/log'
+os.makedirs(LOG_DIR, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('log/chatbot_errors.log'),
+        logging.FileHandler(os.path.join(LOG_DIR, 'chatbot_errors.log')),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -145,10 +152,9 @@ welcome_msg = """Hello! I am your assistant for the LEGO Factory production syst
                  How can I help you today?"""
 demo = gr.ChatInterface(
     handler.process_message,
-    type="messages",
     chatbot=gr.Chatbot(
-        type="messages",
-        value=[{"role": "assistant", "content": welcome_msg}] 
+        value=[{"role": "assistant", "content": welcome_msg}],
+        height=400
     ),
     flagging_mode="manual",
     flagging_options=["Like", "Spam", "Inappropriate", "Other"],
@@ -160,8 +166,7 @@ demo = gr.ChatInterface(
 • **Verification:** Temporal property checking on factory automaton<br>
 • **Process Mining:** Process discovery (Petri nets), conformance checking, performance analysis, log filtering<br>
 • **Hybrid Reasoning:** Multi-step workflows combining simulation, verification, and failure analysis<br><br>
-*Note: Use actual station names (e.g., station11, station21, station41, ...)*<br><br>""",
-    theme="ocean"
+*Note: Use actual station names (e.g., station11, station21, station41, ...)*<br><br>"""
 )
 
 def launch_chatbot_with_fallback():

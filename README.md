@@ -30,10 +30,18 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |       ├── digital_twin_with_failure.json
 |       └── digital_twin.json
 ├── log               # folder where to insert the event log
+├── server            # server deployment configuration
+|   ├── docker-compose.server.yml  # Docker compose for server
+|   ├── Dockerfile.chatbot         # Chatbot container build
+|   ├── requirements.server.txt    # Lightweight API-only deps
+|   └── README.md                  # Server deployment guide
 ├── src               # source code of proposed approach
 |   ├── downward      # Fast-Downward submodule code
 |   ├── DTLogExtSim   # Digital twin extractor code
 |   |   └── Extractor # Extractor component
+|   ├── uppaal        # UPPAAL verification engine (download separately)
+|   |   ├── bin/      # UPPAAL binaries (verifyta, etc.)
+|   |   └── res/      # Contains Dockerfile for building image
 |   ├── pddl          # PDDL files for orchestration
 |   |   ├── domain.pddl    # Orchestrator PDDL domain
 |   |   └── problem.pddl   # Orchestrator PDDL problem
@@ -68,6 +76,7 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   |   ├── unrelated.csv
 |   |   └── verification.csv
 |   └── evaluation    # quantitative evaluation results for each run
+├── docker-compose.yml    # Local Docker services (UPPAAL, Extractor)
 ├── .env              # environment variables (API keys)
 ├── .gitmodules       # git submodules configuration
 ├── setup_submodules.sh  # automated submodule setup script
@@ -120,6 +129,26 @@ GOOGLE_API_KEY=<your Gemini API key>
 
 Set up a license key for [Uppaal](https://uppaal.org/) in the env variable `UPPAAL_LICENSE_KEY`. You can get one from [uppaal.veriaal.dk](https://uppaal.veriaal.dk).
 This step is needed to activate the Uppaal `verifyta` used in this project.
+
+### Docker Services
+
+The setup script will automatically:
+- Download UPPAAL 5.0.0 for Linux to `src/uppaal/`
+- Build the UPPAAL Docker image with your license key
+- Start Docker services (UPPAAL and Extractor)
+
+If you need to manually start the services:
+```bash
+docker-compose up -d
+```
+
+This starts:
+- **uppaal-engine**: Formal verification engine on port 2350
+- **extractor-service**: Digital twin extractor on port 6662
+
+### Server Deployment
+
+For deploying on a remote server with Docker, see [server/README.md](server/README.md).
 
 ## Usage
 

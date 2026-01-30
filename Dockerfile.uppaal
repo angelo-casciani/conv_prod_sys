@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 RUN useradd -ms /bin/bash uppaal
 RUN apt-get -qq update && apt-get -qq upgrade -y

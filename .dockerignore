@@ -1,0 +1,48 @@
+# Docker build ignore file
+# Excludes large/unnecessary files from Docker context
+
+# Fast Downward build artifacts (will be built inside container if needed)
+src/downward/builds/
+src/downward/.git/
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+.gitmodules
+
+# Docker files (don't need to copy these into the image)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Tests and evaluation outputs
+tests/
+*.log
+
+# Server config (already mounted or set via env)
+server/.env*
+
+# Documentation
+*.md
+LICENSE
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store

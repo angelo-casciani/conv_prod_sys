@@ -2,23 +2,30 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including cmake for Fast Downward and docker-cli for UPPAAL
 RUN apt-get update && apt-get install -y \
     build-essential \
     git \
     curl \
+    graphviz \
+    cmake \
+    g++ \
+    docker.io \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY server/requirements.server.txt ./requirements.txt
 
-# Install Python dependencies
+# Install Python dependencies (no PyTorch/CUDA - API-only mode)
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY src/ ./src/
 COPY data/ ./data/
 COPY log/ ./log/
+
+# Build Fast Downward planner
+RUN cd /app/src/downward && python build.py release
 
 # Create necessary directories
 RUN mkdir -p /app/log /app/pmmOutputs

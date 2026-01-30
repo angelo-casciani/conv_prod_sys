@@ -56,6 +56,17 @@ echo "Setting up Docker Services"
 echo "============================================="
 echo ""
 
+# Determine if we need sudo for docker
+DOCKER_CMD="docker"
+DOCKER_COMPOSE_CMD="docker-compose"
+if ! docker info &> /dev/null; then
+    if sudo docker info &> /dev/null; then
+        echo "Docker requires sudo on this system"
+        DOCKER_CMD="sudo docker"
+        DOCKER_COMPOSE_CMD="sudo docker-compose"
+    fi
+fi
+
 if [ ! -f ".env" ]; then
     if [ -f ".env.example" ]; then
         echo "Creating .env file from template..."
@@ -80,32 +91,70 @@ if [ -f ".env" ] && grep -q "UPPAAL_LICENSE_KEY" ".env"; then
         if command -v docker &> /dev/null; then
             echo "Docker found"
             
-            if docker images | grep -q uppaal-engine; then
+            # Download and setup UPPAAL if not present
+            if [ ! -d "src/uppaal" ]; then
+                echo "Downloading UPPAAL 5.0.0..."
+                wget -q --show-progress https://download.uppaal.org/uppaal-5.0/uppaal-5.0.0/uppaal-5.0.0-linux64.zip -O /tmp/uppaal.zip
+                echo "Extracting UPPAAL..."
+                unzip -q /tmp/uppaal.zip -d /tmp/
+                mv /tmp/uppaal-5.0.0-linux64 src/uppaal
+                rm /tmp/uppaal.zip
+                echo "UPPAAL installed to src/uppaal"
+                
+                # Create the Dockerfile for UPPAAL
+                mkdir -p src/uppaal/res
+                cat > src/uppaal/res/Dockerfile << 'EOF'
+FROM ubuntu:22.04
+
+RUN useradd -ms /bin/bash uppaal
+RUN apt-get -qq update && apt-get -qq upgrade -y
+USER uppaal
+ENV USER=uppaal
+WORKDIR /home/uppaal
+ADD . uppaal
+ENV PATH="/home/uppaal/uppaal/bin:$PATH"
+ARG KEY=""
+ARG LEASE="1"
+RUN verifyta.sh --key ${KEY} --lease ${LEASE}
+RUN verifyta.sh --version
+
+EXPOSE 2350
+CMD /home/uppaal/uppaal/bin/socketserver.sh /home/uppaal/uppaal/bin/server.sh
+EOF
+                echo "Created UPPAAL Dockerfile"
+            else
+                echo "UPPAAL already installed at src/uppaal"
+            fi
+            
+            # Build UPPAAL Docker image if not exists
+            if $DOCKER_CMD images | grep -q uppaal-engine; then
                 echo "UPPAAL Docker image already exists"
             else
-                echo "UPPAAL Docker image not found"
-                echo "   You need to build it first from the UPPAAL installation"
-                echo "   See README for instructions"
+                echo "Building UPPAAL Docker image..."
+                cd src/uppaal
+                $DOCKER_CMD build --build-arg KEY=$UPPAAL_LICENSE_KEY --tag uppaal-engine -f res/Dockerfile .
+                cd ../..
+                echo "UPPAAL Docker image built successfully"
             fi
             
             # Start/restart using docker-compose
             if [ -f "docker-compose.yml" ]; then
                 echo "Starting containers using docker-compose..."
-                sudo docker compose up -d
+                $DOCKER_COMPOSE_CMD up -d
                 
                 sleep 2
-                if sudo docker ps | grep -q uppaal-engine; then
+                if $DOCKER_CMD ps | grep -q uppaal-engine; then
                     echo "UPPAAL container is running on port 2350"
                 else
                     echo "UPPAAL container failed to start. Check logs with:"
-                    echo "   sudo docker logs uppaal-engine"
+                    echo "   $DOCKER_CMD logs uppaal-engine"
                 fi
                 
-                if sudo docker ps | grep -q extractor; then
+                if $DOCKER_CMD ps | grep -q extractor; then
                     echo "Extractor container is running on port 6662"
                 else
                     echo "Extractor container failed to start. Check logs with:"
-                    echo "   sudo docker logs <extractor-container-name>"
+                    echo "   $DOCKER_CMD logs extractor-service"
                 fi
             else
                 echo "docker-compose.yml not found"
