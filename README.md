@@ -50,6 +50,7 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   ├── failure_maintenance.py    # failure maintenance logic
 |   ├── extractor.py              # digital twin extraction logic
 |   ├── oracle.py                 # evaluation oracle
+|   ├── rnd_bas_eval.py           # evaluation with rng and LLM-only baselines 
 |   ├── simulation.py             # simulation implementation
 |   ├── test_sets_generation.py   # test set generation script
 |   ├── prompts.json              # LLM prompts configuration
@@ -259,6 +260,15 @@ python src/main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --mo
 ```
 
 The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
+
+### RNG and LLM-Only Baselines experiments
+We provide baseline comparisons for the simulation and verification tasks using `answers-dataset.csv`to motivate our approach, which leverages PPI tools in the backend to produce faithful answers.
+
+``` bash
+python src/rnd_bas_eval.py
+```
+
+The random baseline samples answers uniformly between the minimum and maximum values in the ground-truth dataset for simulation, and samples a boolean value uniformly for verification. The LLM baseline uses only the event log (in the [log](log) folder) as input. By default, it uses the `gemini-2.5-flash` model (requiring a Google API key), but you can change the model inside the script.
 
 ### Generation of New Test Sets
 

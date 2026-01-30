@@ -1,12 +1,15 @@
 import csv
+import json
+from datetime import datetime, timedelta
 import os
 import pandas as pd
 import random
+import sys
 
 import simulation_interface as fa
+from simulation import FactorySimulator
 import uppaal_interface as up
-import json
-from datetime import datetime, timedelta
+
 
 simulation_tasks = {
     "sim_with_time": [
@@ -838,6 +841,107 @@ def main_answer(routing_csv_path):
     print(f"Generated {len(new_questions)} samples and saved to {output_path}")
 
 
+def generate_answers_dataset(num_simulation=50, num_verification=50):
+    sys.path.append(os.path.dirname(__file__))
+    sim_csv_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_sets', 'simulation.csv')
+    ver_csv_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_sets', 'verification.csv')
+    sim_df = pd.read_csv(sim_csv_path)
+    ver_df = pd.read_csv(ver_csv_path)
+    sim_sample_size = min(int(num_simulation * 1.5), len(sim_df))
+    sim_sample = sim_df.sample(n=sim_sample_size, random_state=42)
+    ver_sample = ver_df.sample(n=min(num_verification, len(ver_df)), random_state=42)
+    results = []
+    
+    print(f"Processing {len(sim_sample)} simulation questions (targeting {num_simulation} numeric results)...")
+    for idx, row in sim_sample.iterrows():
+        question = row['question']
+        answer_json = json.loads(row['answer'])
+        
+        try:
+            task = answer_json.get('task')
+            simulation_time = answer_json.get('simulation_time')
+            target_pieces = answer_json.get('target_pieces')
+            answer_value = None
+            
+            if task == 'sim_with_time' and simulation_time:
+                sim = FactorySimulator(simulation_time=int(simulation_time))
+                sim.run()
+                stats = sim.get_statistics()
+                
+                if 'pieces' in question.lower() or 'produced' in question.lower():
+                    answer_value = stats['total_pieces_produced']
+                elif 'processing time' in question.lower():
+                    answer_value = round(stats['total_mean_processing_time'], 2)
+                elif 'waiting time' in question.lower():
+                    answer_value = round(stats['total_mean_waiting_time'], 2)
+                elif 'transfer time' in question.lower():
+                    answer_value = round(stats['total_mean_transfer_time'], 2)
+                else:
+                    answer_value = stats['total_pieces_produced']
+                    
+            elif task == 'sim_with_number_products' and target_pieces:
+                sim = FactorySimulator()
+                sim.compute_batch_production_time(int(target_pieces))
+                stats = sim.get_statistics()
+                
+                if 'time' in question.lower() and 'needed' in question.lower():
+                    answer_value = round(stats['total_execution_time'], 2)
+                elif 'processing time' in question.lower():
+                    answer_value = round(stats['total_mean_processing_time'], 2)
+                elif 'waiting time' in question.lower():
+                    answer_value = round(stats['total_mean_waiting_time'], 2)
+                elif 'transfer time' in question.lower():
+                    answer_value = round(stats['total_mean_transfer_time'], 2)
+                else:
+                    answer_value = round(stats['total_execution_time'], 2)
+                    
+            elif task == 'event_prediction':
+                continue
+            
+            if answer_value is not None:
+                results.append([question, 'simulation', answer_value])
+                print(f"   Processed: {question[:60]}... -> {answer_value}")
+                
+                if sum(1 for r in results if r[1] == 'simulation') >= num_simulation:
+                    break
+            
+        except Exception as e:
+            print(f"   Error processing simulation question: {question[:60]}... -> {str(e)}")
+            continue
+    
+    print(f"\nProcessing {len(ver_sample)} verification questions...")
+    for idx, row in ver_sample.iterrows():
+        question = row['question']
+        answer_json = json.loads(row['answer'])
+        
+        try:
+            uppaal_query = answer_json.get('uppaal_query')
+            
+            if uppaal_query:
+                result = up.execute_query(uppaal_query)
+                answer_value = 'satisfied' in result.lower()
+                
+                results.append([question, 'verification', answer_value])
+                print(f"  ✓ Processed: {question[:60]}... -> {answer_value}")
+            
+        except Exception as e:
+            print(f"  ✗ Error processing verification question: {question[:60]}... -> {str(e)}")
+            continue
+    
+    output_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_sets', 'answers-dataset.csv')
+    with open(output_path, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['question', 'type', 'answer'])
+        for row in results:
+            writer.writerow(row)
+    
+    print(f"\n✓ Generated {len(results)} samples and saved to {output_path}")
+    print(f"  - Simulation questions: {sum(1 for r in results if r[1] == 'simulation')}")
+    print(f"  - Verification questions: {sum(1 for r in results if r[1] == 'verification')}")
+    
+    return output_path
+
+
 if __name__ == "__main__":
     main_simulation()
     main_verification()
@@ -845,6 +949,7 @@ if __name__ == "__main__":
     generate_factory_info_questions(factory_info_questions)
     generate_process_mining_questions(process_mining_questions)
     generate_hybrid_questions(hybrid_questions)
+    generate_answers_dataset(num_simulation=50, num_verification=50)
 
     sim_csv = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_sets', 'simulation.csv')
     ver_csv = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_sets', 'verification.csv')

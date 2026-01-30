@@ -1,0 +1,101 @@
+question,type,answer
+How many pieces can be produced in 4700 units of time?,simulation,138
+What is the mean processing time of activity4 after the factory's execution for 200 time units?,simulation,1.0
+What is the mean waiting time after the factory's simulation for 3200 time units?,simulation,0.0
+What is the mean waiting time after the factory's simulation for 700 time units?,simulation,0.0
+Carry out a simulation for 3700 units of time to check how many pieces are produced.,simulation,82
+What is the mean waiting time of activity4 for creating 150 products?,simulation,0.0
+Run a simulation to estimate the time required to produce 50 products.,simulation,1906
+What is the mean waiting time after the factory's simulation for 2700 time units?,simulation,0.0
+What is the mean waiting time for producing 200 pieces?,simulation,0.0
+What is the mean processing time of activity6 after the factory's execution for 1700 time units?,simulation,1.0
+What is the mean processing time after executing the factory to generate 300 products?,simulation,1.0
+How many pieces can be produced in 3700 units of time?,simulation,86
+What is the mean processing time after executing the factory for 200 time units?,simulation,1.0
+Tell me the mean transfer time after executing the factory for 2200 time units?,simulation,0
+What is the mean processing time of activity6 after the factory's execution for 1200 time units?,simulation,1.0
+What is the mean processing time of activity2 after the factory's execution for 2700 time units?,simulation,1.0
+What is the mean waiting time after the factory's simulation for 700 time units?,simulation,0.0
+What is the mean waiting time of activity3 for creating 200 products?,simulation,0.0
+What is the mean waiting time of activity4 after executing the factory for 3700 time units?,simulation,0.0
+Carry out a simulation for 3700 units of time to check how many pieces are produced.,simulation,107
+Tell me the mean transfer time after executing the factory for 4700 time units?,simulation,0
+What is the mean waiting time for producing 500 pieces?,simulation,0.0
+Carry out a simulation for 2700 units of time to check how many pieces are produced.,simulation,78
+Simulate the execution of the production process to produce 300 pieces.,simulation,10951
+What is the mean waiting time of activity1 after executing the factory for 700 time units?,simulation,0.0
+Run a simulation to estimate the time required to produce 50 products.,simulation,2059
+How many pieces can be produced in 1200 units of time?,simulation,29
+What is the mean waiting time of activity5 for creating 450 products?,simulation,0.0
+What is the mean waiting time of activity4 after executing the factory for 2200 time units?,simulation,0.0
+What is the mean processing time after executing the factory for 200 time units?,simulation,1.0
+Tell me the mean transfer time after executing the factory for 1200 time units?,simulation,0
+Tell me the mean transfer time after executing the factory for 2200 time units?,simulation,0
+What is the mean waiting time of activity2 after executing the factory for 1200 time units?,simulation,0.0
+What is the mean processing time of activity3 after the factory's execution for 3200 time units?,simulation,1.0
+What is the mean processing time after executing the factory for 4200 time units?,simulation,1.0
+What is the mean processing time of activity3 to produce 150 pieces?,simulation,1.0
+How many pieces can be produced in 4700 units of time?,simulation,124
+How many pieces can be produced in 2700 units of time?,simulation,67
+What is the mean processing time of activity3 to produce 300 pieces?,simulation,1.0
+What is the mean processing time of activity1 to produce 300 pieces?,simulation,1.0
+What is the mean processing time of activity6 to produce 250 pieces?,simulation,1.0
+How many pieces can be produced in 3200 units of time?,simulation,63
+Tell me the mean transfer time after executing the factory to produce 150 units?,simulation,0
+Run a simulation to estimate the time required to produce 400 products.,simulation,14006
+What is the mean waiting time of activity3 after executing the factory for 1700 time units?,simulation,0.0
+What is the mean processing time after executing the factory to generate 150 products?,simulation,1.0
+Carry out a simulation for 4200 units of time to check how many pieces are produced.,simulation,97
+Run a simulation to estimate the time required to produce 150 products.,simulation,5731
+Tell me the mean transfer time after executing the factory for 2200 time units?,simulation,0
+Simulate the execution of the production process to produce 150 pieces.,simulation,6442
+Does the system will always eventually reach state q_4.,verification,False
+Does the system will always eventually reach state q_1.,verification,False
+Verify if the automaton can always stay in state q_8 for up to 35 time units.,verification,False
+Does the system will always eventually reach state q_14.,verification,False
+Check if state q_14 is reachable within 10 time units.,verification,False
+Verify if the automaton can always stay in state q_10 for up to 40 time units.,verification,False
+"If the system reaches q_10, will it eventually be in q_14?",verification,False
+"If the system reaches q_13, will it eventually be in q_0?",verification,False
+Does a path where the system stays in state q_14 forever exist?,verification,False
+Check if state q_6 is reachable within 45 time units.,verification,False
+Verify if the automaton can always stay in state q_3 for up to 15 time units.,verification,False
+Verify if the automaton can always stay in state q_5 for up to 25 time units.,verification,False
+Does a path where the system stays in state q_6 forever exist?,verification,False
+Verify if the automaton reaches at least once the states q_11 and q_8.,verification,False
+Does a path where the system stays in state q_4 forever exist?,verification,False
+Verify if the automaton can always stay in state q_11 for up to 50 time units.,verification,False
+Verify if the automaton can always stay in state q_0 for up to 15 time units.,verification,False
+Does a path where state q_2 is reached exist?,verification,False
+Does a path where state q_1 is reached exist?,verification,False
+"If the system reaches q_9, will it eventually be in q_2?",verification,False
+Verify if the automaton can always stay in state q_10 for up to 40 time units.,verification,False
+Does a path where the system stays in state q_7 forever exist?,verification,False
+Verify if the automaton reaches at least once the states q_8 and q_3.,verification,False
+Verify if the automaton can always stay in state q_1 for up to 50 time units.,verification,False
+"If the system reaches q_3, will it eventually be in q_12?",verification,False
+Does the system will always eventually reach state q_0.,verification,False
+Does a path where state q_12 is reached exist?,verification,False
+Does a path where the system stays in state q_10 forever exist?,verification,False
+Check if state q_11 is reachable within 30 time units.,verification,False
+"If the system reaches q_13, will it eventually be in q_11?",verification,False
+Verify if the automaton reaches at least once the states q_9 and q_6.,verification,False
+Verify if the automaton can always stay in state q_5 for up to 50 time units.,verification,False
+Check if state q_10 is reachable within 20 time units.,verification,False
+Verify if the automaton reaches at least once the states q_4 and q_14.,verification,False
+"If the system reaches q_9, will it eventually be in q_0?",verification,False
+Verify if the automaton reaches at least once the states q_8 and q_1.,verification,False
+Verify if the automaton reaches at least once the states q_10 and q_4.,verification,False
+Does a path where the system stays in state q_2 forever exist?,verification,False
+Verify if the automaton reaches at least once the states q_9 and q_4.,verification,False
+"If the system reaches q_11, will it eventually be in q_14?",verification,False
+Does a path where state q_13 is reached exist?,verification,False
+Verify if the automaton reaches at least once the states q_11 and q_2.,verification,False
+Does a path where state q_14 is reached exist?,verification,False
+Does the system will always eventually reach state q_4.,verification,False
+Does the system will always eventually reach state q_14.,verification,False
+"If the system reaches q_14, will it eventually be in q_6?",verification,False
+Does the system will always eventually reach state q_5.,verification,False
+Verify if the automaton can always stay in state q_12 for up to 25 time units.,verification,False
+Does the system will always eventually reach state q_8.,verification,False
+Does a path where the system stays in state q_5 forever exist?,verification,False
