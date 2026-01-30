@@ -1,0 +1,90 @@
+# ============================================================
+# SERVER DEPLOYMENT - Remote server at 195.231.61.196
+# ============================================================
+# Run from the server folder:
+#   docker-compose -f docker-compose.server.yml up -d --build
+# ============================================================
+
+services:
+  chatbot:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile.chatbot
+    container_name: lego-chatbot
+    ports:
+      # Bind only to the specific external IP
+      - "195.231.61.196:7860:7860"
+    volumes:
+      - ../data:/app/data:ro
+      - ../log:/app/log
+      - ../pmmOutputs:/app/pmmOutputs
+      - ../src/extractor_outputs:/app/src/extractor_outputs
+    environment:
+      # API Keys - set these in .env.server file
+      - HF_TOKEN=${HF_TOKEN}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # Gradio settings
+      - GRADIO_SERVER_NAME=0.0.0.0
+      - GRADIO_SERVER_PORT=7860
+    env_file:
+      - .env.server
+    networks:
+      - chatbot_network
+    restart: unless-stopped
+    # Resource limits for stability
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # UPPAAL Engine (required by chatbot)
+  uppaal:
+    image: uppaal-engine:latest
+    container_name: uppaal-engine
+    # Only expose internally, not to the outside world
+    expose:
+      - "2350"
+    volumes:
+      - ../data/automaton:/home/uppaal/models:ro
+    environment:
+      - USER=uppaal
+      - UPPAAL_LICENSE_KEY=${UPPAAL_LICENSE_KEY}
+      - UPPAAL_LEASE=1
+    networks:
+      - chatbot_network
+    restart: unless-stopped
+
+  # Extractor service
+  extractor:
+    build:
+      context: ../src/DTLogExtSim/Extractor
+    container_name: extractor-service
+    # Only expose internally
+    expose:
+      - "6662"
+    volumes:
+      - uploads:/app/uploads
+      - download:/app/download
+      - ../src/extractor_outputs:/app/extractor
+    networks:
+      - chatbot_network
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  download:
+
+networks:
+  chatbot_network:
+    driver: bridge
+    internal: false

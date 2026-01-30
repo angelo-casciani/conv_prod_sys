@@ -175,3 +175,6 @@ pmmOutputs
 .gradio
 favicon.ico
 src/extractor_outputs
+
+# Server deployment files
+server/.env.server
