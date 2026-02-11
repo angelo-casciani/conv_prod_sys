@@ -95,7 +95,8 @@ def main():
             - Estimate maintenance delays and their impact on production;
             - Answer complex queries involving multiple reasoning tasks.
           
-          Note: You can refer to stations using their actual names (e.g., station11, station21, station41, ...).\n""")
+          Note: You can refer to stations using their actual names (e.g., station11, station21, station41, ...).\n
+          Always use seconds as unit of time.""")
 
 
     if modality == 'evaluation-simulation' or modality == 'evaluation-simulation-zeroshot':
