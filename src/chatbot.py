@@ -27,7 +27,11 @@ SEED = 10
 MAX_RESTART_ATTEMPTS = 3
 RESTART_DELAY = 5  # seconds
 warnings.filterwarnings('ignore')
-LOG_DIR = '/app/log'
+
+if os.path.exists('/app'): # For Docker, otherwise use relative path
+    LOG_DIR = '/app/log'
+else:
+    LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'log')
 os.makedirs(LOG_DIR, exist_ok=True)
 
 logging.basicConfig(

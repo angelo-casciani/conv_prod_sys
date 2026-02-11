@@ -106,7 +106,11 @@ This script will:
 - Check for Docker installation (required for Extractor and UPPAAL);
 - Set up and start Docker containers (if Docker and UPPAAL license key are available).
 
-Assuming a working version of Python (v.3.10.12) installed on the machine, create a virtual environment in the root folder of the project.
+### Python Environment
+
+**Requires Python 3.11 or higher.**
+
+Create a virtual environment in the root folder of the project:
 
 ``` bash
 python3 -m venv .venv
