@@ -530,7 +530,7 @@ class LLMPipeline:
                 return prompt, "{}"
             elif action == 'process_discovery':
                 net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
-                self.process_mining_module.view_petri_net(net, initial_marking, final_marking)
+                # Skip view_petri_net - not available in headless/Docker environment
                 nl_output = f"I discovered the process model. The Petri net has been saved at: {net_path}."
             elif action == 'conformance_checking':
                 log = self.process_mining_module.load_log()
