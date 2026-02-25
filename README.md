@@ -23,9 +23,11 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 ├── images            # figures for the README file
 |   └── architecture.png
 ├── data              # extracted automaton and simulation parameters
-|   ├── automaton     # automaton files
+|   ├── automaton     # automaton files (SKG models)
+|   |   ├── default   # reference/fallback SKG files
+|   |   |   └── lego_SKG_item-10_no_doubles.xml
 |   |   ├── factory_automaton.json
-|   |   └── lego_SKG_item-10_no_doubles.xml
+|   |   └── README.md # automaton directory documentation
 |   └── parameters    # digital twin parameters
 |       ├── digital_twin_with_failure.json
 |       └── digital_twin.json
@@ -37,6 +39,7 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   └── README.md                  # Server deployment guide
 ├── src               # source code of proposed approach
 |   ├── downward      # Fast-Downward submodule code
+|   ├── lsha          # LSHA automaton learning submodule (xes_extension branch)
 |   ├── DTLogExtSim   # Digital twin extractor code
 |   |   └── Extractor # Extractor component
 |   ├── uppaal        # UPPAAL verification engine (download separately)
@@ -46,6 +49,7 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   |   ├── domain.pddl    # Orchestrator PDDL domain
 |   |   └── problem.pddl   # Orchestrator PDDL problem
 |   ├── extractor_outputs  # outputs from the digital twin extractor
+|   ├── automaton_learning.py # SKG extraction with LSHA
 |   ├── chatbot.py         # GUI-based conversational interface
 |   ├── docker_manager.py  # Docker container lifecycle management
 |   ├── main.py            # main entry point for the framework
@@ -101,8 +105,9 @@ Initialize submodules and containers within the repository by running the automa
 ```
 
 This script will:
-- initialize and update git submodules (Fast Downward);
-- build Fast Downward automatically;
+- Initialize and update git submodules (Fast Downward, LSHA);
+- Build Fast Downward automatically;
+- Set up LSHA for SKG (Stochastic Knowledge Graph) extraction;
 - Check for Docker installation (required for Extractor and UPPAAL);
 - Set up and start Docker containers (if Docker and UPPAAL license key are available).
 

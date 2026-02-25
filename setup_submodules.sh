@@ -11,6 +11,62 @@ echo "Submodules initialized and updated"
 echo ""
 
 echo "============================================="
+echo "Setting up LSHA Automaton Learner"
+echo "============================================="
+echo ""
+
+if [ -d "src/lsha" ]; then
+    echo "LSHA submodule found"
+    
+    # Check if it's a proper submodule
+    if git config --file .gitmodules --get-regexp 'submodule.src/lsha' > /dev/null 2>&1; then
+        echo "LSHA is properly configured as a submodule"
+        
+        # Verify LSHA dependencies are documented
+        if [ -f "src/lsha/requirements.txt" ]; then
+            echo "LSHA dependencies found at src/lsha/requirements.txt"
+            echo "Note: LSHA dependencies are included in the main requirements.txt"
+        fi
+    else
+        echo "WARNING: LSHA directory exists but is not a submodule"
+        echo "Attempting to convert to submodule..."
+        
+        # Backup existing directory
+        if [ -d "src/lsha.backup" ]; then
+            rm -rf src/lsha.backup
+        fi
+        cp -r src/lsha src/lsha.backup
+        echo "Backup created at src/lsha.backup"
+        
+        # Remove and re-add as submodule
+        rm -rf src/lsha
+        git submodule add -b xes_extension https://github.com/LesLivia/lsha.git src/lsha
+        git submodule update --init --recursive src/lsha
+        
+        if [ -f "src/lsha/README.md" ]; then
+            echo "LSHA successfully converted to submodule"
+            echo "You can remove backup with: rm -rf src/lsha.backup"
+        else
+            echo "ERROR: Failed to convert LSHA to submodule"
+            exit 1
+        fi
+    fi
+else
+    echo "LSHA submodule not found"
+    echo "Adding LSHA as submodule..."
+    git submodule add -b xes_extension https://github.com/LesLivia/lsha.git src/lsha
+    git submodule update --init --recursive src/lsha
+    
+    if [ -f "src/lsha/README.md" ]; then
+        echo "LSHA submodule added successfully"
+    else
+        echo "ERROR: Failed to add LSHA submodule"
+        exit 1
+    fi
+fi
+echo ""
+
+echo "============================================="
 echo "Setting up Fast Downward Planner"
 echo "============================================="
 echo ""
@@ -175,9 +231,15 @@ echo "============================================="
 echo ""
 echo "Submodules initialized:"
 echo "  ✓ Fast Downward (PDDL Planner) at src/downward"
+if [ -d "src/lsha" ] && [ -f "src/lsha/README.md" ]; then
+    echo "  ✓ LSHA (Automaton Learning) at src/lsha"
+else
+    echo "  ⚠ LSHA initialization failed"
+fi
 echo ""
 echo "Components:"
 echo "  ✓ DTLogExtSim Extractor at src/DTLogExtSim/Extractor"
+echo "  ✓ SKG Automaton Learning with LSHA (data/automaton/)"
 echo "  ✓ UPPAAL (Verification Engine) with Docker support"
 echo ""
 echo "Next steps:"

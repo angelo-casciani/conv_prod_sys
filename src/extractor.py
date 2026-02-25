@@ -6,6 +6,7 @@ import ast
 import re
 from pm4py.objects.bpmn.importer import importer as bpmn_importer
 import random
+from automaton_learning import AutomatonLearner
 
 class Extractor:
     def __init__(self, url="http://127.0.0.1:6662/", data = None):
@@ -18,6 +19,13 @@ class Extractor:
                     }
         else:
             self.data = data
+        
+        # Initialize automaton learner for SKG extraction
+        try:
+            self.automaton_learner = AutomatonLearner()
+        except FileNotFoundError:
+            print("Warning: LSHA not found. SKG extraction will be skipped.")
+            self.automaton_learner = None
 
     def extract_parameters(self, params_path):
         with open(params_path, "r") as f:
@@ -260,6 +268,27 @@ class Extractor:
             if source_activity in branch_prob:
                 for destination in branch_prob[source_activity].keys():
                     model["transfer_times"][source_activity][destination] = transfer_data
+
+        # Ensure all routing nodes from branch_prob exist as activities
+        # to keep the simulation aligned with the extracted graph.
+        branch_nodes = set(branch_prob.keys())
+        for src, dsts in branch_prob.items():
+            branch_nodes.update(dsts.keys())
+
+        for node in branch_nodes:
+            if node not in model["activities"]:
+                model["activities"][node] = {
+                    "capacity": 1,
+                    "processing_time": {"type": "fixed", "mean": 0, "arg1": 0, "arg2": 0},
+                    "next_activities": {}
+                }
+
+        for src, dsts in branch_prob.items():
+            if src in model["activities"]:
+                for dst, prob_data in dsts.items():
+                    model["activities"][src]["next_activities"][dst] = {
+                        "probability": prob_data["probability"]
+                    }
         return model
     
     def add_failure_params(self, model, seed=None):
@@ -303,6 +332,29 @@ class Extractor:
                 raise ValueError(f"Unexpected result structure: {parsed_response}")
         else:
             raise ValueError(f"Response missing 'result' field: {parsed_response}")
+
+        # Extract SKG automaton right after DTLogExtSim completes
+        if self.automaton_learner is not None:
+            print("\n" + "="*60)
+            print("Starting SKG (Stochastic Knowledge Graph) extraction...")
+            print("="*60)
+            skg_output_name = os.path.basename(xes_path).replace('.xes', '_skg.xml')
+            try:
+                skg_path = self.automaton_learner.learn_automaton(
+                    xes_path=xes_path,
+                    output_name=skg_output_name,
+                    window_minutes=5
+                )
+                if skg_path:
+                    print(f"\nSKG extraction completed: {skg_path}")
+                else:
+                    print("\nSKG extraction failed, using default")
+            except Exception as e:
+                print(f"\nError during SKG extraction: {e}")
+                print("Continuing with default SKG...")
+            print("="*60 + "\n")
+        else:
+            print("\nSkipping SKG extraction (LSHA not available)\n")
 
         local_output_dir = os.path.join(os.path.dirname(__file__), "extractor_outputs", os.path.basename(output_dir.strip("/")), "output_data", "output_file")
         params_file = None
@@ -389,8 +441,8 @@ class Extractor:
             transfer_times_path = os.path.join(local_output_dir, transfer_times_file)
             transfer_times = self.extract_transfer_times(transfer_times_path)
         else:
-            print("Warning: No transfer times file found. Generating random transfer times.")
-            transfer_times = self.generate_random_transfer_times(branch_prob)
+            print("Warning: No transfer times file found. Defaulting to zero transfer times.")
+            transfer_times = {}
             
         model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times, id_to_label, label_to_id)
 

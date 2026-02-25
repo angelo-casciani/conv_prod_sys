@@ -182,3 +182,7 @@ server/.env.server
 # UPPAAL (download separately - see README)
 src/uppaal/
 server/.env.server
+
+# Auto-generated SKG files (keep default/ folder)
+data/automaton/*.xml
+!data/automaton/default/
