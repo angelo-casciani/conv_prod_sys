@@ -1,0 +1,769 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>broadcast chan s52,s35,s69,s87,s57,s6,s76,s42,s54,s70,s68,s75,s27,s2,s49,s82,s67,s91,s43,s59,s90,s78,s32,s60,s53,s28,s73,s34,s65,s36,s7,s40,s62,s51,s45,s61,s29,s44,s3,s77,s85,s4,s37;
+
+const int TAU = 1000;
+
+</declaration>
+<template>
+<name>DiscoveredSystem</name>
+<declaration>
+clock x;
+
+/**
+** Time CDFs
+**/
+
+int Tcdf = 0;
+
+const int ECDF_SIZES[44] = {2,262,5,9,6,7,1,1,1,4,2,2,1,3,7,0,0,9,1,3,262,1,9,1,2,4,4,4,3,6,5,4,4,3,1,3,5,6,6,3,1,7,3,2};
+
+const int ECDFx_0 = 5;
+const int ECDFx_1 = 5;
+const int ECDFx_2 = 11;
+const int ECDFx_3 = 37;
+const int ECDFx_4 = 13;
+const int ECDFx_5 = 7;
+const int ECDFx_6 = 58;
+const int ECDFx_7 = 7;
+const int ECDFx_8 = 58;
+const int ECDFx_9 = 24;
+const int ECDFx_10 = 5;
+const int ECDFx_11 = 5;
+const int ECDFx_12 = 7;
+const int ECDFx_13 = 54;
+const int ECDFx_14 = 7;
+const int ECDFx_17 = 37;
+const int ECDFx_18 = 58;
+const int ECDFx_19 = 13;
+const int ECDFx_20 = 5;
+const int ECDFx_21 = 4;
+const int ECDFx_22 = 37;
+const int ECDFx_23 = 7;
+const int ECDFx_24 = 5;
+const int ECDFx_25 = 38;
+const int ECDFx_26 = 38;
+const int ECDFx_27 = 38;
+const int ECDFx_28 = 2;
+const int ECDFx_29 = 5;
+const int ECDFx_30 = 11;
+const int ECDFx_31 = 24;
+const int ECDFx_32 = 24;
+const int ECDFx_33 = 13;
+const int ECDFx_34 = 4;
+const int ECDFx_35 = 2;
+const int ECDFx_36 = 11;
+const int ECDFx_37 = 13;
+const int ECDFx_38 = 5;
+const int ECDFx_39 = 54;
+const int ECDFx_40 = 7;
+const int ECDFx_41 = 7;
+const int ECDFx_42 = 54;
+const int ECDFx_43 = 5;
+
+
+void sample_ecdf(int d) {
+     if (d == 0) { 
+        Tcdf = ECDFx_0;
+ }else if (d == 1) { 
+        Tcdf = ECDFx_1;
+ }else if (d == 2) { 
+        Tcdf = ECDFx_2;
+ }else if (d == 3) { 
+        Tcdf = ECDFx_3;
+ }else if (d == 4) { 
+        Tcdf = ECDFx_4;
+ }else if (d == 5) { 
+        Tcdf = ECDFx_5;
+ }else if (d == 6) { 
+        Tcdf = ECDFx_6;
+ }else if (d == 7) { 
+        Tcdf = ECDFx_7;
+ }else if (d == 8) { 
+        Tcdf = ECDFx_8;
+ }else if (d == 9) { 
+        Tcdf = ECDFx_9;
+ }else if (d == 10) { 
+        Tcdf = ECDFx_10;
+ }else if (d == 11) { 
+        Tcdf = ECDFx_11;
+ }else if (d == 12) { 
+        Tcdf = ECDFx_12;
+ }else if (d == 13) { 
+        Tcdf = ECDFx_13;
+ }else if (d == 14) { 
+        Tcdf = ECDFx_14;
+ }else if (d == 17) { 
+        Tcdf = ECDFx_17;
+ }else if (d == 18) { 
+        Tcdf = ECDFx_18;
+ }else if (d == 19) { 
+        Tcdf = ECDFx_19;
+ }else if (d == 20) { 
+        Tcdf = ECDFx_20;
+ }else if (d == 21) { 
+        Tcdf = ECDFx_21;
+ }else if (d == 22) { 
+        Tcdf = ECDFx_22;
+ }else if (d == 23) { 
+        Tcdf = ECDFx_23;
+ }else if (d == 24) { 
+        Tcdf = ECDFx_24;
+ }else if (d == 25) { 
+        Tcdf = ECDFx_25;
+ }else if (d == 26) { 
+        Tcdf = ECDFx_26;
+ }else if (d == 27) { 
+        Tcdf = ECDFx_27;
+ }else if (d == 28) { 
+        Tcdf = ECDFx_28;
+ }else if (d == 29) { 
+        Tcdf = ECDFx_29;
+ }else if (d == 30) { 
+        Tcdf = ECDFx_30;
+ }else if (d == 31) { 
+        Tcdf = ECDFx_31;
+ }else if (d == 32) { 
+        Tcdf = ECDFx_32;
+ }else if (d == 33) { 
+        Tcdf = ECDFx_33;
+ }else if (d == 34) { 
+        Tcdf = ECDFx_34;
+ }else if (d == 35) { 
+        Tcdf = ECDFx_35;
+ }else if (d == 36) { 
+        Tcdf = ECDFx_36;
+ }else if (d == 37) { 
+        Tcdf = ECDFx_37;
+ }else if (d == 38) { 
+        Tcdf = ECDFx_38;
+ }else if (d == 39) { 
+        Tcdf = ECDFx_39;
+ }else if (d == 40) { 
+        Tcdf = ECDFx_40;
+ }else if (d == 41) { 
+        Tcdf = ECDFx_41;
+ }else if (d == 42) { 
+        Tcdf = ECDFx_42;
+ }else if (d == 43) { 
+        Tcdf = ECDFx_43;
+ }
+}
+</declaration>
+<location id="id39" x="0" y="0">
+	<name x="0" y="-20">q_39</name>
+<label kind="invariant" x="0" y="-30">x &lt;= Tcdf </label>
+</location>
+<location id="id0" x="300" y="0">
+	<name x="300" y="-20">q_0</name>
+<label kind="invariant" x="300" y="-30">x &lt;= Tcdf </label>
+</location>
+<location id="id27" x="600" y="0">
+	<name x="600" y="-20">q_27</name>
+<label kind="invariant" x="600" y="-30">x &lt;= Tcdf </label>
+</location>
+<location id="id3" x="900" y="0">
+	<name x="900" y="-20">q_3</name>
+<label kind="invariant" x="900" y="-30">x &lt;= Tcdf </label>
+</location>
+<location id="id25" x="0" y="300">
+	<name x="0" y="280">q_25</name>
+<label kind="invariant" x="0" y="270">x &lt;= Tcdf </label>
+</location>
+<location id="id18" x="300" y="300">
+	<name x="300" y="280">q_18</name>
+<label kind="invariant" x="300" y="270">x &lt;= Tcdf </label>
+</location>
+<location id="id22" x="600" y="300">
+	<name x="600" y="280">q_22</name>
+<label kind="invariant" x="600" y="270">x &lt;= Tcdf </label>
+</location>
+<location id="id35" x="900" y="300">
+	<name x="900" y="280">q_35</name>
+<label kind="invariant" x="900" y="270">x &lt;= Tcdf </label>
+</location>
+<location id="id23" x="0" y="600">
+	<name x="0" y="580">q_23</name>
+<label kind="invariant" x="0" y="570">x &lt;= Tcdf </label>
+</location>
+<location id="id15" x="300" y="600">
+	<name x="300" y="580">q_15</name>
+<label kind="invariant" x="300" y="570">x &lt;= Tcdf </label>
+</location>
+<location id="id40" x="600" y="600">
+	<name x="600" y="580">q_40</name>
+<label kind="invariant" x="600" y="570">x &lt;= Tcdf </label>
+</location>
+<location id="id41" x="900" y="600">
+	<name x="900" y="580">q_41</name>
+<label kind="invariant" x="900" y="570">x &lt;= Tcdf </label>
+</location>
+<location id="id32" x="0" y="900">
+	<name x="0" y="880">q_32</name>
+<label kind="invariant" x="0" y="870">x &lt;= Tcdf </label>
+</location>
+<location id="id11" x="300" y="900">
+	<name x="300" y="880">q_11</name>
+<label kind="invariant" x="300" y="870">x &lt;= Tcdf </label>
+</location>
+<location id="id17" x="600" y="900">
+	<name x="600" y="880">q_17</name>
+<label kind="invariant" x="600" y="870">x &lt;= Tcdf </label>
+</location>
+<location id="id42" x="900" y="900">
+	<name x="900" y="880">q_42</name>
+<label kind="invariant" x="900" y="870">x'==0</label>
+</location>
+<location id="id999" x="0" y="1200">
+	<name x="0" y="1180">__init__</name>
+<label kind="invariant" x="0" y="1170">x &lt;= 0</label>
+</location>
+<location id="id4" x="300" y="1200">
+	<name x="300" y="1180">q_4</name>
+<label kind="invariant" x="300" y="1170">x &lt;= Tcdf </label>
+</location>
+<location id="id24" x="600" y="1200">
+	<name x="600" y="1180">q_24</name>
+<label kind="invariant" x="600" y="1170">x'==0</label>
+</location>
+<location id="id30" x="900" y="1200">
+	<name x="900" y="1180">q_30</name>
+<label kind="invariant" x="900" y="1170">x &lt;= Tcdf </label>
+</location>
+<location id="id1" x="0" y="1500">
+	<name x="0" y="1480">q_1</name>
+<label kind="invariant" x="0" y="1470">x &lt;= Tcdf </label>
+</location>
+<location id="id33" x="300" y="1500">
+	<name x="300" y="1480">q_33</name>
+<label kind="invariant" x="300" y="1470">x &lt;= Tcdf </label>
+</location>
+<location id="id2" x="600" y="1500">
+	<name x="600" y="1480">q_2</name>
+<label kind="invariant" x="600" y="1470">x &lt;= Tcdf </label>
+</location>
+<location id="id36" x="900" y="1500">
+	<name x="900" y="1480">q_36</name>
+<label kind="invariant" x="900" y="1470">x &lt;= Tcdf </label>
+</location>
+<location id="id38" x="0" y="1800">
+	<name x="0" y="1780">q_38</name>
+<label kind="invariant" x="0" y="1770">x &lt;= Tcdf </label>
+</location>
+<location id="id9" x="300" y="1800">
+	<name x="300" y="1780">q_9</name>
+<label kind="invariant" x="300" y="1770">x &lt;= Tcdf </label>
+</location>
+<location id="id5" x="600" y="1800">
+	<name x="600" y="1780">q_5</name>
+<label kind="invariant" x="600" y="1770">x &lt;= Tcdf </label>
+</location>
+<location id="id7" x="900" y="1800">
+	<name x="900" y="1780">q_7</name>
+<label kind="invariant" x="900" y="1770">x &lt;= Tcdf </label>
+</location>
+<location id="id19" x="0" y="2100">
+	<name x="0" y="2080">q_19</name>
+<label kind="invariant" x="0" y="2070">x &lt;= Tcdf </label>
+</location>
+<location id="id8" x="300" y="2100">
+	<name x="300" y="2080">q_8</name>
+<label kind="invariant" x="300" y="2070">x &lt;= Tcdf </label>
+</location>
+<location id="id29" x="600" y="2100">
+	<name x="600" y="2080">q_29</name>
+<label kind="invariant" x="600" y="2070">x &lt;= Tcdf </label>
+</location>
+<location id="id14" x="900" y="2100">
+	<name x="900" y="2080">q_14</name>
+<label kind="invariant" x="900" y="2070">x &lt;= Tcdf </label>
+</location>
+<location id="id16" x="0" y="2400">
+	<name x="0" y="2380">q_16</name>
+<label kind="invariant" x="0" y="2370">x &lt;= Tcdf </label>
+</location>
+<location id="id28" x="300" y="2400">
+	<name x="300" y="2380">q_28</name>
+<label kind="invariant" x="300" y="2370">x &lt;= Tcdf </label>
+</location>
+<location id="id34" x="600" y="2400">
+	<name x="600" y="2380">q_34</name>
+<label kind="invariant" x="600" y="2370">x &lt;= Tcdf </label>
+</location>
+<location id="id21" x="900" y="2400">
+	<name x="900" y="2380">q_21</name>
+<label kind="invariant" x="900" y="2370">x &lt;= Tcdf </label>
+</location>
+<location id="id26" x="0" y="2700">
+	<name x="0" y="2680">q_26</name>
+<label kind="invariant" x="0" y="2670">x &lt;= Tcdf </label>
+</location>
+<location id="id10" x="300" y="2700">
+	<name x="300" y="2680">q_10</name>
+<label kind="invariant" x="300" y="2670">x &lt;= Tcdf </label>
+</location>
+<location id="id6" x="600" y="2700">
+	<name x="600" y="2680">q_6</name>
+<label kind="invariant" x="600" y="2670">x &lt;= Tcdf </label>
+</location>
+<location id="id13" x="900" y="2700">
+	<name x="900" y="2680">q_13</name>
+<label kind="invariant" x="900" y="2670">x &lt;= Tcdf </label>
+</location>
+<location id="id31" x="0" y="3000">
+	<name x="0" y="2980">q_31</name>
+<label kind="invariant" x="0" y="2970">x &lt;= Tcdf </label>
+</location>
+<location id="id20" x="300" y="3000">
+	<name x="300" y="2980">q_20</name>
+<label kind="invariant" x="300" y="2970">x &lt;= Tcdf </label>
+</location>
+<location id="id12" x="600" y="3000">
+	<name x="600" y="2980">q_12</name>
+<label kind="invariant" x="600" y="2970">x &lt;= Tcdf </label>
+</location>
+<location id="id37" x="900" y="3000">
+	<name x="900" y="2980">q_37</name>
+<label kind="invariant" x="900" y="2970">x &lt;= Tcdf </label>
+</location>
+<branchpoint id="id1000" x="600.0" y="2400.0"/>
+<branchpoint id="id1001" x="450.0" y="1200.0"/>
+<branchpoint id="id1002" x="450.0" y="2250.0"/>
+<branchpoint id="id1003" x="300.0" y="2250.0"/>
+<branchpoint id="id1004" x="150.0" y="1200.0"/>
+<branchpoint id="id1005" x="300.0" y="1500.0"/>
+<branchpoint id="id1006" x="750.0" y="1050.0"/>
+<branchpoint id="id1007" x="450.0" y="1200.0"/>
+<branchpoint id="id1008" x="150.0" y="2550.0"/>
+<branchpoint id="id1009" x="600.0" y="2700.0"/>
+<branchpoint id="id1010" x="450.0" y="1500.0"/>
+<branchpoint id="id1011" x="750.0" y="1650.0"/>
+<branchpoint id="id1012" x="300.0" y="300.0"/>
+<branchpoint id="id1013" x="150.0" y="2850.0"/>
+<init ref="id999"/>
+<transition>
+	<source ref="id34"/>
+	<target ref="id19"/>
+	<label kind="guard" x="300.0" y="2250.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="2255.0">s67!</label>
+	<label kind="assignment" x="300.0" y="2260.0">sample_ecdf(28),x=0</label>
+</transition>
+<transition>
+	<source ref="id10"/>
+	<target ref="id25"/>
+	<label kind="guard" x="150.0" y="1500.0"></label>
+	<label kind="synchronisation" x="150.0" y="1505.0">s45!</label>
+	<label kind="assignment" x="150.0" y="1510.0"></label>
+</transition>
+<transition>
+	<source ref="id5"/>
+	<target ref="id7"/>
+	<label kind="guard" x="750.0" y="1800.0"></label>
+	<label kind="synchronisation" x="750.0" y="1805.0">s35!</label>
+	<label kind="assignment" x="750.0" y="1810.0"></label>
+</transition>
+<transition>
+	<source ref="id19"/>
+	<target ref="id21"/>
+	<label kind="guard" x="450.0" y="2250.0"></label>
+	<label kind="synchronisation" x="450.0" y="2255.0">s70!</label>
+	<label kind="assignment" x="450.0" y="2260.0"></label>
+</transition>
+<transition>
+	<source ref="id28"/>
+	<target ref="id30"/>
+	<label kind="guard" x="600.0" y="1800.0"></label>
+	<label kind="synchronisation" x="600.0" y="1805.0">s78!</label>
+	<label kind="assignment" x="600.0" y="1810.0"></label>
+</transition>
+<transition>
+	<source ref="id32"/>
+	<target ref="id33"/>
+	<label kind="guard" x="150.0" y="1200.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="150.0" y="1205.0">s59!</label>
+	<label kind="assignment" x="150.0" y="1210.0">sample_ecdf(21),x=0</label>
+</transition>
+<transition>
+	<source ref="id14"/>
+	<target ref="id15"/>
+	<label kind="guard" x="600.0" y="1350.0"></label>
+	<label kind="synchronisation" x="600.0" y="1355.0">s52!</label>
+	<label kind="assignment" x="600.0" y="1360.0"></label>
+</transition>
+<transition>
+	<source ref="id6"/>
+	<target ref="id8"/>
+	<label kind="guard" x="450.0" y="2400.0"></label>
+	<label kind="synchronisation" x="450.0" y="2405.0">s37!</label>
+	<label kind="assignment" x="450.0" y="2410.0"></label>
+</transition>
+<transition>
+	<source ref="id7"/>
+	<target ref="id9"/>
+	<label kind="guard" x="600.0" y="1800.0"></label>
+	<label kind="synchronisation" x="600.0" y="1805.0">s36!</label>
+	<label kind="assignment" x="600.0" y="1810.0"></label>
+</transition>
+<transition>
+	<source ref="id23"/>
+	<target ref="id24"/>
+	<label kind="guard" x="300.0" y="900.0"></label>
+	<label kind="synchronisation" x="300.0" y="905.0">s77!</label>
+	<label kind="assignment" x="300.0" y="910.0"></label>
+</transition>
+<transition>
+	<source ref="id9"/>
+	<target ref="id25"/>
+	<label kind="guard" x="150.0" y="1050.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="150.0" y="1055.0">s45!</label>
+	<label kind="assignment" x="150.0" y="1060.0">sample_ecdf(4),x=0</label>
+</transition>
+<transition>
+	<source ref="id17"/>
+	<target ref="id18"/>
+	<label kind="guard" x="450.0" y="600.0"></label>
+	<label kind="synchronisation" x="450.0" y="605.0">s60!</label>
+	<label kind="assignment" x="450.0" y="610.0"></label>
+</transition>
+<transition>
+	<source ref="id36"/>
+	<target ref="id37"/>
+	<label kind="guard" x="900.0" y="2250.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="900.0" y="2255.0">s87!</label>
+	<label kind="assignment" x="900.0" y="2260.0">sample_ecdf(43),x=0</label>
+</transition>
+<transition>
+	<source ref="id22"/>
+	<target ref="id23"/>
+	<label kind="guard" x="300.0" y="450.0"></label>
+	<label kind="synchronisation" x="300.0" y="455.0">s76!</label>
+	<label kind="assignment" x="300.0" y="460.0"></label>
+</transition>
+<transition>
+	<source ref="id7"/>
+	<target ref="id10"/>
+	<label kind="guard" x="600.0" y="2250.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="600.0" y="2255.0">s42!</label>
+	<label kind="assignment" x="600.0" y="2260.0">sample_ecdf(37),x=0</label>
+</transition>
+<transition>
+	<source ref="id11"/>
+	<target ref="id12"/>
+	<label kind="guard" x="450.0" y="1950.0"></label>
+	<label kind="synchronisation" x="450.0" y="1955.0">s43!</label>
+	<label kind="assignment" x="450.0" y="1960.0"></label>
+</transition>
+<transition>
+	<source ref="id15"/>
+	<target ref="id16"/>
+	<label kind="guard" x="150.0" y="1500.0"></label>
+	<label kind="synchronisation" x="150.0" y="1505.0">s53!</label>
+	<label kind="assignment" x="150.0" y="1510.0"></label>
+</transition>
+<transition>
+	<source ref="id3"/>
+	<target ref="id4"/>
+	<label kind="guard" x="600.0" y="600.0"></label>
+	<label kind="synchronisation" x="600.0" y="605.0">s29!</label>
+	<label kind="assignment" x="600.0" y="610.0"></label>
+</transition>
+<transition>
+	<source ref="id16"/>
+	<target ref="id17"/>
+	<label kind="guard" x="300.0" y="1650.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="1655.0">s57!</label>
+	<label kind="assignment" x="300.0" y="1660.0">sample_ecdf(14),x=0</label>
+</transition>
+<transition>
+	<source ref="id2"/>
+	<target ref="id3"/>
+	<label kind="guard" x="750.0" y="750.0"></label>
+	<label kind="synchronisation" x="750.0" y="755.0">s28!</label>
+	<label kind="assignment" x="750.0" y="760.0"></label>
+</transition>
+<transition>
+	<source ref="id37"/>
+	<target ref="id38"/>
+	<label kind="guard" x="450.0" y="2400.0"></label>
+	<label kind="synchronisation" x="450.0" y="2405.0">s90!</label>
+	<label kind="assignment" x="450.0" y="2410.0"></label>
+</transition>
+<transition>
+	<source ref="id33"/>
+	<target ref="id34"/>
+	<label kind="guard" x="450.0" y="1950.0"></label>
+	<label kind="synchronisation" x="450.0" y="1955.0">s62!</label>
+	<label kind="assignment" x="450.0" y="1960.0"></label>
+</transition>
+<transition>
+	<source ref="id40"/>
+	<target ref="id41"/>
+	<label kind="guard" x="750.0" y="600.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="750.0" y="605.0">s3!</label>
+	<label kind="assignment" x="750.0" y="610.0">sample_ecdf(11),x=0</label>
+</transition>
+<transition>
+	<source ref="id31"/>
+	<target ref="id32"/>
+	<label kind="guard" x="0.0" y="1950.0"></label>
+	<label kind="synchronisation" x="0.0" y="1955.0">s54!</label>
+	<label kind="assignment" x="0.0" y="1960.0"></label>
+</transition>
+<transition>
+	<source ref="id35"/>
+	<target ref="id36"/>
+	<label kind="guard" x="900.0" y="900.0"></label>
+	<label kind="synchronisation" x="900.0" y="905.0">s85!</label>
+	<label kind="assignment" x="900.0" y="910.0"></label>
+</transition>
+<transition>
+	<source ref="id999"/>
+	<target ref="id0"/>
+	<label kind="guard" x="150.0" y="600.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="150.0" y="605.0">s4!</label>
+	<label kind="assignment" x="150.0" y="610.0">sample_ecdf(1),x=0</label>
+</transition>
+<transition>
+	<source ref="id12"/>
+	<target ref="id13"/>
+	<label kind="guard" x="750.0" y="2850.0"></label>
+	<label kind="synchronisation" x="750.0" y="2855.0">s44!</label>
+	<label kind="assignment" x="750.0" y="2860.0"></label>
+</transition>
+<transition>
+	<source ref="id41"/>
+	<target ref="id42"/>
+	<label kind="guard" x="900.0" y="750.0"></label>
+	<label kind="synchronisation" x="900.0" y="755.0">s7!</label>
+	<label kind="assignment" x="900.0" y="760.0">x=0</label>
+</transition>
+<transition>
+	<source ref="id13"/>
+	<target ref="id14"/>
+	<label kind="guard" x="900.0" y="2400.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="900.0" y="2405.0">s49!</label>
+	<label kind="assignment" x="900.0" y="2410.0">sample_ecdf(31),x=0</label>
+</transition>
+<transition>
+	<source ref="id9"/>
+	<target ref="id10"/>
+	<label kind="guard" x="300.0" y="2250.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="2255.0">s42!</label>
+	<label kind="assignment" x="300.0" y="2260.0">sample_ecdf(37),x=0</label>
+</transition>
+<transition>
+	<source ref="id1"/>
+	<target ref="id2"/>
+	<label kind="guard" x="300.0" y="1500.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="1505.0">s27!</label>
+	<label kind="assignment" x="300.0" y="1510.0">sample_ecdf(22),x=0</label>
+</transition>
+<transition>
+	<source ref="id38"/>
+	<target ref="id39"/>
+	<label kind="guard" x="0.0" y="900.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="0.0" y="905.0">s2!</label>
+	<label kind="assignment" x="0.0" y="910.0">sample_ecdf(0),x=0</label>
+</transition>
+<transition>
+	<source ref="id0"/>
+	<target ref="id1"/>
+	<label kind="guard" x="150.0" y="750.0"></label>
+	<label kind="synchronisation" x="150.0" y="755.0">s6!</label>
+	<label kind="assignment" x="150.0" y="760.0"></label>
+</transition>"<transition>
+	<source ref="id21"/>
+	<target ref="id1000"/>
+</transition><transition>
+	<source ref="id1000"/>
+	<target ref="id28"/>
+	<label kind="guard" x="600.0" y="2400.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="600.0" y="2405.0">s75!</label>
+	<label kind="assignment" x="600.0" y="2410.0">sample_ecdf(33),x=0</label>
+	<label kind="probability" x="600.0" y="2415.0">0.3333333333333333</label></transition>"<transition>
+	<source ref="id25"/>
+	<target ref="id1001"/>
+</transition><transition>
+	<source ref="id1001"/>
+	<target ref="id14"/>
+	<label kind="guard" x="450.0" y="1200.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="450.0" y="1205.0">s49!</label>
+	<label kind="assignment" x="450.0" y="1210.0">sample_ecdf(31),x=0</label>
+	<label kind="probability" x="450.0" y="1215.0">0.3333333333333333</label></transition>"<transition>
+	<source ref="id28"/>
+	<target ref="id1002"/>
+</transition><transition>
+	<source ref="id1002"/>
+	<target ref="id29"/>
+	<label kind="guard" x="450.0" y="2250.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="450.0" y="2255.0">s69!</label>
+	<label kind="assignment" x="450.0" y="2260.0">sample_ecdf(30),x=0</label>
+	<label kind="probability" x="450.0" y="2265.0">0.3333333333333333</label></transition>"<transition>
+	<source ref="id10"/>
+	<target ref="id1003"/>
+</transition><transition>
+	<source ref="id1003"/>
+	<target ref="id9"/>
+	<label kind="guard" x="300.0" y="2250.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="2255.0">s36!</label>
+	<label kind="assignment" x="300.0" y="2260.0">sample_ecdf(25),x=0</label>
+	<label kind="probability" x="300.0" y="2265.0">0.3333333333333333</label></transition><transition>
+	<source ref="id1001"/>
+	<target ref="id6"/>
+	<label kind="guard" x="300.0" y="1500.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="1505.0">s34!</label>
+	<label kind="assignment" x="300.0" y="1510.0">sample_ecdf(38),x=0</label>
+	<label kind="probability" x="300.0" y="1515.0">0.16666666666666666</label></transition>"<transition>
+	<source ref="id18"/>
+	<target ref="id1004"/>
+</transition><transition>
+	<source ref="id1004"/>
+	<target ref="id19"/>
+	<label kind="guard" x="150.0" y="1200.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="150.0" y="1205.0">s67!</label>
+	<label kind="assignment" x="150.0" y="1210.0">sample_ecdf(28),x=0</label>
+	<label kind="probability" x="150.0" y="1215.0">0.42857142857142855</label></transition>"<transition>
+	<source ref="id8"/>
+	<target ref="id1005"/>
+</transition><transition>
+	<source ref="id1005"/>
+	<target ref="id11"/>
+	<label kind="guard" x="300.0" y="1500.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="1505.0">s40!</label>
+	<label kind="assignment" x="300.0" y="1510.0">sample_ecdf(13),x=0</label>
+	<label kind="probability" x="300.0" y="1515.0">0.5</label></transition>"<transition>
+	<source ref="id30"/>
+	<target ref="id1006"/>
+</transition><transition>
+	<source ref="id1006"/>
+	<target ref="id17"/>
+	<label kind="guard" x="750.0" y="1050.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="750.0" y="1055.0">s57!</label>
+	<label kind="assignment" x="750.0" y="1060.0">sample_ecdf(14),x=0</label>
+	<label kind="probability" x="750.0" y="1065.0">0.3333333333333333</label></transition><transition>
+	<source ref="id1005"/>
+	<target ref="id10"/>
+	<label kind="guard" x="300.0" y="2400.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="2405.0">s42!</label>
+	<label kind="assignment" x="300.0" y="2410.0">sample_ecdf(37),x=0</label>
+	<label kind="probability" x="300.0" y="2415.0">0.5</label></transition>"<transition>
+	<source ref="id27"/>
+	<target ref="id1007"/>
+</transition><transition>
+	<source ref="id1007"/>
+	<target ref="id28"/>
+	<label kind="guard" x="450.0" y="1200.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="450.0" y="1205.0">s75!</label>
+	<label kind="assignment" x="450.0" y="1210.0">sample_ecdf(33),x=0</label>
+	<label kind="probability" x="450.0" y="1215.0">0.6</label></transition>"<transition>
+	<source ref="id19"/>
+	<target ref="id1008"/>
+</transition><transition>
+	<source ref="id1008"/>
+	<target ref="id20"/>
+	<label kind="guard" x="150.0" y="2550.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="150.0" y="2555.0">s61!</label>
+	<label kind="assignment" x="150.0" y="2560.0">sample_ecdf(41),x=0</label>
+	<label kind="probability" x="150.0" y="2565.0">0.3333333333333333</label></transition>"<transition>
+	<source ref="id20"/>
+	<target ref="id1009"/>
+</transition><transition>
+	<source ref="id1009"/>
+	<target ref="id21"/>
+	<label kind="guard" x="600.0" y="2700.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="600.0" y="2705.0">s70!</label>
+	<label kind="assignment" x="600.0" y="2710.0">sample_ecdf(35),x=0</label>
+	<label kind="probability" x="600.0" y="2715.0">0.42857142857142855</label></transition>"<transition>
+	<source ref="id4"/>
+	<target ref="id1010"/>
+</transition><transition>
+	<source ref="id1010"/>
+	<target ref="id5"/>
+	<label kind="guard" x="450.0" y="1500.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="450.0" y="1505.0">s32!</label>
+	<label kind="assignment" x="450.0" y="1510.0">sample_ecdf(26),x=0</label>
+	<label kind="probability" x="450.0" y="1515.0">0.375</label></transition>"<transition>
+	<source ref="id29"/>
+	<target ref="id1011"/>
+</transition><transition>
+	<source ref="id1011"/>
+	<target ref="id30"/>
+	<label kind="guard" x="750.0" y="1650.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="750.0" y="1655.0">s78!</label>
+	<label kind="assignment" x="750.0" y="1660.0">sample_ecdf(19),x=0</label>
+	<label kind="probability" x="750.0" y="1665.0">0.6</label></transition><transition>
+	<source ref="id1006"/>
+	<target ref="id35"/>
+	<label kind="guard" x="900.0" y="750.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="900.0" y="755.0">s82!</label>
+	<label kind="assignment" x="900.0" y="760.0">sample_ecdf(7),x=0</label>
+	<label kind="probability" x="900.0" y="765.0">0.3333333333333333</label></transition>"<transition>
+	<source ref="id39"/>
+	<target ref="id1012"/>
+</transition><transition>
+	<source ref="id1012"/>
+	<target ref="id40"/>
+	<label kind="guard" x="300.0" y="300.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="300.0" y="305.0">s91!</label>
+	<label kind="assignment" x="300.0" y="310.0">sample_ecdf(10),x=0</label>
+	<label kind="probability" x="300.0" y="315.0">0.5</label></transition><transition>
+	<source ref="id1000"/>
+	<target ref="id22"/>
+	<label kind="guard" x="750.0" y="1350.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="750.0" y="1355.0">s73!</label>
+	<label kind="assignment" x="750.0" y="1360.0">sample_ecdf(6),x=0</label>
+	<label kind="probability" x="750.0" y="1365.0">0.3333333333333333</label></transition>"<transition>
+	<source ref="id26"/>
+	<target ref="id1013"/>
+</transition><transition>
+	<source ref="id1013"/>
+	<target ref="id20"/>
+	<label kind="guard" x="150.0" y="2850.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="150.0" y="2855.0">s61!</label>
+	<label kind="assignment" x="150.0" y="2860.0">sample_ecdf(41),x=0</label>
+	<label kind="probability" x="150.0" y="2865.0">0.4</label></transition><transition>
+	<source ref="id1001"/>
+	<target ref="id31"/>
+	<label kind="guard" x="0.0" y="1650.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="0.0" y="1655.0">s51!</label>
+	<label kind="assignment" x="0.0" y="1660.0">sample_ecdf(40),x=0</label>
+	<label kind="probability" x="0.0" y="1665.0">0.16666666666666666</label></transition><transition>
+	<source ref="id1004"/>
+	<target ref="id26"/>
+	<label kind="guard" x="150.0" y="1500.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="150.0" y="1505.0">s65!</label>
+	<label kind="assignment" x="150.0" y="1510.0">sample_ecdf(36),x=0</label>
+	<label kind="probability" x="150.0" y="1515.0">0.5714285714285714</label></transition><transition>
+	<source ref="id1009"/>
+	<target ref="id27"/>
+	<label kind="guard" x="450.0" y="1500.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="450.0" y="1505.0">s68!</label>
+	<label kind="assignment" x="450.0" y="1510.0">sample_ecdf(2),x=0</label>
+	<label kind="probability" x="450.0" y="1515.0">0.5714285714285714</label></transition><transition>
+	<source ref="id1010"/>
+	<target ref="id6"/>
+	<label kind="guard" x="450.0" y="1950.0">x &gt;= 0</label>
+	<label kind="synchronisation" x="450.0" y="1955.0">s34!</label>
+	<label kind="assignment" x="450.0" y="1960.0">sample_ecdf(38),x=0</label>
+	<label kind="probability" x="450.0" y="1965.0">0.625</label></transition></template>
+<system>
+s = DiscoveredSystem();
+
+system s;
+</system>
+<queries>
+		<query>
+			<formula>E&lt;&gt; s.q_4</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate[&lt;=TAU;1000]{s.x}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate[&lt;=TAU]{s.q_39,s.q_0,s.q_27,s.q_3,s.q_25,s.q_18,s.q_22,s.q_35,s.q_23,s.q_15,s.q_40,s.q_41,s.q_32,s.q_11,s.q_17,s.q_42,s.__init__,s.q_4,s.q_24,s.q_30,s.q_1,s.q_33,s.q_2,s.q_36,s.q_38,s.q_9,s.q_5,s.q_7,s.q_19,s.q_8,s.q_29,s.q_14,s.q_16,s.q_28,s.q_34,s.q_21,s.q_26,s.q_10,s.q_6,s.q_13,s.q_31,s.q_20,s.q_12,s.q_37}</formula>
+			<comment></comment>
+		</query>
+</queries>
+</nta>
