@@ -34,6 +34,7 @@ else:
     LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'log')
 os.makedirs(LOG_DIR, exist_ok=True)
 
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -44,6 +45,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+interaction_logger = logging.getLogger("chatbot_interactions")
+interaction_logger.setLevel(logging.INFO)
+interaction_handler = logging.FileHandler(os.path.join(LOG_DIR, 'chatbot_interactions.log'))
+interaction_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+interaction_logger.addHandler(interaction_handler)
+interaction_logger.propagate = False
 
 def stop_containers():
     try:
