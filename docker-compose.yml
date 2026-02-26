@@ -7,6 +7,30 @@
 version: '2.4'
 
 services:
+  # Chatbot UI/API
+  chatbot:
+    build:
+      context: .
+      dockerfile: server/Dockerfile.chatbot
+    container_name: lego-chatbot
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./data:/app/data:ro
+      - ./log:/app/log
+      - ./pmmOutputs:/app/pmmOutputs
+      - ./src/extractor_outputs:/app/src/extractor_outputs
+      # Mount Docker socket to allow controlling sibling containers (for UPPAAL)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    env_file:
+      - .env
+    environment:
+      - GRADIO_SERVER_NAME=0.0.0.0
+      - GRADIO_SERVER_PORT=7860
+    networks:
+      - chatbot_network
+    restart: unless-stopped
+
   # UPPAAL Verification Engine
   # Build: cd src/uppaal && docker build --build-arg KEY=$UPPAAL_LICENSE_KEY --tag uppaal-engine -f res/Dockerfile .
   uppaal:

@@ -202,23 +202,17 @@ For deploying on a remote server with Docker, see [server/README.md](server/READ
 
 ## Usage
 
-Start the conversational framework and interact with it through CLI:
+### CLI Interface
+
+Start the conversational framework and interact with it through the command line:
 
 ``` bash
 python src/main.py
 ```
 
-or for the GUI version:
-
-``` bash
-python src/chatbot.py
-```
-
-Running `chatbot.py` launches a local web application that provides a GUI for the chatbot. Once the script is launched, your terminal will provide a local link, typically something like `http://127.0.0.1:7860`. This address acts as a local server that you can access directly from your web browser.
-
 The complete conversation will be stored in a `.txt` file in the [outputs](tests/outputs) folder.
 
-The default parameters are:
+The default parameters for the `main.py` are:
 
 * Gateway LLM: `'gpt-4o-mini'`;
 * Simulation LLM: `'gpt-4o-mini'`;
@@ -239,6 +233,17 @@ To customize these settings, modify the corresponding arguments when executing `
 * Use `--extracted_model_failure` to specify if the model with failure data has already been extracted (True or False).
 
 A comprehensive list of commands can be found in `src/cmd4tests.sh`.
+
+### Web GUI
+
+The chatbot GUI is provided as a **Docker container** and should be accessed via the Docker setup rather than running locally. To use the web interface:
+
+First, ensure Docker services are running:
+   ``` bash
+   docker compose up -d
+   ```
+
+Then access the chatbot at: `http://localhost:7860`
 
 ## LLMs Requirements
 
