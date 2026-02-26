@@ -22,11 +22,17 @@ SEED = 10
 MAX_RESTART_ATTEMPTS = 3
 RESTART_DELAY = 5  # seconds
 warnings.filterwarnings('ignore')
+
+# Ensure log directory exists
+log_dir = os.path.join(os.path.dirname(__file__), '..', 'log')
+os.makedirs(log_dir, exist_ok=True)
+log_file_path = os.path.join(log_dir, 'main_errors.log')
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('log/main_errors.log'),
+        logging.FileHandler(log_file_path),
         logging.StreamHandler(sys.stderr)
     ]
 )

@@ -51,6 +51,9 @@ class FactorySimulator:
         else:
             print("Warning: No start activity found!")
 
+    def is_pass_activity(self, activity_name):
+        return isinstance(activity_name, str) and activity_name.endswith("_pass")
+
     def arrival_generator(self):
         # It simulates the arrival of new pieces to process based on inter-arrival time distribution.
         while True:
@@ -66,7 +69,13 @@ class FactorySimulator:
             return None  # No next activity
 
         activities, probabilities = zip(*[(activity, data["probability"]) for activity, data in next_activities.items()])
-        return np.random.choice(activities, p=probabilities)
+        prob_array = np.array(probabilities, dtype=float)
+        total = prob_array.sum()
+        if total <= 0:
+            return None
+        if not np.isclose(total, 1.0):
+            prob_array = prob_array / total
+        return np.random.choice(activities, p=prob_array)
 
     def sample_distribution(self, processing_time):
         dist_type = processing_time.get("type", "fixed").lower()
@@ -151,6 +160,23 @@ class FactorySimulator:
     def process_piece(self, activity_name):
         # It processes a piece through the factory activities.
         while activity_name:
+            if self.is_pass_activity(activity_name):
+                if activity_name in self.activities:
+                    pass_delay_cfg = self.activities[activity_name]["processing_time"]
+                    next_map = self.activities[activity_name]["next_activities"]
+                else:
+                    pass_delay_cfg = self.config.get("pass_through_time", {"type": "fixed", "mean": 0})
+                    base_activity = activity_name[:-5]
+                    next_map = self.activities.get(base_activity, {}).get("next_activities", {})
+
+                pass_delay = max(0, self.sample_distribution(pass_delay_cfg))
+                if pass_delay > 0:
+                    yield self.env.timeout(pass_delay)
+                    self.stats["total_transfer_time"].append(pass_delay)
+
+                activity_name = self.choose_next_activity(next_map)
+                continue
+
             activity = self.activities[activity_name]
             # Request a slot in the current activity's capacity
             with activity["resource"].request() as request:

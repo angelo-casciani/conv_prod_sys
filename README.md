@@ -111,9 +111,13 @@ This script will:
 - Check for Docker installation (required for Extractor and UPPAAL);
 - Set up and start Docker containers (if Docker and UPPAAL license key are available).
 
-### Python Environment
+### Python Environments
 
 **Requires Python 3.11 or higher.**
+
+The project uses a dual Python environment setup to manage dependency conflicts:
+
+#### Main Environment (venv)
 
 Create a virtual environment in the root folder of the project:
 
@@ -122,10 +126,47 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Run the following command to install the necessary packages along with their dependencies in the `requirements.txt` file using `pip`:
+Install the core framework dependencies:
 
 ``` bash
 pip install -r requirements.txt
+```
+
+This venv is used for the main framework components: conversational layer, simulation, verification orchestration, etc.
+
+#### LSHA Automaton Learning (conda)
+
+LSHA (Stochastic Hybrid Automaton learning) has specific version requirements that conflict with the main framework dependencies, so it uses a separate **conda environment**.
+
+The conda environment is automatically created by the setup script:
+
+``` bash
+./setup_submodules.sh
+```
+
+This creates an `lsha` conda environment with the exact dependencies specified in `src/lsha/environment.yml`, including `skg-connector` and other specific dependencies (e.g., TensorFlow, JAX, Neo4j).
+
+**If conda is not installed**, install [Miniconda](https://docs.conda.io/en/latest/miniconda.html) first:
+
+``` bash
+# Verify conda is available
+conda --version
+```
+
+**Why separate environments?** LSHA requires exact versions of dependencies like TensorFlow, JAX, and Neo4j that would conflict with the main framework's requirements. The conda environment provides dependency isolation, while `automaton_learning.py` automatically invokes LSHA via subprocess, so you typically won't need to manually activate the conda environment.
+
+#### Environment Setup Verification
+
+After running `./setup_submodules.sh`, verify both environments are ready:
+
+``` bash
+# Check main venv
+source .venv/bin/activate
+python --version  # Should be 3.11+
+
+# Check LSHA conda environment
+conda activate lsha
+python -c "import skg_connector; print('SKG Connector:', skg_connector.__version__)"
 ```
 
 Set up a [HuggingFace token](https://huggingface.co/) and/or an [OpenAI API key](https://platform.openai.com/overview) in a `.env` file in the root directory:

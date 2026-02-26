@@ -17,16 +17,3 @@ sentencepiece>=0.2.1
 simpy==4.1.1
 torch>=2.7.0
 transformers>=4.51.3
-
-# LSHA (Stochastic Hybrid Automaton Learning) dependencies
-# Note: LSHA has stricter version requirements that may conflict with the above
-# If you encounter issues, consider using a separate virtual environment for LSHA
-graphviz>=0.20.1
-imbalanced-learn>=0.12.0
-jax>=0.4.24
-neo4j>=5.17.0
-promg>=0.1.40
-tabulate>=0.9.0
-tensorflow>=2.12.0
-z3-solver>=4.12.5.0
-tqdm>=4.66.2

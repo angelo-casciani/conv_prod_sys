@@ -2,15 +2,15 @@
   "inter_arrival_time": {
     "type": "lognorm",
     "mean": 39.17,
-    "arg1": 1493.12,
+    "arg1": 1493.16,
     "arg2": 0
   },
   "activities": {
     "corner2": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
+        "type": "LOGNORMAL",
+        "mean": "2.24",
         "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
@@ -24,98 +24,80 @@
     "station11": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "LOGNORMAL",
+        "mean": "18.15",
+        "arg1": "71.97",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
         "station21": {
-          "probability": 1.0
+          "probability": 0.25
+        },
+        "station21_pass": {
+          "probability": 0.75
         }
       }
     },
     "station21": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "LOGNORMAL",
+        "mean": "50.89",
+        "arg1": "512.06",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station22": {
-          "probability": 0.8
-        },
-        "splitter2": {
-          "probability": 0.1
-        },
-        "splitter1": {
-          "probability": 0.1
+        "station22_pass": {
+          "probability": 1.0
         }
       }
     },
-    "station22": {
+    "station22_pass": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "NORMAL",
+        "mean": "3.32",
+        "arg1": "0.15",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station31": {
-          "probability": 0.67
-        },
-        "station41": {
-          "probability": 0.33
-        }
-      }
-    },
-    "splitter1": {
-      "capacity": 1,
-      "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
-        "arg2": "",
-        "timeUnit": "seconds"
-      },
-      "next_activities": {
-        "station22": {
-          "probability": 0.05
+        "station31_pass": {
+          "probability": 0.02
         },
         "station31": {
-          "probability": 0.95
+          "probability": 0.34
+        },
+        "station21_pass": {
+          "probability": 0.64
         }
       }
     },
     "station31": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "LOGNORMAL",
+        "mean": "18.02",
+        "arg1": "33.2",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station22": {
-          "probability": 0.02
+        "station41_pass": {
+          "probability": 0.4
         },
         "station41": {
-          "probability": 0.98
+          "probability": 0.6
         }
       }
     },
     "station41": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
+        "type": "EXPONENTIAL",
+        "mean": "10.64",
         "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
@@ -129,77 +111,64 @@
     "station51": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "LOGNORMAL",
+        "mean": "30.52",
+        "arg1": "150.31",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "splitter3": {
-          "probability": 0.1
-        },
-        "station41": {
-          "probability": 0.9
+        "station52_pass": {
+          "probability": 1.0
         }
       }
     },
-    "station52": {
+    "station52_pass": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
+        "type": "LOGNORMAL",
+        "mean": "3.35",
         "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {}
     },
-    "splitter3": {
+    "station51_pass": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "NORMAL",
+        "mean": "3.41",
+        "arg1": "0.01",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "station51": {
-          "probability": 0.1
+        "station52_pass": {
+          "probability": 0.72
         },
-        "splitter4": {
-          "probability": 0.66
-        },
-        "station61": {
-          "probability": 0.24
+        "station52": {
+          "probability": 0.28
         }
       }
     },
-    "splitter4": {
+    "station52": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "LOGNORMAL",
+        "mean": "29.1",
+        "arg1": "56.89",
         "arg2": "",
         "timeUnit": "seconds"
       },
-      "next_activities": {
-        "station41": {
-          "probability": 0.75
-        },
-        "splitter2": {
-          "probability": 0.25
-        }
-      }
+      "next_activities": {}
     },
     "station61": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "LOGNORMAL",
+        "mean": "25.66",
+        "arg1": "0.04",
         "arg2": "",
         "timeUnit": "seconds"
       },
@@ -212,9 +181,9 @@
     "station71": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "LOGNORMAL",
+        "mean": "9.24",
+        "arg1": "3.06",
         "arg2": "",
         "timeUnit": "seconds"
       },
@@ -227,18 +196,24 @@
     "corner1": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
-        "arg1": "",
+        "type": "NORMAL",
+        "mean": "1.9",
+        "arg1": "0.01",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "splitter5": {
-          "probability": 0.62
+        "station41_pass": {
+          "probability": 0.05
         },
-        "station71": {
-          "probability": 0.38
+        "splitter5": {
+          "probability": 0.57
+        },
+        "station21_pass": {
+          "probability": 0.03
+        },
+        "station71_pass": {
+          "probability": 0.35
         }
       }
     },
@@ -252,264 +227,133 @@
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "splitter4": {
-          "probability": 0.61
-        },
-        "station71": {
-          "probability": 0.39
+        "station21_pass": {
+          "probability": 1.0
         }
       }
     },
-    "splitter2": {
+    "station21_pass": {
       "capacity": 1,
       "processing_time": {
-        "type": "FIXED",
-        "mean": "1",
+        "type": "NORMAL",
+        "mean": "3.32",
+        "arg1": "0.02",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station22_pass": {
+          "probability": 0.75
+        },
+        "station22": {
+          "probability": 0.25
+        }
+      }
+    },
+    "station22": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "LOGNORMAL",
+        "mean": "49.15",
+        "arg1": "399.31",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station31": {
+          "probability": 1.0
+        }
+      }
+    },
+    "station41_pass": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "LOGNORMAL",
+        "mean": "3.41",
         "arg1": "",
         "arg2": "",
         "timeUnit": "seconds"
       },
       "next_activities": {
-        "corner2": {
-          "probability": 0.41
+        "station51_pass": {
+          "probability": 0.85
         },
-        "station21": {
-          "probability": 0.59
+        "station51": {
+          "probability": 0.15
+        }
+      }
+    },
+    "station61_pass": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "LOGNORMAL",
+        "mean": "3.31",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station71_pass": {
+          "probability": 0.36
+        },
+        "station71": {
+          "probability": 0.64
+        }
+      }
+    },
+    "station71_pass": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "LOGNORMAL",
+        "mean": "3.29",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "corner1": {
+          "probability": 1.0
+        }
+      }
+    },
+    "station31_pass": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "LOGNORMAL",
+        "mean": "3.34",
+        "arg1": "",
+        "arg2": "",
+        "timeUnit": "seconds"
+      },
+      "next_activities": {
+        "station41_pass": {
+          "probability": 1.0
+        }
+      }
+    },
+    "event": {
+      "capacity": 1,
+      "processing_time": {
+        "type": "fixed",
+        "mean": 0,
+        "arg1": 0,
+        "arg2": 0
+      },
+      "next_activities": {
+        "station61": {
+          "probability": 0.2
+        },
+        "station61_pass": {
+          "probability": 0.2
+        },
+        "station41_pass": {
+          "probability": 0.2
+        },
+        "station41": {
+          "probability": 0.2
         }
       }
     }
   },
-  "transfer_times": {
-    "splitter2": {
-      "corner2": {
-        "type": "normal",
-        "mean": 3.92,
-        "arg1": 0.32,
-        "arg2": 0
-      },
-      "station21": {
-        "type": "normal",
-        "mean": 3.92,
-        "arg1": 0.32,
-        "arg2": 0
-      }
-    },
-    "station31": {
-      "station22": {
-        "type": "normal",
-        "mean": 2.83,
-        "arg1": 0.46,
-        "arg2": 0
-      },
-      "station41": {
-        "type": "normal",
-        "mean": 2.83,
-        "arg1": 0.46,
-        "arg2": 0
-      }
-    },
-    "station22": {
-      "station31": {
-        "type": "normal",
-        "mean": 4.21,
-        "arg1": 0.77,
-        "arg2": 0
-      },
-      "station41": {
-        "type": "normal",
-        "mean": 4.21,
-        "arg1": 0.77,
-        "arg2": 0
-      }
-    },
-    "station21": {
-      "station22": {
-        "type": "normal",
-        "mean": 4.68,
-        "arg1": 0.36,
-        "arg2": 0
-      },
-      "splitter2": {
-        "type": "normal",
-        "mean": 4.68,
-        "arg1": 0.36,
-        "arg2": 0
-      },
-      "splitter1": {
-        "type": "normal",
-        "mean": 4.68,
-        "arg1": 0.36,
-        "arg2": 0
-      }
-    },
-    "station61": {
-      "station71": {
-        "type": "normal",
-        "mean": 3.27,
-        "arg1": 0.32,
-        "arg2": 0
-      }
-    },
-    "splitter1": {
-      "station22": {
-        "type": "normal",
-        "mean": 2.66,
-        "arg1": 0.65,
-        "arg2": 0
-      },
-      "station31": {
-        "type": "normal",
-        "mean": 2.66,
-        "arg1": 0.65,
-        "arg2": 0
-      }
-    },
-    "station41": {
-      "station51": {
-        "type": "normal",
-        "mean": 2.08,
-        "arg1": 0.44,
-        "arg2": 0
-      }
-    },
-    "event": {
-      "station52": {
-        "type": "normal",
-        "mean": 3.95,
-        "arg1": 0.68,
-        "arg2": 0
-      },
-      "event": {
-        "type": "normal",
-        "mean": 3.95,
-        "arg1": 0.68,
-        "arg2": 0
-      },
-      "station22": {
-        "type": "normal",
-        "mean": 3.95,
-        "arg1": 0.68,
-        "arg2": 0
-      },
-      "splitter2": {
-        "type": "normal",
-        "mean": 3.95,
-        "arg1": 0.68,
-        "arg2": 0
-      },
-      "station41": {
-        "type": "normal",
-        "mean": 3.95,
-        "arg1": 0.68,
-        "arg2": 0
-      },
-      "splitter1": {
-        "type": "normal",
-        "mean": 3.95,
-        "arg1": 0.68,
-        "arg2": 0
-      }
-    },
-    "splitter3": {
-      "station51": {
-        "type": "normal",
-        "mean": 2.66,
-        "arg1": 0.71,
-        "arg2": 0
-      },
-      "splitter4": {
-        "type": "normal",
-        "mean": 2.66,
-        "arg1": 0.71,
-        "arg2": 0
-      },
-      "station61": {
-        "type": "normal",
-        "mean": 2.66,
-        "arg1": 0.71,
-        "arg2": 0
-      }
-    },
-    "splitter4": {
-      "station41": {
-        "type": "normal",
-        "mean": 4.43,
-        "arg1": 0.3,
-        "arg2": 0
-      },
-      "splitter2": {
-        "type": "normal",
-        "mean": 4.43,
-        "arg1": 0.3,
-        "arg2": 0
-      }
-    },
-    "splitter5": {
-      "splitter4": {
-        "type": "normal",
-        "mean": 4.42,
-        "arg1": 0.79,
-        "arg2": 0
-      },
-      "station71": {
-        "type": "normal",
-        "mean": 4.42,
-        "arg1": 0.79,
-        "arg2": 0
-      }
-    },
-    "station51": {
-      "splitter3": {
-        "type": "normal",
-        "mean": 3.02,
-        "arg1": 0.41,
-        "arg2": 0
-      },
-      "station41": {
-        "type": "normal",
-        "mean": 3.02,
-        "arg1": 0.41,
-        "arg2": 0
-      }
-    },
-    "corner1": {
-      "splitter5": {
-        "type": "normal",
-        "mean": 4.87,
-        "arg1": 0.54,
-        "arg2": 0
-      },
-      "station71": {
-        "type": "normal",
-        "mean": 4.87,
-        "arg1": 0.54,
-        "arg2": 0
-      }
-    },
-    "station71": {
-      "corner1": {
-        "type": "normal",
-        "mean": 2.28,
-        "arg1": 0.37,
-        "arg2": 0
-      }
-    },
-    "station11": {
-      "station21": {
-        "type": "normal",
-        "mean": 4.54,
-        "arg1": 0.72,
-        "arg2": 0
-      }
-    },
-    "corner2": {
-      "station11": {
-        "type": "normal",
-        "mean": 4.42,
-        "arg1": 0.81,
-        "arg2": 0
-      }
-    },
-    "station52": {}
-  }
+  "transfer_times": {}
 }

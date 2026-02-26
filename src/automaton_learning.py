@@ -1,12 +1,14 @@
+import argparse
 import os
 import sys
 import logging
 import shutil
+import subprocess
 import configparser
 from pathlib import Path
 from datetime import datetime, timedelta
+from pm4py.objects.log.importer.xes import importer as xes_importer
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -34,10 +36,6 @@ class AutomatonLearner:
             logger.error(f"Expected location: {self.lsha_path}")
             raise FileNotFoundError(f"LSHA not found at {self.lsha_path}")
         
-        # Add LSHA to Python path
-        if str(self.lsha_path) not in sys.path:
-            sys.path.insert(0, str(self.lsha_path))
-        
         logger.info(f"LSHA path configured: {self.lsha_path}")
     
     def configure_lsha_for_xes(self, xes_path, window_minutes=5):
@@ -49,56 +47,67 @@ class AutomatonLearner:
             window_minutes: Time window in minutes for learning
             
         Returns:
-            bool: True if configuration successful
+            tuple: (bool, start_time, end_time) - success status and time range
         """
         try:
+            try:
+                log = xes_importer.apply(str(xes_path))
+                timestamps = [event['time:timestamp'] for trace in log for event in trace]
+                first_event = min(timestamps)
+                last_event = max(timestamps)
+                logger.info(f"XES log time range: {first_event} to {last_event}")
+                logger.info(f"Total traces: {len(log)}, Total events: {sum(len(t) for t in log)}")
+                
+                start_time = first_event
+                end_time = start_time + timedelta(minutes=window_minutes)
+                logger.info(f"Using time window: {start_time} to {end_time} ({window_minutes} minutes)")
+                
+            except Exception as e:
+                logger.warning(f"Could not read XES timestamps: {e}")
+                start_time = datetime(2025, 9, 5, 12, 30, 0) # Fallback to default times
+                end_time = start_time + timedelta(minutes=window_minutes)
+            
             config_path = self.lsha_path / "sha_learning" / "resources" / "config" / "config.ini"
             
             if not config_path.exists():
                 logger.error(f"LSHA config file not found: {config_path}")
-                return False
+                return False, None, None
             
-            # Read current config
             config = configparser.ConfigParser()
             config.read(config_path)
             
             # Update configuration for XES processing
             if 'SUL CONFIGURATION' not in config:
-                config['SUL CONFIGURATION'] = {}
-            
-            config['SUL CONFIGURATION']['RESAMPLE_STRATEGY'] = 'XES'
-            config['SUL CONFIGURATION']['CASE_STUDY'] = 'LEGO_FACTORY'
-            
-            # Set time window (using example dates - LSHA will process based on actual log timestamps)
-            if 'AUTO-TWIN CONFIGURATION' not in config:
+                config['SUL CONFIGURATION'] = {}    
+            config['SUL CONFIGURATION']['resample_strategy'] = 'XES'
+            config['SUL CONFIGURATION']['case_study'] = 'LEGO_FACTORY'
+            config['SUL CONFIGURATION']['cs_version'] = '1'
+        
+            if 'AUTO-TWIN CONFIGURATION' not in config: # Set time window based on actual log
                 config['AUTO-TWIN CONFIGURATION'] = {}
+            config['AUTO-TWIN CONFIGURATION']['pov'] = 'item'
+            config['AUTO-TWIN CONFIGURATION']['start_date'] = start_time.strftime('%Y-%m-%d-%H-%M-%S')
+            config['AUTO-TWIN CONFIGURATION']['end_date'] = end_time.strftime('%Y-%m-%d-%H-%M-%S')
             
-            # Use a time window of specified minutes
-            start_time = datetime.now()
-            end_time = start_time + timedelta(minutes=window_minutes)
-            
-            config['AUTO-TWIN CONFIGURATION']['START_DATE'] = start_time.strftime('%Y-%m-%d-%H-%M-%S')
-            config['AUTO-TWIN CONFIGURATION']['END_DATE'] = end_time.strftime('%Y-%m-%d-%H-%M-%S')
-            
-            # Write updated config
             with open(config_path, 'w') as configfile:
                 config.write(configfile)
-            
             logger.info(f"LSHA configured for XES processing with {window_minutes} minute window")
-            return True
+            
+            return True, start_time, end_time
             
         except Exception as e:
             logger.error(f"Error configuring LSHA: {e}", exc_info=True)
-            return False
+            return False, None, None
     
     def extract_skg(self, xes_path, output_path, window_minutes=5):
         """
-        Extract SKG (Stochastic Knowledge Graph) from XES event log using LSHA.
+        Extract SKG from XES event log using LSHA.
+        Uses LSHA's built-in learn_and_convert_to_upp.py script via conda environment.
         
         Args:
             xes_path: Path to the input XES file
             output_path: Path where the UPPAAL XML file should be saved
-            window_minutes: Time window in minutes for the learning algorithm
+            window_minutes: Time window in minutes for the learning algorithm (default: 5)
             
         Returns:
             bool: True if successful, False otherwise
@@ -111,8 +120,9 @@ class AutomatonLearner:
             logger.info(f"Time window: {window_minutes} minutes")
             logger.info("=" * 60)
             
-            # Configure LSHA for this XES file
-            if not self.configure_lsha_for_xes(xes_path, window_minutes):
+            # Configure LSHA for this XES file and get time range
+            success, start_time, end_time = self.configure_lsha_for_xes(xes_path, window_minutes)
+            if not success:
                 return False
             
             # Copy XES file to LSHA resources directory for processing
@@ -121,86 +131,90 @@ class AutomatonLearner:
             shutil.copy(xes_path, lsha_xes_path)
             logger.info(f"XES file copied to LSHA resources: {lsha_xes_path}")
             
-            # Import and run LSHA (need to be in LSHA directory for relative paths)
+            # Find conda executable
+            conda_paths = [
+                Path.home() / "miniconda3" / "bin" / "conda",
+                Path.home() / "anaconda3" / "bin" / "conda",
+                Path("/opt/conda/bin/conda"),
+            ]
+            
+            conda_exe = None
+            for path in conda_paths:
+                if path.exists():
+                    conda_exe = str(path)
+                    break
+            
+            if not conda_exe:
+                # Try to find conda in PATH
+                result = subprocess.run(["which", "conda"], capture_output=True, text=True)
+                if result.returncode == 0:
+                    conda_exe = result.stdout.strip()
+            
+            if not conda_exe:
+                logger.error("Could not find conda installation. Please ensure conda is installed.")
+                return False
+            
+            logger.info(f"Using conda: {conda_exe}")
+            
+            # Run LSHA using conda environment
             original_dir = os.getcwd()
             try:
                 os.chdir(self.lsha_path)
                 logger.info("Changed to LSHA directory for execution")
                 
-                # Set Neo4j environment variables (required by LSHA even if not used)
-                os.environ['NEO4J_URI'] = 'empty'
-                os.environ['NEO4J_USERNAME'] = 'empty'
-                os.environ['NEO4J_PASSWORD'] = 'empty'
-                os.environ['NEO4J_SCHEMA'] = 'empty'
-                
                 logger.info("Learning in progress... This may take several minutes.")
-                logger.info("Progress will be logged below:")
+                logger.info("Running LSHA's learn_and_convert_to_upp.py script via conda...")
                 logger.info("-" * 60)
                 
-                # Import LSHA modules
-                import warnings
-                warnings.filterwarnings('ignore')
+                # Run LSHA's built-in learning script with conda
+                result = subprocess.run(
+                    [conda_exe, "run", "-n", "lsha", "python", "learn_and_convert_to_upp.py"],
+                    capture_output=True,
+                    text=True,
+                    timeout=600  # 10 minute timeout
+                )
                 
-                from sha_learning.case_studies.lego_factory.sul_definition import getSUL
-                from sha_learning.domain.lshafeatures import Trace
-                from sha_learning.domain.obstable import ObsTable
-                from sha_learning.learning_setup.learner import Learner
-                from sha_learning.learning_setup.teacher import Teacher
-                import sha_learning.pltr.sha_pltr as ha_pltr
-                from uppaal_generator.model_generator.sha2uppaal import generate_upp_model
-                from uppaal_generator.model_generator.dot2sha import parse_sha
+                # Log output
+                if result.stdout:
+                    for line in result.stdout.splitlines():
+                        if "parsing log" in line or "%" in line or "it/s" in line:
+                            continue  # Skip progress bars
+                        logger.info(f"LSHA: {line}")
                 
-                logger.info("LSHA modules imported successfully")
+                if result.stderr:
+                    for line in result.stderr.splitlines():
+                        if line.strip() and "conda.cli" not in line:  # Skip conda warnings
+                            logger.warning(f"LSHA: {line}")
                 
-                # Get System Under Learning
-                SUL, events_labels_dict = getSUL()
-                logger.info("System Under Learning (SUL) initialized")
+                if result.returncode != 0:
+                    logger.error(f"LSHA script failed with return code {result.returncode}")
+                    return False
                 
-                # Create teacher and learner
-                TEACHER = Teacher(SUL)
-                long_traces = [Trace(events=[e]) for e in SUL.events]
-                obs_table = ObsTable([], [Trace(events=[])], long_traces)
-                LEARNER = Learner(TEACHER, obs_table)
-                logger.info("Teacher and Learner initialized")
+                logger.info("-" * 60)
+                logger.info("LSHA learning completed!")
                 
-                # Run learning algorithm
-                logger.info("Running LSHA learning algorithm...")
-                LEARNED_HA = LEARNER.run_lsha(filter_empty=True)
-                logger.info("Learning completed!")
+                # Find the generated UPPAAL file
+                gen_models_dir = self.lsha_path / "uppaal_generator" / "resources" / "gen_models"
+                if not gen_models_dir.exists():
+                    logger.error(f"Generated models directory not found: {gen_models_dir}")
+                    return False
                 
-                # Save learned SHA
-                sha_save_path = "sha_learning/resources/learned_sha/"
-                os.makedirs(sha_save_path, exist_ok=True)
+                # Find the most recent XML file
+                xml_files = list(gen_models_dir.glob("*.xml"))
+                if not xml_files:
+                    logger.error("No generated UPPAAL XML files found")
+                    return False
                 
-                cs_name = f"learned_skg_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                graphviz_sha = ha_pltr.to_graphviz(LEARNED_HA, cs_name, sha_save_path, view=False)
+                # Get the most recently modified file
+                latest_file = max(xml_files, key=lambda p: p.stat().st_mtime)
+                logger.info(f"Found generated UPPAAL model: {latest_file.name}")
                 
-                # Save SHA source
-                sha_source = graphviz_sha.source
-                sha_source_path = os.path.join(sha_save_path, f"{cs_name}_source.txt")
-                with open(sha_source_path, 'w') as f:
-                    f.write(sha_source)
-                logger.info(f"SHA source saved to: {sha_source_path}")
-                
-                # Convert to UPPAAL format
-                logger.info("Converting SHA to UPPAAL format...")
-                automaton_path = os.path.join(sha_save_path, cs_name)
-                sha = parse_sha(automaton_path, cs_name)
-                
-                # Use default acquisition bounds (can be customized if needed)
-                from sha_learning.case_studies.lego_factory.sul_functions import get_acquisition_bounds
-                automaton_start, automaton_end = get_acquisition_bounds()
-                
-                model_path = generate_upp_model(sha, cs_name, automaton_start, automaton_end)
-                logger.info(f"UPPAAL model generated: {model_path}")
-                
-                # Copy generated UPPAAL file to desired output location
+                # Copy to desired output location
                 os.chdir(original_dir)
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
-                shutil.copy(model_path, output_path)
+                shutil.copy(latest_file, output_path)
                 logger.info(f"UPPAAL model copied to: {output_path}")
                 
-                logger.info("-" * 60)
                 logger.info("SKG extraction completed successfully!")
                 return True
                 
@@ -208,9 +222,8 @@ class AutomatonLearner:
                 # Always restore original directory
                 os.chdir(original_dir)
                 
-        except ImportError as e:
-            logger.error(f"Failed to import LSHA modules: {e}", exc_info=True)
-            logger.error("Make sure LSHA dependencies are installed: pip install -r src/lsha/requirements.txt")
+        except subprocess.TimeoutExpired:
+            logger.error("LSHA learning timed out after 10 minutes")
             return False
         except Exception as e:
             logger.error(f"Error during SKG extraction: {e}", exc_info=True)
@@ -228,7 +241,7 @@ class AutomatonLearner:
         """
         try:
             base_dir = Path(__file__).parent.parent
-            default_skg_dir = base_dir / "data" / "automaton" / "default"
+            default_skg_dir = base_dir / "data" / "automaton"
             
             # Find the default SKG file
             default_files = list(default_skg_dir.glob("*.xml"))
@@ -283,9 +296,6 @@ class AutomatonLearner:
 
 
 if __name__ == "__main__":
-    # Example usage
-    import argparse
-    
     parser = argparse.ArgumentParser(description='Learn automaton from XES event log')
     parser.add_argument('xes_file', help='Path to XES event log file')
     parser.add_argument('--output', '-o', help='Output file name', default='learned_skg.xml')

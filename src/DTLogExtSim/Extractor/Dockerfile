@@ -1,5 +1,5 @@
-# Use a Python 3.12 base image with bookworm (Debian 12)
-FROM python:3.12-slim-bookworm
+# Use a Python 3.12.9 base image 
+FROM python:3.12.9-slim-bullseye
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -7,10 +7,12 @@ ENV PYTHONUNBUFFERED=1
 # Set Flask environment for development
 ENV FLASK_ENV=development
 
-RUN apt-get update && apt-get install -y openjdk-17-jdk-headless xvfb graphviz && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openjdk-11-jdk && \
+    apt-get clean
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+RUN apt-get install -y xvfb && apt-get install -y graphviz
+
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH=$JAVA_HOME/bin:$PATH
 
 
