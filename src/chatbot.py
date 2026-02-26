@@ -71,6 +71,7 @@ def parse_arguments():
     parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, live')
     parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
     parser.add_argument('--extracted_model_failure', type=bool, default=False, help='True if already exists the file digital_twin_with_failure.json. Default False')
+    parser.add_argument('--ensure_skg', type=bool, default=True, help='Ensure an SKG automaton exists (runs LSHA if needed)')
     args = parser.parse_args()
     return args
 
@@ -93,9 +94,13 @@ class GradioHandler:
                 max_new_tokens = args.max_new_tokens
                 extracted_model = args.extracted_model
                 extracted_model_failure = args.extracted_model_failure
+                ensure_skg = args.ensure_skg
                 self.initialization_message = "Initializing system and digital twins..."
                 logger.info("Starting chatbot initialization")
                 self.chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens, extracted_model, extracted_model_failure)
+                if ensure_skg and hasattr(self.chain, "_ensure_skg_exists"):
+                    logger.info("Ensuring SKG automaton exists...")
+                    self.chain._ensure_skg_exists()
                 self.initialization_message = None
 
                 self.initialized = True
