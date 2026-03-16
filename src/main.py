@@ -23,9 +23,8 @@ MAX_RESTART_ATTEMPTS = 3
 RESTART_DELAY = 5  # seconds
 warnings.filterwarnings('ignore')
 
-# Ensure log directory exists
-log_dir = os.path.join(os.path.dirname(__file__), '..', 'log')
-os.makedirs(log_dir, exist_ok=True)
+# Ensure runtime log directory exists
+log_dir = get_runtime_log_dir()
 log_file_path = os.path.join(log_dir, 'main_errors.log')
 
 logging.basicConfig(
@@ -89,11 +88,12 @@ def main():
             - Discrete simulation of the production of a specified number of pieces;
             - Prediction of the next activity in the production line;
             - Discrete simulation considering the potential maintenance time of a station;
+                        - Supported simulation KPIs: total pieces produced, mean processing time, mean waiting time, mean transfer time, station-level mean processing times, station-level mean waiting times, total execution time;
           - Verification of temporal properties on the automaton representing the factory.
           - Process Mining:
-            - Discover a process model (i.e., Petri Net) from an event log through the Inductive Miner;
-            - Conformance checking (via token-based replay) to verify if the observed executions in the log match a given process model;            
-            - Performance analysis to compute performance indicators such as throughput time or station frequencies;
+                        - Discover the Petri net representing the process from an event log through the Inductive Miner;
+                        - Conformance checking (via token-based replay) to verify if the observed executions in the log match a given Petri net;
+                        - Performance analysis to compute indicators such as throughput time, station frequencies, or station workload;
             - Filter the log between a specific time range;
           - Hybrid Reasoning:
             - Combine simulation, verification, and failure analysis in multi-step workflows;
@@ -160,7 +160,7 @@ def run_with_fallback():
                 print(f"\n{'='*60}")
                 print(f"FATAL ERROR: Maximum restart attempts ({MAX_RESTART_ATTEMPTS}) reached.")
                 print(f"Last error: {str(e)}")
-                print(f"Please check the log file at 'log/main_errors.log' for details.")
+                print(f"Please check the log file at 'runtime_logs/main_errors.log' for details.")
                 print(f"{'='*60}\n")
                 logger.critical("Maximum restart attempts reached. Application terminating.")
                 stop_containers()

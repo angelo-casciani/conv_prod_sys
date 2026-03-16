@@ -26,6 +26,24 @@ def seed_everything(seed=10):
         torch.backends.cudnn.deterministic = True
 
 
+def get_repo_root():
+    return os.path.join(os.path.dirname(__file__), '..')
+
+
+def get_runtime_log_dir():
+    default_dir = '/app/runtime_logs' if os.path.exists('/app') else os.path.join(get_repo_root(), 'runtime_logs')
+    log_dir = os.getenv('APP_LOG_DIR', default_dir)
+    os.makedirs(log_dir, exist_ok=True)
+    return log_dir
+
+
+def get_interaction_log_dir():
+    default_dir = os.path.join(get_runtime_log_dir(), 'interactions')
+    interaction_dir = os.getenv('INTERACTION_LOG_DIR', default_dir)
+    os.makedirs(interaction_dir, exist_ok=True)
+    return interaction_dir
+
+
 def str2bool(v):
     if isinstance(v, bool):
         return v

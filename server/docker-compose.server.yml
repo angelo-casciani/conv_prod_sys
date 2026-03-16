@@ -6,8 +6,6 @@
 #   docker-compose -f docker-compose.server.yml up -d --build
 # ============================================================
 
-version: '2.4'
-
 services:
   chatbot:
     build:
@@ -20,6 +18,7 @@ services:
     volumes:
       - ../data:/app/data:ro
       - ../log:/app/log
+      - ../runtime_logs:/app/runtime_logs
       - ../pmmOutputs:/app/pmmOutputs
       - ../src/extractor_outputs:/app/src/extractor_outputs
       # Mount Docker socket to allow controlling sibling containers (for UPPAAL)
@@ -30,6 +29,8 @@ services:
       # Gradio settings
       - GRADIO_SERVER_NAME=0.0.0.0
       - GRADIO_SERVER_PORT=${SERVER_PORT:-7860}
+      - APP_LOG_DIR=/app/runtime_logs
+      - INTERACTION_LOG_DIR=/app/runtime_logs/interactions
     networks:
       - chatbot_network
     restart: unless-stopped

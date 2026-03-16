@@ -154,6 +154,9 @@ class ProcessMiningModule:
     def get_resource_analysis(self, log):
         return pm4py.stats.get_event_attribute_values(log, "station_id")
 
+    def get_station_workload(self, log):
+        return self.get_resource_analysis(log)
+
     def filter_top_variants(self, log, k=5):
         return pm4py.filtering.filter_variants_top_k(log, k)
     
@@ -224,38 +227,60 @@ class ProcessMiningModule:
                 "data": {"start_activities": start_acts, "end_activities": end_acts},
                 "interpretation": interpretation
             }
-        elif metric == "resource_analysis":
-            result = self.get_resource_analysis(log)
+        elif metric in ["resource_analysis", "station_workload"]:
+            result = self.get_station_workload(log)
+            station_id = None
+            if json_question:
+                station_id = json_question.get("station_id")
+            if station_id:
+                normalized_station = str(station_id).replace(" ", "").lower()
+                matched_station = next((s for s in result.keys() if str(s).replace(" ", "").lower() == normalized_station), None)
+                if matched_station is None:
+                    return {
+                        "metric": metric,
+                        "station_id": station_id,
+                        "data": {},
+                        "interpretation": f"Station workload was requested for '{station_id}', but that station is not present in the event log."
+                    }
+                station_events = result[matched_station]
+                interpretation = f"Station Workload Analysis:\n"
+                interpretation += f"- Station '{matched_station}': {station_events} events"
+                return {
+                    "metric": metric,
+                    "station_id": matched_station,
+                    "data": {matched_station: station_events},
+                    "interpretation": interpretation
+                }
             sorted_resources = sorted(result.items(), key=lambda x: x[1], reverse=True)
             most_used = sorted_resources[0] if sorted_resources else None
             least_used = sorted_resources[-1] if sorted_resources else None
             total_events = sum(result.values())
             avg_events = total_events / len(result) if result else 0
             
-            interpretation = f"Resource Utilization Analysis:\n"
-            interpretation += f"- Total events across all resources: {total_events}\n"
-            interpretation += f"- Number of unique resources: {len(result)}\n"
-            interpretation += f"- Average events per resource: {avg_events:.1f}\n\n"
+            interpretation = f"Station Workload Analysis:\n"
+            interpretation += f"- Total events across all stations: {total_events}\n"
+            interpretation += f"- Number of unique stations: {len(result)}\n"
+            interpretation += f"- Average events per station: {avg_events:.1f}\n\n"
             
             if most_used:
-                interpretation += f"Most Utilized Resources:\n"
-                for i, (resource, count) in enumerate(sorted_resources[:3], 1):
+                interpretation += f"Most Loaded Stations:\n"
+                for i, (station, count) in enumerate(sorted_resources[:3], 1):
                     percentage = (count/total_events*100)
                     deviation = ((count - avg_events) / avg_events * 100) if avg_events > 0 else 0
-                    interpretation += f"  {i}. '{resource}': {count} events ({percentage:.1f}%, {deviation:+.1f}% vs avg)\n"
+                    interpretation += f"  {i}. '{station}': {count} events ({percentage:.1f}%, {deviation:+.1f}% vs avg)\n"
             
             if least_used and len(sorted_resources) > 3:
-                interpretation += f"\nLeast Utilized Resources:\n"
-                for i, (resource, count) in enumerate(sorted_resources[-3:][::-1], 1):
+                interpretation += f"\nLeast Loaded Stations:\n"
+                for i, (station, count) in enumerate(sorted_resources[-3:][::-1], 1):
                     percentage = (count/total_events*100)
                     deviation = ((count - avg_events) / avg_events * 100) if avg_events > 0 else 0
-                    interpretation += f"  {i}. '{resource}': {count} events ({percentage:.1f}%, {deviation:+.1f}% vs avg)\n"
+                    interpretation += f"  {i}. '{station}': {count} events ({percentage:.1f}%, {deviation:+.1f}% vs avg)\n"
             
             # Check for potential bottlenecks or imbalances
             if most_used and least_used:
                 ratio = most_used[1] / least_used[1] if least_used[1] > 0 else float('inf')
                 if ratio > 3:
-                    interpretation += f"\n⚠️  Significant imbalance detected: The most utilized resource handles {ratio:.1f}x more events than the least utilized."
+                    interpretation += f"\n⚠️  Significant imbalance detected: The most loaded station handles {ratio:.1f}x more events than the least loaded station."
             
             return {
                 "metric": metric,
@@ -308,7 +333,7 @@ if __name__ == "__main__":
     end_date = "2025-02-17T17:16:12.689944"
     print(f"\nEvent log filtered between {start_date} and {end_date}:", pmm.filter_by_time_range(log, start_date, end_date))
 
-    #print("\nResource analysis:", pmm.get_resource_analysis(log))
+    #print("\nStation workload analysis:", pmm.get_station_workload(log))
 
     k = 3
     print(f"\nEvent log filtered by top {k} variants:", pmm.filter_top_variants(log, k))

@@ -321,7 +321,7 @@ def generate_factory_info_questions(factory_info_questions, number_samples=300):
     write_samples_to_csv('factory_info', samples)
 
 process_mining_questions = [
-    ("Can you discover the process model from the event log?", {
+    ("Can you discover the Petri net representing the process from the event log?", {
     "task": "process_discovery"
 }),
     ("Can you perform conformance checking between the event log and the reference model?", {
@@ -349,7 +349,7 @@ process_mining_questions = [
     "start_date": "{year}-{month}-{day}T{hour}:{minute}:{second}", 
     "end_date": "{year1}-{month1}-{day1}T{hour1}:{minute1}:{second1}"
 }),
-    ("Can you show the discovered Petri net model?", {
+    ("Can you show the discovered Petri net?", {
     "task": "process_discovery"
 }),
     ("Can you show me the top {k} variants that are present in the event log?", {

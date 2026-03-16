@@ -442,9 +442,10 @@ class LLMPipeline:
             print(combined_results)
 
             sys_mess = self.prompts.get('system_message_results_sim', '') + """
-                    If the context contains both 'Original analysis' and 'Follow-up analysis', 
-                    make sure to provide information from both analyses in your response.
-                    """
+                If the context contains both 'Original analysis' and 'Follow-up analysis',
+                use both only when needed to answer the user's exact question.
+                Do not include unrelated KPIs or stations.
+                """
             context = f"The labels for the activities are: {activity_names}\nResults from the simulation: {combined_results}.\nNote: If there are both original and follow-up analyses, provide a complete answer using both."
             invoke_payload = {"question": question,
                             "context": context,
@@ -572,22 +573,32 @@ class LLMPipeline:
             elif action == 'process_discovery':
                 net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
                 # Skip view_petri_net - not available in headless/Docker environment
-                nl_output = f"I discovered the process model. The Petri net has been saved at: {net_path}."
+                nl_output = f"I discovered the Petri net representing the process. The Petri net has been saved at: {net_path}."
             elif action == 'conformance_checking':
                 log = self.process_mining_module.load_log()
                 net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
                 trace_is_fit, trace_fitness = self.process_mining_module.conformal_checking(net, initial_marking, final_marking, log)
                 fit_text = "fits" if trace_is_fit else "does not fit"
-                nl_output = f"The event log {fit_text} the discovered model, with a fitness score of {trace_fitness:.2f}."
+                nl_output = f"The event log {fit_text} the discovered Petri net, with a fitness score of {trace_fitness:.2f}."
             elif action == 'performance_analysis':
                 metric = parsed_json.get("metric")
                 log = self.process_mining_module.load_log()    
                 result = self.process_mining_module.performance_analysis(log, metric, parsed_json)
 
-                if isinstance(result, dict) and 'interpretation' in result:
-                    nl_output = result['interpretation']
+                raw_result_text = result['interpretation'] if isinstance(result, dict) and 'interpretation' in result else f"I computed the {metric} metric. Result: {result}"
+                sys_mess_results = self.prompts.get('system_message_results_pmm', '')
+                context_results = f"Process mining computed result: {result}. Raw interpretation: {raw_result_text}"
+                invoke_payload_results = {
+                    "question": question,
+                    "context": context_results,
+                    "system_message": sys_mess_results
+                }
+                prompt = self.chain_gateway.first.format_prompt(**invoke_payload_results).to_string()
+                complete_answer_results = self.chain_gateway.invoke(invoke_payload_results)
+                if self.model_type_gateway == 'local':
+                    prompt, nl_output = self._parse_llm_answer(complete_answer_results, self.model_family_gateway)
                 else:
-                    nl_output = f"I computed the {metric} metric. Result: {result}"
+                    nl_output = complete_answer_results.content
             elif action == "filter_by_time_range":
                 log = self.process_mining_module.load_log()
                 start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 

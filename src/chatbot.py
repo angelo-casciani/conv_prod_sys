@@ -28,29 +28,70 @@ MAX_RESTART_ATTEMPTS = 3
 RESTART_DELAY = 5  # seconds
 warnings.filterwarnings('ignore')
 
-if os.path.exists('/app'): # For Docker, otherwise use relative path
-    LOG_DIR = '/app/log'
-else:
-    LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'log')
-os.makedirs(LOG_DIR, exist_ok=True)
+LOG_DIR = get_runtime_log_dir()
+INTERACTION_LOG_DIR = get_interaction_log_dir()
 
+
+def _build_file_handler(path, formatter=None):
+    try:
+        handler = logging.FileHandler(path)
+    except OSError as exc:
+        fallback = logging.StreamHandler(sys.stdout)
+        if formatter is not None:
+            fallback.setFormatter(formatter)
+        fallback._logging_fallback_error = exc
+        return fallback
+
+    if formatter is not None:
+        handler.setFormatter(formatter)
+    return handler
+
+
+main_log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+main_file_handler = _build_file_handler(os.path.join(LOG_DIR, 'chatbot_errors.log'), main_log_formatter)
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(main_log_formatter)
+
+main_handlers = [main_file_handler]
+if not hasattr(main_file_handler, '_logging_fallback_error'):
+    main_handlers.append(console_handler)
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(os.path.join(LOG_DIR, 'chatbot_errors.log')),
-        logging.StreamHandler(sys.stdout)
-    ]
+    handlers=main_handlers
 )
 logger = logging.getLogger(__name__)
 
+if hasattr(main_file_handler, '_logging_fallback_error'):
+    logger.warning(
+        "Could not open chatbot error log file in %s; logging to stdout only. Error: %s",
+        LOG_DIR,
+        main_file_handler._logging_fallback_error,
+    )
+
 interaction_logger = logging.getLogger("chatbot_interactions")
 interaction_logger.setLevel(logging.INFO)
-interaction_handler = logging.FileHandler(os.path.join(LOG_DIR, 'chatbot_interactions.log'))
-interaction_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+interaction_handler = _build_file_handler(
+    os.path.join(INTERACTION_LOG_DIR, 'chatbot_interactions.log'),
+    logging.Formatter('%(asctime)s - %(message)s')
+)
 interaction_logger.addHandler(interaction_handler)
 interaction_logger.propagate = False
+
+if hasattr(interaction_handler, '_logging_fallback_error'):
+    logger.warning(
+        "Could not open interaction log file in %s; interaction logs will go to stdout. Error: %s",
+        INTERACTION_LOG_DIR,
+        interaction_handler._logging_fallback_error,
+    )
+
+
+def log_chat_interaction(role, content):
+    if isinstance(content, gr.FileData):
+        payload = f"file:{content.path}"
+    else:
+        payload = str(content).replace("\n", "\\n")
+    interaction_logger.info("%s - %s", role.upper(), payload)
 
 def stop_containers():
     try:
@@ -128,28 +169,35 @@ class GradioHandler:
             if not self.initialized:
                 error_msg = "System not initialized. Please restart the chatbot."
                 logger.warning(error_msg)
+                log_chat_interaction("assistant", error_msg)
                 yield {"role": "assistant", "content": error_msg}
                 return
                 
             logger.info(f"Processing user message: {message[:100]}...")  # Log first 100 chars
+            log_chat_interaction("user", message)
             yield {"role": "assistant", "content": f"Processing: {message}"}
             
             for result in self.chain.live_prompting(query=message, info_run=self.run_data, chatbot=True):
-                if "I discovered the process model. The Petri net has been saved at" in result:
+                if "I discovered the Petri net representing the process. The Petri net has been saved at" in result:
                     match = re.search(r"saved at:\s*(\S+)", result)
                     if match:
                         path = match.group(1).rstrip(".")
+                        log_chat_interaction("assistant", result)
                         yield {"role": "assistant", "content": result}
+                        log_chat_interaction("assistant", f"file:{path}")
                         yield {"role": "assistant", "content": gr.FileData(path=path, mime_type="image/png")}
                     else:
+                        log_chat_interaction("assistant", result)
                         yield {"role": "assistant", "content": result}
                 else:
+                    log_chat_interaction("assistant", result)
                     yield {"role": "assistant", "content": result}
                     
             logger.info("Message processed successfully")
             
         except KeyboardInterrupt:
             logger.info("Processing interrupted by user")
+            log_chat_interaction("assistant", "Processing interrupted by user.")
             yield {"role": "assistant", "content": "Processing interrupted by user."}
             
         except Exception as e:
@@ -158,6 +206,7 @@ class GradioHandler:
             logger.error(f"Traceback:\n{traceback.format_exc()}")
             logger.info("Attempting to recover by resetting state")
             self.reset_state()
+            log_chat_interaction("assistant", error_msg)
             yield {
                 "role": "assistant", 
                 "content": f"{error_msg}\n\nThe system has been reset. Please try your request again, or restart the chatbot if the problem persists."
@@ -165,27 +214,204 @@ class GradioHandler:
 
 handler = GradioHandler()
 
-welcome_msg = """Hello! I am your assistant for the LEGO Factory production system. 
-                 How can I help you today?"""
-demo = gr.ChatInterface(
-    handler.process_message,
-    chatbot=gr.Chatbot(
-        value=[{"role": "assistant", "content": welcome_msg}],
-        height=400
-    ),
-    flagging_mode="manual",
-    flagging_options=["Like", "Spam", "Inappropriate", "Other"],
-    save_history=True,
-    title="LEGO Factory Production System Assistant",
-    description="""Welcome! Make sure you inserted the event log in the "log" folder.<br><br>
+CHAT_HISTORY_CSS = """
+[class*='history'] [class*='item'], [data-testid*='history'] [class*='item'] {
+    position: relative;
+}
+
+.history-trash-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.65;
+    padding: 2px 4px;
+    border-radius: 6px;
+}
+
+.history-trash-btn:hover {
+    opacity: 1;
+    background: rgba(200, 200, 200, 0.2);
+}
+
+.chatbot-welcome-message {
+    margin: 12px 0;
+    padding: 12px 14px;
+    max-width: min(680px, 92%);
+    border-radius: 14px;
+    background: rgba(240, 244, 248, 0.95);
+    border: 1px solid rgba(160, 174, 192, 0.35);
+    color: #1f2937;
+    white-space: pre-wrap;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+"""
+
+CHAT_HISTORY_JS = """
+() => {
+    const welcomeMessage = "Hello! I am your assistant for the LEGO Factory production system.\nHow can I help you today?";
+    const itemSelectors = [
+        "[data-testid='history-item']",
+        "[data-testid*='history-item']",
+        ".history-item",
+        "[class*='history-item']",
+        "[class*='chat-history'] [class*='item']"
+    ];
+
+    const chatbotSelectors = [
+        "[data-testid='chatbot']",
+        "[data-testid*='chatbot']",
+        ".gr-chatbot",
+        "[class*='chatbot']"
+    ];
+
+    const messageSelectors = [
+        "[data-testid='chatbot-message']",
+        "[data-testid*='message']",
+        "[role='log'] > *",
+        "[class*='message']"
+    ];
+
+    const findHistoryItems = () => {
+        for (const selector of itemSelectors) {
+            const items = Array.from(document.querySelectorAll(selector));
+            if (items.length) return items;
+        }
+        return [];
+    };
+
+    const findChatbot = () => {
+        for (const selector of chatbotSelectors) {
+            const candidates = Array.from(document.querySelectorAll(selector));
+            const chatbot = candidates.find((el) => el instanceof HTMLElement);
+            if (chatbot) return chatbot;
+        }
+        return null;
+    };
+
+    const getMessageNodes = (chatbot) => {
+        if (!(chatbot instanceof HTMLElement)) return [];
+        for (const selector of messageSelectors) {
+            const nodes = Array.from(chatbot.querySelectorAll(selector)).filter(
+                (el) => el instanceof HTMLElement && !el.classList.contains('chatbot-welcome-message')
+            );
+            if (nodes.length) return nodes;
+        }
+        return [];
+    };
+
+    const ensureWelcomeMessage = () => {
+        const chatbot = findChatbot();
+        if (!(chatbot instanceof HTMLElement)) return;
+
+        const existingWelcome = chatbot.querySelector('.chatbot-welcome-message');
+        const messages = getMessageNodes(chatbot);
+
+        if (messages.length > 0) {
+            if (existingWelcome) existingWelcome.remove();
+            return;
+        }
+
+        if (existingWelcome) return;
+
+        const logContainer = chatbot.querySelector("[role='log']") || chatbot;
+        const welcomeNode = document.createElement('div');
+        welcomeNode.className = 'chatbot-welcome-message';
+        welcomeNode.setAttribute('data-welcome-message', 'true');
+        welcomeNode.textContent = welcomeMessage;
+        logContainer.prepend(welcomeNode);
+    };
+
+    const clickDeleteAction = (item) => {
+        const directDelete = item.querySelector(
+            "button[aria-label*='Delete'], button[title*='Delete'], [data-testid*='delete']"
+        );
+        if (directDelete) {
+            directDelete.click();
+            return true;
+        }
+
+        const moreBtn = item.querySelector(
+            "button[aria-label*='More'], button[title*='More'], button[aria-haspopup='menu']"
+        );
+
+        if (moreBtn) {
+            moreBtn.click();
+            setTimeout(() => {
+                const menuDelete = document.querySelector(
+                    "button[role='menuitem'][aria-label*='Delete'], button[role='menuitem'][title*='Delete'], [role='menuitem'][data-testid*='delete']"
+                ) || Array.from(document.querySelectorAll("[role='menuitem'], button")).find(
+                    (el) => /delete|remove|trash/i.test((el.textContent || "").trim())
+                );
+                if (menuDelete) menuDelete.click();
+            }, 50);
+            return true;
+        }
+
+        return false;
+    };
+
+    const enhanceHistory = () => {
+        const items = findHistoryItems();
+        items.forEach((item) => {
+            if (!(item instanceof HTMLElement)) return;
+            if (item.querySelector('.history-trash-btn')) return;
+
+            const btn = document.createElement('button');
+            btn.className = 'history-trash-btn';
+            btn.type = 'button';
+            btn.title = 'Delete chat';
+            btn.setAttribute('aria-label', 'Delete chat');
+            btn.textContent = '🗑️';
+
+            btn.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                clickDeleteAction(item);
+            });
+
+            item.appendChild(btn);
+        });
+
+        ensureWelcomeMessage();
+    };
+
+    const observer = new MutationObserver(() => enhanceHistory());
+    observer.observe(document.body, { childList: true, subtree: true });
+    enhanceHistory();
+}
+"""
+
+welcome_msg = "Hello! I am your assistant for the LEGO Factory production system.\nHow can I help you today?"
+
+chatbot_description = """Welcome! Make sure you inserted the event log in the "log" folder.<br><br>
 **Available Tasks:**<br>
-• **Simulation:** Production simulation over time, by piece count, next activity prediction, maintenance scenarios<br>
+• **Simulation:** Production simulation over time, by piece count, next activity prediction, maintenance scenarios.<br>
+Supported simulation KPIs: total pieces produced, mean processing time, mean waiting time, mean transfer time, station-level mean processing times, station-level mean waiting times, total execution time<br>
 • **Verification:** Temporal property checking on factory automaton<br>
-• **Process Mining:** Process discovery (Petri nets), conformance checking, performance analysis, log filtering<br>
+• **Process Mining:** Process discovery of the Petri net representing the process, conformance checking, performance analysis, log filtering<br>
 • **Hybrid Reasoning:** Multi-step workflows combining simulation, verification, and failure analysis<br><br>
-*Note: Use actual station names (e.g., station11, station21, station41, ...)*<br><br>"
+*Note: Use actual station names (e.g., station11, station21, station41, ...)*<br><br>
 *Always use **seconds** as unit of time.*<br><br>"""
-)
+
+with gr.Blocks(css=CHAT_HISTORY_CSS, js=CHAT_HISTORY_JS, title="LEGO Factory Production System Assistant") as demo:
+    gr.ChatInterface(
+        handler.process_message,
+        chatbot=gr.Chatbot(
+            value=[{"role": "assistant", "content": welcome_msg}],
+            height=400
+        ),
+        flagging_mode="manual",
+        flagging_options=["Like", "Spam", "Inappropriate", "Other"],
+        save_history=True,
+        title="LEGO Factory Production System Assistant",
+        description=chatbot_description,
+    )
 
 def launch_chatbot_with_fallback():
     attempt = 0
@@ -228,7 +454,7 @@ def launch_chatbot_with_fallback():
                 print(f"\n{'='*60}")
                 print(f"FATAL ERROR: Maximum restart attempts ({MAX_RESTART_ATTEMPTS}) reached.")
                 print(f"Last error: {str(e)}")
-                print(f"Please check the log file at 'log/chatbot_errors.log' for details.")
+                print(f"Please check the log file at 'runtime_logs/chatbot_errors.log' for details.")
                 print(f"{'='*60}\n")
                 logger.critical("Maximum restart attempts reached. Chatbot terminating.")
                 stop_containers()

@@ -4,8 +4,6 @@
 # For server deployment, use: server/docker-compose.server.yml
 # ============================================================
 
-version: '2.4'
-
 services:
   # Chatbot UI/API
   chatbot:
@@ -18,6 +16,7 @@ services:
     volumes:
       - ./data:/app/data:ro
       - ./log:/app/log
+      - ./runtime_logs:/app/runtime_logs
       - ./pmmOutputs:/app/pmmOutputs
       - ./src/extractor_outputs:/app/src/extractor_outputs
       # Mount Docker socket to allow controlling sibling containers (for UPPAAL)
@@ -27,6 +26,8 @@ services:
     environment:
       - GRADIO_SERVER_NAME=0.0.0.0
       - GRADIO_SERVER_PORT=7860
+      - APP_LOG_DIR=/app/runtime_logs
+      - INTERACTION_LOG_DIR=/app/runtime_logs/interactions
     networks:
       - chatbot_network
     restart: unless-stopped
