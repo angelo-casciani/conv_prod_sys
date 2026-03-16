@@ -6,6 +6,8 @@
 #   docker-compose -f docker-compose.server.yml up -d --build
 # ============================================================
 
+version: "3.3"
+
 services:
   chatbot:
     build:
@@ -14,7 +16,7 @@ services:
     container_name: lego-chatbot
     ports:
       # Bind to the IP and port specified in .env.server
-      - "${SERVER_HOST:-0.0.0.0}:${SERVER_PORT:-7860}:7860"
+      - "${SERVER_HOST}:${SERVER_PORT}:7860"
     volumes:
       - ../data:/app/data:ro
       - ../log:/app/log
@@ -28,21 +30,17 @@ services:
     environment:
       # Gradio settings
       - GRADIO_SERVER_NAME=0.0.0.0
-      - GRADIO_SERVER_PORT=${SERVER_PORT:-7860}
+      - GRADIO_SERVER_PORT=${SERVER_PORT}
       - APP_LOG_DIR=/app/runtime_logs
       - INTERACTION_LOG_DIR=/app/runtime_logs/interactions
     networks:
       - chatbot_network
     restart: unless-stopped
-    # Resource limits for stability
-    mem_limit: 8g
-    mem_reservation: 4g
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7860/"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
 
   # UPPAAL Engine (required by chatbot)
   uppaal:
