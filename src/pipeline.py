@@ -128,6 +128,9 @@ class LLMPipeline:
         self.chain_process_mining = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.failure_module = failure_maintenance.FailureMaintenanceModule()
         self.process_mining_module = process_mining.ProcessMiningModule()
+        self.pending_simulation_request = None
+        self.hybrid_simulation_defaults = None
+        self.sim_time = None
         print("Initializing digital twins...")
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         digital_twin_path = os.path.join(base_dir, "data", "parameters", "digital_twin.json")
@@ -292,6 +295,103 @@ class LLMPipeline:
         chain = prompt_template_structure | model
         return chain
 
+    def _set_pending_simulation_request(self, source, original_question, modality, base_request=None, simulation_question=None):
+        self.pending_simulation_request = {
+            "source": source,
+            "question": original_question,
+            "modality": modality,
+            "base_request": base_request or {},
+            "simulation_question": simulation_question or original_question
+        }
+
+    def _clear_pending_simulation_request(self):
+        self.pending_simulation_request = None
+
+    def _set_hybrid_simulation_defaults(self, request_data):
+        self.hybrid_simulation_defaults = factory_interface.normalize_simulation_request(request_data or {})
+
+    def _clear_hybrid_simulation_defaults(self):
+        self.hybrid_simulation_defaults = None
+
+    def _format_missing_simulation_params_prompt(self, missing_fields):
+        ordered_required = ["replicas", "initial_state_mode", "simulation_time", "warm_up_replicas", "warm_up_time"]
+        missing_sorted = [field for field in ordered_required if field in missing_fields]
+        labels = {
+            "replicas": "the number of replicas of the requested simulation",
+            "initial_state_mode": "the initial state mode (empty or warm-up)",
+            "simulation_time": "the simulation time in seconds",
+            "warm_up_replicas": "the number of warm-up replicas",
+            "warm_up_time": "the warm-up time in seconds"
+        }
+
+        if len(missing_sorted) == 1:
+            missing_text = labels[missing_sorted[0]]
+        elif len(missing_sorted) == 2:
+            missing_text = f"{labels[missing_sorted[0]]} and {labels[missing_sorted[1]]}"
+        else:
+            missing_text = ", ".join(labels[field] for field in missing_sorted[:-1])
+            missing_text += f", and {labels[missing_sorted[-1]]}"
+
+        return (
+            "Great, I can run this simulation. "
+            f"However, I still need {missing_text}."
+        )
+
+    def _finalize_simulation_answer(self, question, parsed_request, prompt, activity_names):
+        request_payload = factory_interface.normalize_simulation_request(parsed_request)
+        results = factory_interface.interface_with_llm(json.dumps(request_payload))
+        combined_results = results
+
+        if isinstance(results, dict) and isinstance(results.get('results'), dict):
+            self.sim_time = results['results'].get('total_execution_time', self.sim_time)
+
+        print(combined_results)
+
+        sys_mess = self.prompts.get('system_message_results_sim', '') + """
+            If the context contains both 'Original analysis' and 'Follow-up analysis',
+            use both only when needed to answer the user's exact question.
+            Do not include unrelated KPIs or stations.
+            """
+        context = f"The labels for the activities are: {activity_names}\nResults from the simulation: {combined_results}.\nNote: If there are both original and follow-up analyses, provide a complete answer using both."
+        invoke_payload = {"question": question,
+                        "context": context,
+                        "system_message": sys_mess}
+        prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
+        complete_answer = self.chain_gateway.invoke(invoke_payload)
+        if self.model_type_gateway == 'local':
+            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
+        else:
+            answer = complete_answer.content
+
+        sim_results = results.get('results', {}) if isinstance(results, dict) else {}
+        can_meet_deadline = sim_results.get('can_meet_deadline')
+        target_pieces = sim_results.get('target_pieces', results.get('target_pieces') if isinstance(results, dict) else None)
+        needed_time = sim_results.get('mean_time_needed_for_target_pieces')
+        if can_meet_deadline is False and needed_time is not None and target_pieces is not None:
+            needed_time = float(needed_time)
+            deadline_sentence = (
+                f" The estimated time needed to produce {int(target_pieces)} pieces is {needed_time:.1f} seconds."
+            )
+            answer_lower = answer.lower()
+            if "estimated time needed" not in answer_lower and "would take" not in answer_lower and "time needed" not in answer_lower:
+                answer = f"{answer}{deadline_sentence}"
+        return prompt, answer
+
+    def _extract_simulation_request_from_answer(self, answer):
+        answer_text = answer if isinstance(answer, str) else str(answer)
+        cleaned_json = clean_json_block(answer_text)
+        if cleaned_json is None:
+            return None
+        try:
+            return json.loads(cleaned_json)
+        except json.JSONDecodeError:
+            return None
+
+    def _merge_with_hybrid_simulation_defaults(self, parsed_request):
+        if not self.hybrid_simulation_defaults:
+            return parsed_request
+        return factory_interface.merge_simulation_request(parsed_request or {}, self.hybrid_simulation_defaults)
+
 
     def _produce_answer_gateway(self, question, answer_phase, modality=''):
         prompt, answer = ('', '')
@@ -404,7 +504,7 @@ class LLMPipeline:
         
         return follow_up_results
         
-    def _produce_answer_simulation(self, question, modality):
+    def _produce_answer_simulation(self, question, modality, source_context='direct', root_question=None):
         factory_data = retrieve_factory()
         activity_names = ', '.join([activity for activity in factory_data['activities']])
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
@@ -419,43 +519,33 @@ class LLMPipeline:
         else:
             answer = complete_answer.content
 
+        answer_text = answer if isinstance(answer, str) else str(answer)
+
         if 'evaluation' not in modality:
-            results = factory_interface.interface_with_llm(answer)
-            #print(answer)
-            if "event_prediction" not in answer:
-                if results['target_pieces'] != '' and results['simulation_time']:
-                    is_negative_result = self._check_negative_result(results)
-                    print(results)
-                    print(is_negative_result)
-                    if is_negative_result:
-                        new_question = self._generate_new_sim_question(results)
-                        new_results = self._execute_follow_up_simulation(new_question, activity_names)
+            parsed_request = self._extract_simulation_request_from_answer(answer_text)
+            if parsed_request is None:
+                return prompt, (
+                    "I could not parse the simulation request. "
+                    "Please restate it and include: replicas, initial_state_mode (empty or warm_up), "
+                    "simulation_time, and if warm_up is used also warm_up_replicas and warm_up_time."
+                )
 
-                        combined_results = self._format_results_for_llm(results, new_results)
-                    else:
-                        combined_results = self._format_results_for_llm(results)
-                else:
-                    self.sim_time = results['results']['total_execution_time'] 
-                    combined_results = results
-            else:
-                combined_results = results
-            print(combined_results)
+            if source_context == 'hybrid':
+                parsed_request = self._merge_with_hybrid_simulation_defaults(parsed_request)
 
-            sys_mess = self.prompts.get('system_message_results_sim', '') + """
-                If the context contains both 'Original analysis' and 'Follow-up analysis',
-                use both only when needed to answer the user's exact question.
-                Do not include unrelated KPIs or stations.
-                """
-            context = f"The labels for the activities are: {activity_names}\nResults from the simulation: {combined_results}.\nNote: If there are both original and follow-up analyses, provide a complete answer using both."
-            invoke_payload = {"question": question,
-                            "context": context,
-                            "system_message": sys_mess}
-            prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
-            complete_answer = self.chain_gateway.invoke(invoke_payload)
-            if self.model_type_gateway == 'local':
-                prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
-            else:
-                answer = complete_answer.content
+            missing_fields = factory_interface.find_missing_required_parameters(parsed_request)
+            if missing_fields:
+                self._set_pending_simulation_request(
+                    source=source_context,
+                    original_question=root_question or question,
+                    modality=modality,
+                    base_request=parsed_request,
+                    simulation_question=question
+                )
+                return prompt, self._format_missing_simulation_params_prompt(missing_fields)
+
+            self._clear_pending_simulation_request()
+            prompt, answer = self._finalize_simulation_answer(question, parsed_request, prompt, activity_names)
         return prompt, answer
 
 
@@ -665,7 +755,16 @@ class LLMPipeline:
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".pddl") as temp_file:
             temp_file.write(problem_string)
             problem_path = temp_file.name
-        plan = pddl_interface.run_planner(problem_path)
+        try:
+            plan = pddl_interface.run_planner(problem_path)
+        except RuntimeError as planner_error:
+            message = (
+                "I could not complete the hybrid reasoning plan for this request. "
+                "The planner failed while processing the generated PDDL problem. "
+                f"Details: {planner_error}"
+            )
+            print(message)
+            return prompt_gateway, message
         print(plan)
         
         question_json = explicit_deadlock_free(question_json, plan)
@@ -706,7 +805,14 @@ class LLMPipeline:
                 type_counters[qtype] += 1
 
                 if qtype == "simulation":
-                    prompt, answer = self._produce_answer_simulation(q_text, modality)
+                    prompt, answer = self._produce_answer_simulation(
+                        q_text,
+                        modality,
+                        source_context='hybrid',
+                        root_question=question
+                    )
+                    if self.pending_simulation_request is not None:
+                        return prompts + f"\n{i+1}. Prompt simulation:\n{prompt}\n", answer
 
                 elif qtype == "failure":
                     last_sim_time = self.sim_time
@@ -731,9 +837,11 @@ class LLMPipeline:
                         ])
                         
                         if not is_deadlock_free:
-                            print(f"Deadlock detected in validation step {i+1}. Stopping further simulations.")
-                            answers += f"\nCRITICAL: Deadlock detected. Further simulations may be unreliable.\n"
-                            break                
+                            print(f"Deadlock detected in validation step {i+1}. Continuing with remaining requested analyses.")
+                            answers += (
+                                "\nWarning: A deadlock may exist based on validation results. "
+                                "Continuing with the remaining requested analyses as requested.\n"
+                            )
 
                 prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
                 answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
@@ -746,6 +854,57 @@ class LLMPipeline:
         return prompts, answer
     
     def _generate_response(self, question, curr_datetime, info_run, chatbot=False):
+        if self.pending_simulation_request is not None:
+            pending = dict(self.pending_simulation_request)
+
+            extracted_updates = factory_interface.extract_simulation_params_from_text(question)
+            merged_request = factory_interface.merge_simulation_request(pending.get("base_request", {}), extracted_updates)
+            missing_fields = factory_interface.find_missing_required_parameters(merged_request)
+
+            if missing_fields:
+                self._set_pending_simulation_request(
+                    source=pending["source"],
+                    original_question=pending["question"],
+                    modality=pending["modality"],
+                    base_request=merged_request,
+                    simulation_question=pending.get("simulation_question", pending["question"])
+                )
+                complete_prompt = "simulation-parameter-completion"
+                answer = self._format_missing_simulation_params_prompt(missing_fields)
+            else:
+                self._clear_pending_simulation_request()
+                if pending["source"] == "hybrid":
+                    self._set_hybrid_simulation_defaults(merged_request)
+                    completed_question = (
+                        f"{pending['question']}\n"
+                        "Simulation parameters explicitly provided by the user: "
+                        f"{json.dumps(merged_request)}"
+                    )
+                    try:
+                        complete_prompt, answer = self._produce_answer_hybrid(completed_question, pending["modality"])
+                    finally:
+                        self._clear_hybrid_simulation_defaults()
+                else:
+                    factory_data = retrieve_factory()
+                    activity_names = ', '.join([activity for activity in factory_data['activities']])
+                    complete_prompt = "simulation-parameter-completion"
+                    complete_prompt, answer = self._finalize_simulation_answer(
+                        pending.get("simulation_question", pending["question"]),
+                        merged_request,
+                        complete_prompt,
+                        activity_names
+                    )
+
+            print(f'Prompt: {complete_prompt}\n')
+            print(f'{answer}\n')
+            print('--------------------------------------------------')
+
+            if chatbot:
+                yield answer
+            log_to_file(f'Query: {complete_prompt}\n\n{answer}\n\n##########################\n\n',
+                        curr_datetime, info_run)
+            return
+
         complete_prompt, answer = self._produce_answer_gateway(question, 'routing')
         print(f'\n\nPrompt: {complete_prompt}\n')
         print(f'{answer}\n')
