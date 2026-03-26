@@ -92,14 +92,6 @@ def extract_json(llm_answer):
     return json_str
 
 
-def retrieve_automata():
-    model_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'automaton', 'factory_automaton.json')
-    with open(model_path, 'r') as file:
-        data = json.load(file)
-    
-    return data
-
-
 def retrieve_factory():
     model_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'parameters', 'digital_twin.json')
     with open(model_path, 'r') as file:

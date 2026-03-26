@@ -88,9 +88,8 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 |   └── architecture.png
 ├── data              # extracted automaton and simulation parameters
 |   ├── automaton     # automaton files (SKG models)
-|   |   ├── default   # reference/fallback SKG files
-|   |   |   └── lego_SKG_item-10_no_doubles.xml
-|   |   ├── factory_automaton.json
+|   |   ├── *_skg.xml            # discovered/selected SKG automaton used for verification
+|   |   ├── *.txt                # observable event semantics used for semantic lookup
 |   |   └── README.md # automaton directory documentation
 |   └── parameters    # digital twin parameters
 |       ├── digital_twin_with_failure.json

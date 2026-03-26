@@ -39,12 +39,21 @@ MODEL_PATH, MODEL_PATH_IN_CONTAINER = get_skg_model_path()
 
 def interface_with_llm(llm_answer):
     json_request = extract_json(llm_answer)
+    if not isinstance(json_request, dict):
+        return {
+            "task": "verification",
+            "uppaal_query": "",
+            "results": "Error: Unable to parse verification request JSON from model answer."
+        }
+
     task = json_request.get("task")
     formal_query = json_request.get("uppaal_query")
     uppaal_output = ''
 
-    if task == "verification":
+    if task == "verification" and formal_query:
         uppaal_output = execute_query(formal_query)
+    elif task == "verification" and not formal_query:
+        uppaal_output = "Error: Missing 'uppaal_query' in verification request."
     
     json_request["results"] = uppaal_output
     return json_request

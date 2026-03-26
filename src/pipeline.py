@@ -3,6 +3,7 @@ import json
 import os
 import re
 import io
+import xml.etree.ElementTree as ET
 from contextlib import redirect_stdout
 
 from langchain.chat_models import init_chat_model
@@ -19,7 +20,7 @@ except ImportError:
 import simulation_interface as factory_interface
 from oracle import AnswerVerificationOracle
 import uppaal_interface
-from utility import log_to_file, retrieve_automata, retrieve_factory, load_csv_questions, retrieve_factory_with_failure, load_txt_questions
+from utility import log_to_file, retrieve_factory, load_csv_questions, retrieve_factory_with_failure, load_txt_questions
 import pddl_interface
 import tempfile
 import failure_maintenance
@@ -548,13 +549,153 @@ class LLMPipeline:
             prompt, answer = self._finalize_simulation_answer(question, parsed_request, prompt, activity_names)
         return prompt, answer
 
+    def _build_state_semantics_mapping(self):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        automaton_dir = os.path.join(base_dir, "data", "automaton")
+
+        if not os.path.isdir(automaton_dir):
+            return {}, "", {}
+
+        skg_candidates = [
+            os.path.join(automaton_dir, file_name)
+            for file_name in os.listdir(automaton_dir)
+            if file_name.endswith("_skg.xml")
+        ]
+        if not skg_candidates:
+            skg_candidates = [
+                os.path.join(automaton_dir, file_name)
+                for file_name in os.listdir(automaton_dir)
+                if file_name.endswith(".xml")
+            ]
+
+        txt_candidates = [
+            os.path.join(automaton_dir, file_name)
+            for file_name in os.listdir(automaton_dir)
+            if file_name.endswith(".txt")
+        ]
+
+        if not skg_candidates or not txt_candidates:
+            return {}, "", {}
+
+        skg_path = max(skg_candidates, key=os.path.getmtime)
+        semantics_txt_path = max(txt_candidates, key=os.path.getmtime)
+
+        event_semantics = {}
+        with open(semantics_txt_path, "r", encoding="utf-8") as semantics_file:
+            in_observable_section = False
+            for raw_line in semantics_file:
+                line = raw_line.strip()
+                if line == "--OBSERVABLE EVENTS--":
+                    in_observable_section = True
+                    continue
+                if in_observable_section and line.startswith("--") and line != "--OBSERVABLE EVENTS--":
+                    break
+
+                if in_observable_section:
+                    match = re.match(r"^(s\d+)\s*:\s*(.+)$", line)
+                    if match:
+                        event_semantics[match.group(1)] = match.group(2).strip()
+
+        tree = ET.parse(skg_path)
+        root = tree.getroot()
+
+        location_id_to_name = {}
+        for location in root.findall(".//location"):
+            location_id = location.get("id")
+            name_node = location.find("name")
+            if location_id is None or name_node is None or not name_node.text:
+                continue
+            location_id_to_name[location_id] = name_node.text.strip()
+
+        incoming_event_for_state = {}
+        for transition in root.findall(".//transition"):
+            target = transition.find("target")
+            sync_label = None
+            for label in transition.findall("label"):
+                if label.get("kind") == "synchronisation":
+                    sync_label = (label.text or "").strip()
+                    break
+
+            if target is None or not sync_label:
+                continue
+
+            target_ref = target.get("ref")
+            state_name = location_id_to_name.get(target_ref)
+            if not state_name:
+                continue
+
+            event_symbol = sync_label.replace("!", "").replace("?", "").strip()
+            if not re.match(r"^s\d+$", event_symbol):
+                continue
+
+            incoming_event_for_state[state_name] = event_symbol
+
+        state_semantics = {}
+        for state_name, event_symbol in incoming_event_for_state.items():
+            semantic_label = event_semantics.get(event_symbol)
+            if semantic_label:
+                state_semantics[state_name] = (event_symbol, semantic_label)
+
+        def state_sort_key(state_name):
+            match = re.match(r"^q_(\d+)$", state_name)
+            if match:
+                return (0, int(match.group(1)))
+            return (1, state_name)
+
+        formatted_lines = []
+        for state_name in sorted(state_semantics.keys(), key=state_sort_key):
+            event_symbol, semantic_label = state_semantics[state_name]
+            formatted_lines.append(
+                f"- location {state_name} <- event {event_symbol}: {semantic_label}"
+            )
+
+        return state_semantics, "\n".join(formatted_lines), event_semantics
+
+    def _build_verification_context(self):
+        state_semantics, mapping_text, event_semantics = self._build_state_semantics_mapping()
+
+        automaton_states = sorted(state_semantics.keys(), key=lambda s: int(s.split('_')[1]) if re.match(r'^q_\d+$', s) else s)
+        def event_sort_key(event_symbol):
+            match = re.match(r"^s(\d+)$", event_symbol)
+            if match:
+                return (0, int(match.group(1)))
+            return (1, event_symbol)
+
+        formatted_event_lines = []
+        for event_symbol in sorted(event_semantics.keys(), key=event_sort_key):
+            formatted_event_lines.append(f"- event {event_symbol}: {event_semantics[event_symbol]}")
+        event_mapping_text = "\n".join(formatted_event_lines)
+
+        context_template = self.prompts.get('context_verification', '')
+        context = context_template.replace('SEMANTIC_STATE_MAPPING', mapping_text if mapping_text else 'Not available.')
+        context = context.replace('EVENT_SEMANTICS_MAPPING', event_mapping_text if event_mapping_text else 'Not available.')
+        if 'STATES' in context:
+            context = context.replace('STATES', str(automaton_states))
+        else:
+            context = f"Automaton states: {automaton_states}\n\n{context}"
+        return context
+
+    def _parse_verification_payload(self, answer_text):
+        cleaned = clean_json_block(answer_text if isinstance(answer_text, str) else str(answer_text))
+        if cleaned is None:
+            return None
+
+        try:
+            parsed = json.loads(cleaned)
+        except json.JSONDecodeError:
+            return None
+
+        if isinstance(parsed, dict):
+            return parsed
+        return None
+
 
     def _produce_answer_verification(self, question, modality):
-        automata_data = retrieve_automata()
         sys_mess = self.prompts.get('system_message_verification', '')
         if 'zeroshot' not in modality:
             sys_mess += self.prompts.get('shots_verification', '')
-        context = self.prompts.get('context_verification', '').replace('STATES', str(list(automata_data['transitions'].keys())))
+        context = self._build_verification_context()
+
         invoke_payload = {"question": question,
                         "context": context,
                         "system_message": sys_mess}
@@ -566,7 +707,16 @@ class LLMPipeline:
             answer = complete_answer.content
 
         if 'evaluation' not in modality:
-            results = uppaal_interface.interface_with_llm(answer)
+            parsed_payload = self._parse_verification_payload(answer)
+
+            if isinstance(parsed_payload, dict) and parsed_payload.get("task") == "semantic_lookup":
+                semantic_response = parsed_payload.get("response")
+                if isinstance(semantic_response, str) and semantic_response.strip():
+                    return prompt, semantic_response.strip()
+                return prompt, "I don't know."
+
+            answer_for_uppaal = json.dumps(parsed_payload) if isinstance(parsed_payload, dict) else answer
+            results = uppaal_interface.interface_with_llm(answer_for_uppaal)
             sys_mess = self.prompts.get('system_message_results_ver', '')
             context = f'Results from Uppaal: {results}'
             invoke_payload = {"question": question,
