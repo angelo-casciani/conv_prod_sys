@@ -4,6 +4,8 @@
 # For server deployment, use: server/docker-compose.server.yml
 # ============================================================
 
+version: "3.3"
+
 services:
   # Chatbot UI/API
   chatbot:
