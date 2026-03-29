@@ -5,6 +5,7 @@ from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 import tempfile
 import os
 from datetime import datetime
+import uuid
 from extractor import Extractor
 
 class ProcessMiningModule:
@@ -77,8 +78,9 @@ class ProcessMiningModule:
         return log
 
     def save_net_image(self, net, initial_marking, final_marking, file_path="pmmOutputs/petri_net_"):
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_path = os.path.join(self.output_dir, f"petri_net_{timestamp}.png")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        suffix = uuid.uuid4().hex[:8]
+        file_path = os.path.join(self.output_dir, f"petri_net_{timestamp}_{suffix}.png")
         pm4py.save_vis_petri_net(net, initial_marking, final_marking, file_path=file_path)
         return file_path
 
@@ -144,10 +146,11 @@ class ProcessMiningModule:
         
         filtered_log = pm4py.filtering.filter_time_range(log, start_date, end_date)
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        suffix = uuid.uuid4().hex[:8]
         start_str = start_date.strftime("%Y%m%d")
         end_str = end_date.strftime("%Y%m%d")
-        output_path = os.path.join(self.output_dir, f"filtered_log_{start_str}_to_{end_str}_{timestamp}.xes")
+        output_path = os.path.join(self.output_dir, f"filtered_log_{start_str}_to_{end_str}_{timestamp}_{suffix}.xes")
         pm4py.write.write_xes(filtered_log, output_path)
         return output_path
     

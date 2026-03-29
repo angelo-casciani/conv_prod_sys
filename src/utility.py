@@ -6,12 +6,16 @@ import re
 import random
 import argparse
 import numpy as np
+from threading import Lock
 
 try: # (Optional) torch import (not needed for API-only mode)
     import torch
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
+
+
+_log_file_lock = Lock()
 
 
 def seed_everything(seed=10):
@@ -72,12 +76,13 @@ def log_to_file(conversation, curr_datetime, info_run):
     output_dir = os.path.join(script_dir, "..", "tests", 'outputs')
     os.makedirs(output_dir, exist_ok=True)
     filepath = os.path.join(output_dir, f"output_{curr_datetime}.txt")
-    with open(filepath, 'a') as file:
-        file.write('INFORMATION ON THE RUN\n\n')
-        for key in info_run.keys():
-            file.write(f"{key}: {info_run[key]}\n")
-        file.write('\n-----------------------------------\n\n')
-        file.write(conversation)
+    with _log_file_lock:
+        with open(filepath, 'a', encoding='utf-8') as file:
+            file.write('INFORMATION ON THE RUN\n\n')
+            for key in info_run.keys():
+                file.write(f"{key}: {info_run[key]}\n")
+            file.write('\n-----------------------------------\n\n')
+            file.write(conversation)
 
 
 def extract_json(llm_answer):

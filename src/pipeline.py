@@ -129,9 +129,11 @@ class LLMPipeline:
         self.chain_process_mining = self._initialize_chain(model_id_gateway, self.model_family_gateway, self.model_type_gateway)
         self.failure_module = failure_maintenance.FailureMaintenanceModule()
         self.process_mining_module = process_mining.ProcessMiningModule()
-        self.pending_simulation_request = None
-        self.hybrid_simulation_defaults = None
-        self.sim_time = None
+        self._default_session_state = {
+            "pending_simulation_request": None,
+            "hybrid_simulation_defaults": None,
+            "sim_time": None,
+        }
         print("Initializing digital twins...")
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         digital_twin_path = os.path.join(base_dir, "data", "parameters", "digital_twin.json")
@@ -296,8 +298,18 @@ class LLMPipeline:
         chain = prompt_template_structure | model
         return chain
 
-    def _set_pending_simulation_request(self, source, original_question, modality, base_request=None, simulation_question=None):
-        self.pending_simulation_request = {
+    def _ensure_session_state(self, session_state=None):
+        if session_state is None:
+            session_state = self._default_session_state
+
+        session_state.setdefault("pending_simulation_request", None)
+        session_state.setdefault("hybrid_simulation_defaults", None)
+        session_state.setdefault("sim_time", None)
+        return session_state
+
+    def _set_pending_simulation_request(self, source, original_question, modality, base_request=None, simulation_question=None, session_state=None):
+        state = self._ensure_session_state(session_state)
+        state["pending_simulation_request"] = {
             "source": source,
             "question": original_question,
             "modality": modality,
@@ -305,14 +317,17 @@ class LLMPipeline:
             "simulation_question": simulation_question or original_question
         }
 
-    def _clear_pending_simulation_request(self):
-        self.pending_simulation_request = None
+    def _clear_pending_simulation_request(self, session_state=None):
+        state = self._ensure_session_state(session_state)
+        state["pending_simulation_request"] = None
 
-    def _set_hybrid_simulation_defaults(self, request_data):
-        self.hybrid_simulation_defaults = factory_interface.normalize_simulation_request(request_data or {})
+    def _set_hybrid_simulation_defaults(self, request_data, session_state=None):
+        state = self._ensure_session_state(session_state)
+        state["hybrid_simulation_defaults"] = factory_interface.normalize_simulation_request(request_data or {})
 
-    def _clear_hybrid_simulation_defaults(self):
-        self.hybrid_simulation_defaults = None
+    def _clear_hybrid_simulation_defaults(self, session_state=None):
+        state = self._ensure_session_state(session_state)
+        state["hybrid_simulation_defaults"] = None
 
     def _format_missing_simulation_params_prompt(self, missing_fields):
         ordered_required = ["replicas", "initial_state_mode", "simulation_time", "warm_up_replicas", "warm_up_time"]
@@ -338,13 +353,14 @@ class LLMPipeline:
             f"However, I still need {missing_text}."
         )
 
-    def _finalize_simulation_answer(self, question, parsed_request, prompt, activity_names):
+    def _finalize_simulation_answer(self, question, parsed_request, prompt, activity_names, session_state=None):
+        state = self._ensure_session_state(session_state)
         request_payload = factory_interface.normalize_simulation_request(parsed_request)
         results = factory_interface.interface_with_llm(json.dumps(request_payload))
         combined_results = results
 
         if isinstance(results, dict) and isinstance(results.get('results'), dict):
-            self.sim_time = results['results'].get('total_execution_time', self.sim_time)
+            state['sim_time'] = results['results'].get('total_execution_time', state.get('sim_time'))
 
         print(combined_results)
 
@@ -388,10 +404,12 @@ class LLMPipeline:
         except json.JSONDecodeError:
             return None
 
-    def _merge_with_hybrid_simulation_defaults(self, parsed_request):
-        if not self.hybrid_simulation_defaults:
+    def _merge_with_hybrid_simulation_defaults(self, parsed_request, session_state=None):
+        state = self._ensure_session_state(session_state)
+        defaults = state.get("hybrid_simulation_defaults")
+        if not defaults:
             return parsed_request
-        return factory_interface.merge_simulation_request(parsed_request or {}, self.hybrid_simulation_defaults)
+        return factory_interface.merge_simulation_request(parsed_request or {}, defaults)
 
 
     def _produce_answer_gateway(self, question, answer_phase, modality=''):
@@ -430,7 +448,8 @@ class LLMPipeline:
             answer = complete_answer.content
         return prompt, answer
 
-    def _format_results_for_llm(self, results, follow_up_results=None):
+    def _format_results_for_llm(self, results, follow_up_results=None, session_state=None):
+        state = self._ensure_session_state(session_state)
         original_pieces = results['results']['total_pieces_produced']
         target_pieces = results['target_pieces']
         original_time = results['simulation_time'] 
@@ -452,14 +471,14 @@ class LLMPipeline:
 
                             ANSWER: No, {target_pieces} pieces cannot be produced in {original_time} time units. Only {original_pieces} pieces can be produced in that timeframe. To produce the full {target_pieces} pieces, you would need {needed_time} time units.
                             """
-            self.sim_time = needed_time
+            state['sim_time'] = needed_time
         else:
             formatted = f"""
                             SIMULATION RESULTS:
                             - Pieces produced: {original_pieces}
                             - Time used: {original_time} time units
                             """
-            self.sim_time = original_time
+            state['sim_time'] = original_time
         
          
         return formatted
@@ -505,7 +524,8 @@ class LLMPipeline:
         
         return follow_up_results
         
-    def _produce_answer_simulation(self, question, modality, source_context='direct', root_question=None):
+    def _produce_answer_simulation(self, question, modality, source_context='direct', root_question=None, session_state=None):
+        state = self._ensure_session_state(session_state)
         factory_data = retrieve_factory()
         activity_names = ', '.join([activity for activity in factory_data['activities']])
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
@@ -532,7 +552,7 @@ class LLMPipeline:
                 )
 
             if source_context == 'hybrid':
-                parsed_request = self._merge_with_hybrid_simulation_defaults(parsed_request)
+                parsed_request = self._merge_with_hybrid_simulation_defaults(parsed_request, session_state=state)
 
             missing_fields = factory_interface.find_missing_required_parameters(parsed_request)
             if missing_fields:
@@ -541,12 +561,13 @@ class LLMPipeline:
                     original_question=root_question or question,
                     modality=modality,
                     base_request=parsed_request,
-                    simulation_question=question
+                    simulation_question=question,
+                    session_state=state
                 )
                 return prompt, self._format_missing_simulation_params_prompt(missing_fields)
 
-            self._clear_pending_simulation_request()
-            prompt, answer = self._finalize_simulation_answer(question, parsed_request, prompt, activity_names)
+            self._clear_pending_simulation_request(session_state=state)
+            prompt, answer = self._finalize_simulation_answer(question, parsed_request, prompt, activity_names, session_state=state)
         return prompt, answer
 
     def _build_state_semantics_mapping(self):
@@ -865,7 +886,8 @@ class LLMPipeline:
         return prompt, answer
 
 
-    def _produce_answer_hybrid(self, question, modality):
+    def _produce_answer_hybrid(self, question, modality, session_state=None):
+        state = self._ensure_session_state(session_state)
         factory_model = retrieve_factory()
         activities = [a for a in factory_model['activities'].keys()]
         activities_str = ", ".join(activities)
@@ -959,13 +981,14 @@ class LLMPipeline:
                         q_text,
                         modality,
                         source_context='hybrid',
-                        root_question=question
+                        root_question=question,
+                        session_state=state
                     )
-                    if self.pending_simulation_request is not None:
+                    if state.get("pending_simulation_request") is not None:
                         return prompts + f"\n{i+1}. Prompt simulation:\n{prompt}\n", answer
 
                 elif qtype == "failure":
-                    last_sim_time = self.sim_time
+                    last_sim_time = state.get("sim_time")
                     prompt, answer = self._produce_answer_failure(q_text, last_sim_time, modality)
                     try:
                         delay = json.loads(answer).get("estimated_maintenance_delay", 0)
@@ -1003,9 +1026,10 @@ class LLMPipeline:
         prompt, answer = self._produce_rewritten_answer(answers) 
         return prompts, answer
     
-    def _generate_response(self, question, curr_datetime, info_run, chatbot=False):
-        if self.pending_simulation_request is not None:
-            pending = dict(self.pending_simulation_request)
+    def _generate_response(self, question, curr_datetime, info_run, chatbot=False, session_state=None):
+        state = self._ensure_session_state(session_state)
+        if state.get("pending_simulation_request") is not None:
+            pending = dict(state["pending_simulation_request"])
 
             extracted_updates = factory_interface.extract_simulation_params_from_text(question)
             merged_request = factory_interface.merge_simulation_request(pending.get("base_request", {}), extracted_updates)
@@ -1017,23 +1041,24 @@ class LLMPipeline:
                     original_question=pending["question"],
                     modality=pending["modality"],
                     base_request=merged_request,
-                    simulation_question=pending.get("simulation_question", pending["question"])
+                    simulation_question=pending.get("simulation_question", pending["question"]),
+                    session_state=state
                 )
                 complete_prompt = "simulation-parameter-completion"
                 answer = self._format_missing_simulation_params_prompt(missing_fields)
             else:
-                self._clear_pending_simulation_request()
+                self._clear_pending_simulation_request(session_state=state)
                 if pending["source"] == "hybrid":
-                    self._set_hybrid_simulation_defaults(merged_request)
+                    self._set_hybrid_simulation_defaults(merged_request, session_state=state)
                     completed_question = (
                         f"{pending['question']}\n"
                         "Simulation parameters explicitly provided by the user: "
                         f"{json.dumps(merged_request)}"
                     )
                     try:
-                        complete_prompt, answer = self._produce_answer_hybrid(completed_question, pending["modality"])
+                        complete_prompt, answer = self._produce_answer_hybrid(completed_question, pending["modality"], session_state=state)
                     finally:
-                        self._clear_hybrid_simulation_defaults()
+                        self._clear_hybrid_simulation_defaults(session_state=state)
                 else:
                     factory_data = retrieve_factory()
                     activity_names = ', '.join([activity for activity in factory_data['activities']])
@@ -1042,7 +1067,8 @@ class LLMPipeline:
                         pending.get("simulation_question", pending["question"]),
                         merged_request,
                         complete_prompt,
-                        activity_names
+                        activity_names,
+                        session_state=state
                     )
 
             print(f'Prompt: {complete_prompt}\n')
@@ -1065,7 +1091,7 @@ class LLMPipeline:
         if 'uppaal_verification' in answer.lower():
             complete_prompt, answer = self._produce_answer_verification(question, 'live')
         elif 'factory_simulation' in answer.lower():
-            complete_prompt, answer = self._produce_answer_simulation(question, 'live')
+            complete_prompt, answer = self._produce_answer_simulation(question, 'live', session_state=state)
         elif 'factory_info' in answer.lower():
             complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info', info_run.get('Interaction Modality', ''))
             answer = clean_json_block(answer)
@@ -1074,7 +1100,7 @@ class LLMPipeline:
         elif 'process_mining' in answer.lower():
             complete_prompt, answer = self._produce_answer_process_mining(question, 'live')
         elif 'hybrid' in answer.lower():
-            complete_prompt, answer = self._produce_answer_hybrid(question, 'live')
+            complete_prompt, answer = self._produce_answer_hybrid(question, 'live', session_state=state)
         else:
             complete_prompt, answer = self._produce_answer_gateway(question, 'negative_response')
 
@@ -1088,8 +1114,10 @@ class LLMPipeline:
                     curr_datetime, info_run)
 
 
-    def live_prompting(self, info_run, chatbot, query=""):
-        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    def live_prompting(self, info_run, chatbot, query="", session_state=None, request_id=None):
+        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")
+        if request_id:
+            current_datetime = f"{current_datetime}_{str(request_id)[:8]}"
         if chatbot:
             if query.lower().strip() == "quit":
                 yield "Goodbye!"
@@ -1097,7 +1125,7 @@ class LLMPipeline:
 
             yield f"Processing your query: {query}"
             
-            for response in self._generate_response(query, current_datetime, info_run, chatbot=True):
+            for response in self._generate_response(query, current_datetime, info_run, chatbot=True, session_state=session_state):
                 yield response
         else:
             while True:
@@ -1107,7 +1135,7 @@ class LLMPipeline:
                     print("Exiting the chat.")
                     break
                 
-                for response in self._generate_response(query, current_datetime, info_run, chatbot=False):
+                for response in self._generate_response(query, current_datetime, info_run, chatbot=False, session_state=session_state):
                     print(response)
                     print()
 
