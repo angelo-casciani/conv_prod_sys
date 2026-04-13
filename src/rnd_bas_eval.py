@@ -3,11 +3,62 @@ import json
 import numpy as np
 import pandas as pd
 from typing import Dict
+from argparse import ArgumentParser
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import pm4py
 
 load_dotenv()
+
+HF_TOKEN = os.getenv('HF_TOKEN')
+
+MODEL_CONFIGS = {
+    'llama-3.2-1b': {
+        'model_id': 'meta-llama/Llama-3.2-1B-Instruct',
+        'model_provider': 'huggingface',
+    },
+    'qwen2.5-7b': {
+        'model_id': 'Qwen/Qwen2.5-7B-Instruct',
+        'model_provider': 'huggingface',
+    },
+    'phi-4': {
+        'model_id': 'microsoft/phi-4',
+        'model_provider': 'huggingface',
+    },
+    'gemini-2.5-flash': {
+        'model_id': 'gemini-2.5-flash',
+        'model_provider': 'google_genai',
+    },
+    'gemini-2.5-pro': {
+        'model_id': 'gemini-2.5-pro',
+        'model_provider': 'google_genai',
+    },
+}
+
+DEFAULT_LLM_MODELS = [
+    'llama-3.2-1b',
+    'qwen2.5-7b',
+    'phi-4',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
+]
+
+
+def parse_arguments():
+    parser = ArgumentParser(description="Run random and LLM-only baselines.")
+    parser.add_argument(
+        '--llm_models',
+        type=str,
+        default=','.join(DEFAULT_LLM_MODELS),
+        help='Comma-separated model aliases. Supported: ' + ', '.join(MODEL_CONFIGS.keys())
+    )
+    parser.add_argument(
+        '--num_random_runs',
+        type=int,
+        default=10,
+        help='Number of runs for random baseline.'
+    )
+    return parser.parse_args()
 
 
 def parse_boolean(value) -> bool:
@@ -73,15 +124,21 @@ class RandomBaseline:
 
 class LLMOnlyBaseline:
     
-    def __init__(self, model_id='gemini-2.5-flash', api_key: str = None):
-        if api_key is None:
-            api_key = os.getenv('GOOGLE_API_KEY')
-        if api_key:
-            os.environ['GOOGLE_API_KEY'] = api_key
+    def __init__(self, model_id='gemini-2.5-flash', model_provider='google_genai', api_key: str = None):
+        self.model_id = model_id
+        self.model_provider = model_provider
+
+        if self.model_provider == 'google_genai':
+            if api_key is None:
+                api_key = os.getenv('GOOGLE_API_KEY')
+            if api_key:
+                os.environ['GOOGLE_API_KEY'] = api_key
+        elif self.model_provider == 'huggingface' and HF_TOKEN:
+            os.environ['HUGGINGFACEHUB_API_TOKEN'] = HF_TOKEN
         
         self.model = init_chat_model(
             model_id,
-            model_provider='google_genai',
+            model_provider=model_provider,
             temperature=0.1,
             max_tokens=2048
         )
@@ -203,7 +260,9 @@ class LLMOnlyBaseline:
         }
 
 
-def run_evaluation(dataset_path: str, num_random_runs: int = 10):
+def run_evaluation(dataset_path: str, llm_models=None, num_random_runs: int = 10):
+    if llm_models is None:
+        llm_models = DEFAULT_LLM_MODELS
     
     print("="*80)
     print("BASELINE EVALUATION")
@@ -232,15 +291,31 @@ def run_evaluation(dataset_path: str, num_random_runs: int = 10):
     print(f"  Accuracy: {random_avg_accuracy:.2f}% ± {random_std_accuracy:.2f}%")
     
     print("\n" + "-"*80)
-    print("2. LLM-ONLY BASELINE (gemini-2.5-flash)")
+    print("2. LLM-ONLY BASELINE (multiple models)")
     print("-"*80)
-    
-    llm_baseline = LLMOnlyBaseline()
-    llm_results = llm_baseline.evaluate(dataset_path)
-    
-    print(f"\nLLM-Only Baseline Results:")
-    print(f"  MAPE: {llm_results['mape']:.2f}%")
-    print(f"  Accuracy: {llm_results['accuracy']:.2f}%")
+
+    llm_results_by_model = {}
+    failed_models = {}
+
+    for model_alias in llm_models:
+        model_key = model_alias.strip().lower()
+        model_cfg = MODEL_CONFIGS.get(model_key)
+        if model_cfg is None:
+            failed_models[model_alias] = 'Unsupported model alias'
+            print(f"\nSkipping {model_alias}: unsupported model alias")
+            continue
+
+        print(f"\nEvaluating model: {model_alias} ({model_cfg['model_id']}, provider={model_cfg['model_provider']})")
+        try:
+            llm_baseline = LLMOnlyBaseline(
+                model_id=model_cfg['model_id'],
+                model_provider=model_cfg['model_provider']
+            )
+            llm_results = llm_baseline.evaluate(dataset_path)
+            llm_results_by_model[model_alias] = llm_results
+        except Exception as e:
+            failed_models[model_alias] = str(e)
+            print(f"Failed {model_alias}: {e}")
     
     print("\n" + "="*80)
     print("SUMMARY")
@@ -248,7 +323,12 @@ def run_evaluation(dataset_path: str, num_random_runs: int = 10):
     print(f"\n{'Baseline':<25} {'MAPE (%)':<20} {'Accuracy (%)':<20}")
     print("-"*80)
     print(f"{'Random':<25} {random_avg_mape:>8.2f} ± {random_std_mape:<7.2f} {random_avg_accuracy:>8.2f} ± {random_std_accuracy:<7.2f}")
-    print(f"{'LLM-Only (gemini-2.5-flash)':<25} {llm_results['mape']:>8.2f} {'':>9} {llm_results['accuracy']:>8.2f}")
+    for model_alias in llm_models:
+        if model_alias in llm_results_by_model:
+            result = llm_results_by_model[model_alias]
+            print(f"{('LLM-Only (' + model_alias + ')'):<25} {result['mape']:>8.2f} {'':>9} {result['accuracy']:>8.2f}")
+        elif model_alias in failed_models:
+            print(f"{('LLM-Only (' + model_alias + ')'):<25} {'FAILED':>8} {'':>9} {'FAILED':>8}")
     print("="*80)
     
     results_summary = {
@@ -258,10 +338,8 @@ def run_evaluation(dataset_path: str, num_random_runs: int = 10):
             'accuracy_mean': random_avg_accuracy,
             'accuracy_std': random_std_accuracy
         },
-        'llm_only_baseline': {
-            'mape': llm_results['mape'],
-            'accuracy': llm_results['accuracy']
-        }
+        'llm_only_baseline': llm_results_by_model,
+        'failed_models': failed_models,
     }
     
     output_path = os.path.join(os.path.dirname(dataset_path), 'evaluation_results.json')
@@ -274,6 +352,7 @@ def run_evaluation(dataset_path: str, num_random_runs: int = 10):
 
 
 if __name__ == "__main__":
+    args = parse_arguments()
     dataset_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_sets', 'answers-dataset.csv')
     
     if not os.path.exists(dataset_path):
@@ -281,4 +360,5 @@ if __name__ == "__main__":
         print("Please generate the dataset first using generate_answers_dataset()")
         exit(1)
     
-    run_evaluation(dataset_path, num_random_runs=10)
+    selected_models = [m.strip() for m in args.llm_models.split(',') if m.strip()]
+    run_evaluation(dataset_path, llm_models=selected_models, num_random_runs=args.num_random_runs)
