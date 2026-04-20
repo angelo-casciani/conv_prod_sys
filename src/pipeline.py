@@ -404,6 +404,54 @@ class LLMPipeline:
         except json.JSONDecodeError:
             return None
 
+    def _extract_simulation_params_with_llm(self, user_text, base_request=None, missing_fields=None):
+        """Fallback extractor for simulation parameters when regex parsing is not enough."""
+        extraction_system_message = (
+            "Extract only explicitly provided simulation parameters from the user message. "
+            "Return a JSON object with only these keys: replicas, initial_state_mode, simulation_time, "
+            "warm_up_replicas, warm_up_time, target_pieces. "
+            "Rules: "
+            "1) Do not infer missing values. "
+            "2) Use initial_state_mode only as 'empty' or 'warm_up'. "
+            "3) Accept variants like '5 simulation replicas', 'empty initial state', and 'for 1000 seconds'. "
+            "4) Output JSON only, no prose."
+        )
+        extraction_context = (
+            f"Current known simulation request: {json.dumps(base_request or {})}\n"
+            f"Still missing fields: {json.dumps(missing_fields or [])}\n"
+            f"User follow-up message: {user_text}"
+        )
+        invoke_payload = {
+            "question": "Extract only the parameters explicitly present in the user follow-up message.",
+            "context": extraction_context,
+            "system_message": extraction_system_message,
+        }
+
+        try:
+            complete_answer = self.chain_gateway.invoke(invoke_payload)
+            if self.model_type_gateway == 'local':
+                raw_answer = complete_answer
+            else:
+                raw_answer = complete_answer.content
+
+            parsed = self._extract_simulation_request_from_answer(raw_answer)
+            if not isinstance(parsed, dict):
+                return {}
+
+            allowed_keys = {
+                "replicas",
+                "initial_state_mode",
+                "simulation_time",
+                "warm_up_replicas",
+                "warm_up_time",
+                "target_pieces",
+            }
+            filtered = {k: v for k, v in parsed.items() if k in allowed_keys}
+            return factory_interface.normalize_simulation_request(filtered)
+        except Exception as e:
+            print(f"Warning: LLM-based simulation parameter extraction failed: {e}")
+            return {}
+
     def _merge_with_hybrid_simulation_defaults(self, parsed_request, session_state=None):
         state = self._ensure_session_state(session_state)
         defaults = state.get("hybrid_simulation_defaults")
@@ -555,6 +603,17 @@ class LLMPipeline:
                 parsed_request = self._merge_with_hybrid_simulation_defaults(parsed_request, session_state=state)
 
             missing_fields = factory_interface.find_missing_required_parameters(parsed_request)
+            if missing_fields and source_context == 'hybrid' and root_question:
+                regex_updates = factory_interface.extract_simulation_params_from_text(root_question)
+                llm_updates = self._extract_simulation_params_with_llm(
+                    root_question,
+                    base_request=parsed_request,
+                    missing_fields=missing_fields,
+                )
+                merged_updates = factory_interface.merge_simulation_request(regex_updates, llm_updates)
+                parsed_request = factory_interface.merge_simulation_request(parsed_request, merged_updates)
+                missing_fields = factory_interface.find_missing_required_parameters(parsed_request)
+
             if missing_fields:
                 self._set_pending_simulation_request(
                     source=source_context,
@@ -1034,6 +1093,15 @@ class LLMPipeline:
             extracted_updates = factory_interface.extract_simulation_params_from_text(question)
             merged_request = factory_interface.merge_simulation_request(pending.get("base_request", {}), extracted_updates)
             missing_fields = factory_interface.find_missing_required_parameters(merged_request)
+
+            if missing_fields:
+                llm_updates = self._extract_simulation_params_with_llm(
+                    question,
+                    base_request=merged_request,
+                    missing_fields=missing_fields,
+                )
+                merged_request = factory_interface.merge_simulation_request(merged_request, llm_updates)
+                missing_fields = factory_interface.find_missing_required_parameters(merged_request)
 
             if missing_fields:
                 self._set_pending_simulation_request(

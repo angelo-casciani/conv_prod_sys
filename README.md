@@ -57,11 +57,8 @@ Then open: `http://localhost:7860`
 # Stop everything
 sudo docker compose down
 
-# Rebuild and restart after code changes
+# Rebuild and restart
 sudo docker compose up --build
-
-# Follow logs
-sudo docker compose logs -f chatbot
 ```
 
 ### Runtime files
@@ -183,7 +180,11 @@ LSHA uses a separate conda environment because of dependency conflicts. The reco
 
 For a remote-server deployment, see [server/README.md](server/README.md).
 
-## Usage
+### Interaction Guide
+
+An interaction guide is also provided in [interaction_guide.pdf](interaction_guide.pdf).
+
+## Supported Interfaces
 
 ### CLI Interface
 
@@ -199,10 +200,10 @@ The complete conversation will be stored in a `.txt` file in the [outputs](tests
 
 The default parameters for the `main.py` are:
 
-* Gateway LLM: `'gpt-4o-mini'`;
-* Simulation LLM: `'gpt-4o-mini'`;
-* Verification LLM: `'gpt-4o-mini'`;
-* Number of generated tokens: `512`;
+* Gateway LLM: `'gemini-2.5-flash'`;
+* Simulation LLM: `'gemini-2.5-flash'`;
+* Verification LLM: `'gemini-2.5-flash'`;
+* Number of generated tokens: `32768`;
 * Interaction Modality: `'live'`, i.e., the live chat with the conversational framework.;
 * Extracted model: `False`, i.e., the digital twin for simulation will be extracted from scratch;
 * Extracted model with failure data: `False`, i.e., the digital twin for predictive maintenance will be extracted from scratch.
@@ -250,95 +251,9 @@ Retrive your OpenAI API key to use the supported GPT model.
 Please note that each of the selected models have specific requirements in terms of GPU availability.
 It is recommended to have access to a GPU-enabled environment meeting at least the minimum requirements for these models to run the software effectively.
 
+### Experimental Evaluation
 
-## Experiments
-
-### Simulation experiments
-
-To reproduce the experiments for the *simulation* evaluation, for example:
-
-``` bash
-python src/main.py --llm_id_simulation Qwen/Qwen2.5-7B-Instruct --modality evaluation-simulation --max_new_tokens 512
-```
-
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
-
-### Verification experiments
-
-To reproduce the experiments for the *verification* evaluation, for example:
-
-``` bash
-python src/main.py --llm_id_verification gpt-4o-mini --modality evaluation-verification --max_new_tokens 512
-```
-
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
-
-### Factory info experiments
-
-To reproduce the experiments for the *factory\_info* evaluation, for example:
-
-``` bash
-python src/main.py --llm_id_gateway gemini-2.0-flash --modality evaluation-factory_info --max_new_tokens 512
-```
-
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
-
-### Process mining experiments
-
-To reproduce the experiments for the *process\_mining* evaluation, for example:
-
-``` bash
-python src/main.py --llm_id_gateway mistralai/Mistral-Nemo-Instruct-2407 --modality evaluation-process_mining --max_new_tokens 512
-```
-
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
-
-### Hybrid experiments
-
-To reproduce the experiments for the *hybrid* evaluation, for example:
-
-``` bash
-python src/main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-hybrid --max_new_tokens 512
-```
-
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
-
-### Routing experiments
-
-To reproduce the experiments for the *routing* evaluation, for example:
-
-``` bash
-python src/main.py --llm_id_gateway mistralai/Mistral-7B-Instruct-v0.3 --modality evaluation-routing --max_new_tokens 512
-```
-
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
-
-### Qualitative Hybrid experiments
-
-To reproduce the experiments for the *hybrid* qualitative evaluation, for example:
-
-``` bash
-python src/main.py --llm_id_gateway deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --modality evaluation-qualitative-hybrid --max_new_tokens 512
-```
-
-The results will be stored in a `.txt` file reporting all the information for the run and the corresponding results in the [evaluation](tests/evaluation) folder.
-
-### RNG and LLM-Only Baselines experiments
-We provide baseline comparisons for the simulation and verification tasks using `answers-dataset.csv`to motivate our approach, which leverages PPI tools in the backend to produce faithful answers.
-
-``` bash
-python src/rnd_bas_eval.py
-```
-
-The random baseline samples answers uniformly between the minimum and maximum values in the ground-truth dataset for simulation, and samples a boolean value uniformly for verification. The LLM baseline uses only the event log (in the [log](log) folder) as input. By default, it uses the `gemini-2.5-flash` model (requiring a Google API key), but you can change the model inside the script.
-
-### Generation of New Test Sets
-
-To generate new test sets for the three supported evaluation, run the script `test_sets_generation.py` before running an evaluation.
-
-``` bash
-python src/test_sets_generation.py
-```
+Instructions to reproduce the experimental evaluation results are reported in [src/README.md](src/README.md).
 
 ## License
 

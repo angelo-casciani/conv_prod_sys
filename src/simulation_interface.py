@@ -80,9 +80,14 @@ def extract_simulation_params_from_text(text):
     user_text = (text or "").lower().strip()
     params = {}
 
-    match = re.search(r"replicas?\s*[:=]?\s*(\d+)", user_text)
+    match = re.search(
+        r"\breplicas?\b\s*(?:of\s+(?:the\s+)?)?(?:requested\s+)?(?:simulation\s+)?[:=]?\s*(\d+)\b",
+        user_text,
+    )
     if not match:
-        match = re.search(r"(\d+)\s*replicas?", user_text)
+        match = re.search(r"\b(\d+)\s*(?:simulation\s+)?replicas?\b", user_text)
+    if not match:
+        match = re.search(r"\buse\s+(\d+)\s*(?:simulation\s+)?replicas?\b", user_text)
     if match:
         params["replicas"] = int(match.group(1))
 
