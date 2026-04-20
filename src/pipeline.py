@@ -359,7 +359,16 @@ class LLMPipeline:
         results = factory_interface.interface_with_llm(json.dumps(request_payload))
         combined_results = results
 
-        if isinstance(results, dict) and isinstance(results.get('results'), dict):
+        sim_results = results.get('results', {}) if isinstance(results, dict) else {}
+        target_pieces = sim_results.get('target_pieces', results.get('target_pieces') if isinstance(results, dict) else None)
+        needed_time = sim_results.get('mean_time_needed_for_target_pieces')
+
+        if target_pieces is not None and needed_time is not None:
+            try:
+                state['sim_time'] = float(needed_time)
+            except (TypeError, ValueError):
+                state['sim_time'] = sim_results.get('total_execution_time', state.get('sim_time'))
+        elif isinstance(results, dict) and isinstance(results.get('results'), dict):
             state['sim_time'] = results['results'].get('total_execution_time', state.get('sim_time'))
 
         print(combined_results)
@@ -380,10 +389,7 @@ class LLMPipeline:
         else:
             answer = complete_answer.content
 
-        sim_results = results.get('results', {}) if isinstance(results, dict) else {}
         can_meet_deadline = sim_results.get('can_meet_deadline')
-        target_pieces = sim_results.get('target_pieces', results.get('target_pieces') if isinstance(results, dict) else None)
-        needed_time = sim_results.get('mean_time_needed_for_target_pieces')
         if can_meet_deadline is False and needed_time is not None and target_pieces is not None:
             needed_time = float(needed_time)
             deadline_sentence = (
@@ -1053,7 +1059,7 @@ class LLMPipeline:
                         delay = json.loads(answer).get("estimated_maintenance_delay", 0)
                         if isinstance(delay, (int, float)):
                             failure_delay += delay
-                            answer = f"Estimated maintenance delay: {delay} units of time"
+                            answer = f"Estimated maintenance delay: {delay:.1f} seconds"
                         else:
                             print(f"Warning: Delay value is not numeric: {delay}. Ignoring.")
                     except (json.JSONDecodeError, TypeError) as e:
@@ -1077,9 +1083,9 @@ class LLMPipeline:
 
                 prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
                 answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
-            if last_sim_time and failure_delay:
+            if last_sim_time is not None and failure_delay:
                 total_time = last_sim_time + failure_delay
-                answers += f"Adding {failure_delay} units of maintenance delay, the total estimated time is {total_time} units.\n"
+                answers += f"Adding {failure_delay:.1f} seconds of maintenance delay, the total estimated time is {total_time:.1f} seconds.\n"
                 
             #print(answers)
         prompt, answer = self._produce_rewritten_answer(answers) 
