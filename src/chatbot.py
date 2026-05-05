@@ -10,6 +10,9 @@ import sys
 import time
 import traceback
 import logging
+import json
+import uuid
+import threading
 from docker_manager import setup_docker_lifecycle, stop_docker_containers
 
 try:
@@ -86,12 +89,19 @@ if hasattr(interaction_handler, '_logging_fallback_error'):
     )
 
 
-def log_chat_interaction(role, content):
+def log_chat_interaction(role, content, session_id="unknown", request_id="unknown"):
     if isinstance(content, gr.FileData):
         payload = f"file:{content.path}"
     else:
         payload = str(content).replace("\n", "\\n")
-    interaction_logger.info("%s - %s", role.upper(), payload)
+
+    entry = {
+        "session_id": str(session_id),
+        "request_id": str(request_id),
+        "role": role.upper(),
+        "content": payload,
+    }
+    interaction_logger.info(json.dumps(entry, ensure_ascii=False))
 
 def stop_containers():
     try:
@@ -105,9 +115,9 @@ def stop_containers():
 
 def parse_arguments():
     parser = ArgumentParser(description="Run LLM Generation.")
-    parser.add_argument('--llm_id_gateway', type=str, default='gemini-2.5-flash', help='LLM model identifier for Gateway')
-    parser.add_argument('--llm_id_simulation', type=str, default='gemini-2.5-flash', help='LLM model identifier for Simulation')
-    parser.add_argument('--llm_id_verification', type=str, default='gemini-2.5-flash', help='LLM model identifier for Verification')
+    parser.add_argument('--llm_id_gateway', type=str, default='gemini-2.5-pro', help='LLM model identifier for Gateway')
+    parser.add_argument('--llm_id_simulation', type=str, default='gemini-2.5-pro', help='LLM model identifier for Simulation')
+    parser.add_argument('--llm_id_verification', type=str, default='gemini-2.5-pro', help='LLM model identifier for Verification')
     parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=32768)
     parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, live')
     parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
@@ -123,6 +133,9 @@ class GradioHandler:
         self.chain = None
         self.initialization_message = None
         self.initialization_attempts = 0
+        self.session_states = {}
+        self.session_locks = {}
+        self._session_guard = threading.Lock()
         
     def initialize(self):
         if not self.initialized:
@@ -163,53 +176,103 @@ class GradioHandler:
         self.initialized = False
         self.chain = None
         self.initialization_message = None
+        with self._session_guard:
+            self.session_states.clear()
+            self.session_locks.clear()
+
+    def _resolve_session_id(self, request):
+        if request is not None:
+            session_hash = getattr(request, "session_hash", None)
+            if session_hash:
+                return str(session_hash)
+        return f"legacy-{threading.get_ident()}"
+
+    def _get_or_create_session_context(self, session_id):
+        with self._session_guard:
+            if session_id not in self.session_states:
+                self.session_states[session_id] = {
+                    "pending_simulation_request": None,
+                    "hybrid_simulation_defaults": None,
+                    "sim_time": None,
+                }
+            if session_id not in self.session_locks:
+                self.session_locks[session_id] = threading.Lock()
+
+            return self.session_states[session_id], self.session_locks[session_id]
+
+    def _reset_single_session(self, session_id):
+        with self._session_guard:
+            self.session_states[session_id] = {
+                "pending_simulation_request": None,
+                "hybrid_simulation_defaults": None,
+                "sim_time": None,
+            }
     
-    def process_message(self, message, history):
+    def process_message(self, message, history, request: gr.Request = None):
+        session_id = self._resolve_session_id(request)
+        request_id = uuid.uuid4().hex
+        session_state, session_lock = self._get_or_create_session_context(session_id)
+        info_run = dict(self.run_data) if hasattr(self, "run_data") else {}
+        info_run["Session ID"] = session_id
+        info_run["Request ID"] = request_id
+
         try:
             if not self.initialized:
                 error_msg = "System not initialized. Please restart the chatbot."
                 logger.warning(error_msg)
-                log_chat_interaction("assistant", error_msg)
+                log_chat_interaction("assistant", error_msg, session_id=session_id, request_id=request_id)
                 yield {"role": "assistant", "content": error_msg}
                 return
-                
-            logger.info(f"Processing user message: {message[:100]}...")  # Log first 100 chars
-            log_chat_interaction("user", message)
-            yield {"role": "assistant", "content": f"Processing: {message}"}
-            
-            for result in self.chain.live_prompting(query=message, info_run=self.run_data, chatbot=True):
-                if "I discovered the Petri net representing the process. The Petri net has been saved at" in result:
-                    match = re.search(r"saved at:\s*(\S+)", result)
-                    if match:
-                        path = match.group(1).rstrip(".")
-                        log_chat_interaction("assistant", result)
-                        yield {"role": "assistant", "content": result}
-                        log_chat_interaction("assistant", f"file:{path}")
-                        yield {"role": "assistant", "content": gr.FileData(path=path, mime_type="image/png")}
+
+            with session_lock:
+                logger.info(
+                    "Processing user message [session=%s request=%s]: %s...",
+                    session_id,
+                    request_id,
+                    message[:100],
+                )
+                log_chat_interaction("user", message, session_id=session_id, request_id=request_id)
+                yield {"role": "assistant", "content": f"Processing: {message}"}
+
+                for result in self.chain.live_prompting(
+                    query=message,
+                    info_run=info_run,
+                    chatbot=True,
+                    session_state=session_state,
+                    request_id=request_id,
+                ):
+                    if "I discovered the Petri net representing the process. The Petri net has been saved at" in result:
+                        match = re.search(r"saved at:\s*(\S+)", result)
+                        if match:
+                            path = match.group(1).rstrip(".")
+                            log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
+                            yield {"role": "assistant", "content": result}
+                            log_chat_interaction("assistant", f"file:{path}", session_id=session_id, request_id=request_id)
+                            yield {"role": "assistant", "content": gr.FileData(path=path, mime_type="image/png")}
+                        else:
+                            log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
+                            yield {"role": "assistant", "content": result}
                     else:
-                        log_chat_interaction("assistant", result)
+                        log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
                         yield {"role": "assistant", "content": result}
-                else:
-                    log_chat_interaction("assistant", result)
-                    yield {"role": "assistant", "content": result}
-                    
+
             logger.info("Message processed successfully")
             
         except KeyboardInterrupt:
             logger.info("Processing interrupted by user")
-            log_chat_interaction("assistant", "Processing interrupted by user.")
+            log_chat_interaction("assistant", "Processing interrupted by user.", session_id=session_id, request_id=request_id)
             yield {"role": "assistant", "content": "Processing interrupted by user."}
             
         except Exception as e:
             error_msg = f"An error occurred while processing your request: {str(e)}"
             logger.error(f"Error processing message: {str(e)}")
             logger.error(f"Traceback:\n{traceback.format_exc()}")
-            logger.info("Attempting to recover by resetting state")
-            self.reset_state()
-            log_chat_interaction("assistant", error_msg)
+            logger.info("Attempting to recover by resetting only the active session state")
+            self._reset_single_session(session_id)
+            log_chat_interaction("assistant", error_msg, session_id=session_id, request_id=request_id)
             yield {
                 "role": "assistant", 
-                "content": f"{error_msg}\n\nThe system has been reset. Please try your request again, or restart the chatbot if the problem persists."
+                "content": f"{error_msg}\n\nYour session context has been reset. Please try your request again."
             }
 
 handler = GradioHandler()
@@ -412,6 +475,8 @@ with gr.Blocks(css=CHAT_HISTORY_CSS, js=CHAT_HISTORY_JS, title="LEGO Factory Pro
         title="LEGO Factory Production System Assistant",
         description=chatbot_description,
     )
+
+demo.queue(default_concurrency_limit=16, max_size=128)
 
 def launch_chatbot_with_fallback():
     attempt = 0

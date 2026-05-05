@@ -1,6 +1,7 @@
 import os
 import subprocess
 import logging
+import shlex
 from pathlib import Path
 from utility import extract_json
 from docker_manager import get_docker_command
@@ -39,12 +40,21 @@ MODEL_PATH, MODEL_PATH_IN_CONTAINER = get_skg_model_path()
 
 def interface_with_llm(llm_answer):
     json_request = extract_json(llm_answer)
+    if not isinstance(json_request, dict):
+        return {
+            "task": "verification",
+            "uppaal_query": "",
+            "results": "Error: Unable to parse verification request JSON from model answer."
+        }
+
     task = json_request.get("task")
     formal_query = json_request.get("uppaal_query")
     uppaal_output = ''
 
-    if task == "verification":
+    if task == "verification" and formal_query:
         uppaal_output = execute_query(formal_query)
+    elif task == "verification" and not formal_query:
+        uppaal_output = "Error: Missing 'uppaal_query' in verification request."
     
     json_request["results"] = uppaal_output
     return json_request
@@ -65,16 +75,33 @@ def execute_query(query):
         if not docker_cmd:
             return "Error: UPPAAL verification not available (Docker not found in container environment)"
         
+        verify_script = (
+            "set -euo pipefail; "
+            "query_file=$(mktemp /tmp/query_XXXXXX.q); "
+            "trap 'rm -f \"$query_file\"' EXIT; "
+            "cat > \"$query_file\"; "
+            f"verifyta {shlex.quote(model_path_in_container)} \"$query_file\""
+        )
+
         exec_cmd = docker_cmd + [
             'exec', '-i',
             DOCKER_CONTAINER_NAME,
-            'bash', '-c',
-            f'echo "{query}" > /tmp/query.q && verifyta {model_path_in_container} /tmp/query.q'
+            'bash', '-lc',
+            verify_script,
         ]
-        process = subprocess.Popen(exec_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        stdout, stderr = process.communicate()
+
+        process = subprocess.run(
+            exec_cmd,
+            input=f"{query}\n",
+            capture_output=True,
+            text=True,
+        )
+        stdout = process.stdout or ""
+        stderr = process.stderr or ""
         result = format_uppaal_output(stdout)
 
+        if process.returncode != 0:
+            return f"Result: {result}\nErrors: {stderr}\nExit code: {process.returncode}"
         return f"Result: {result}\nErrors: {stderr}"
     
     except Exception as e:

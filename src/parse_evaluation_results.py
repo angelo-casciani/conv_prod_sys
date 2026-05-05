@@ -9,6 +9,9 @@ import re
 import csv
 from pathlib import Path
 from datetime import datetime
+from collections import defaultdict
+
+import matplotlib.pyplot as plt
 
 
 def parse_time_to_hours(time_str):
@@ -93,6 +96,84 @@ def parse_results_file(file_path):
     return data
 
 
+def plot_accuracy_distributions(all_data, evaluation_dir, timestamp):
+    """Generate two box plots: few-shot and zero-shot accuracy by LLM."""
+    valid_rows = [
+        row for row in all_data
+        if row.get('accuracy') is not None
+        and row.get('interaction_modality')
+        and row.get('llm_id')
+    ]
+
+    if not valid_rows:
+        print("No valid rows found to plot accuracy distributions.")
+        return []
+
+    generated_plots = []
+
+    # Define the desired model order
+    model_order = [
+        'Meta-Llama-3-8B',
+        'Llama-3.1-8B',
+        'Llama-3.2-1B',
+        'Llama-3.2-3B',
+        'Mistral-7B-Instruct-v0.2',
+        'Mistral-7B-Instruct-v0.3',
+        'Mistral-Nemo',
+        'Ministral-8B',
+        'Qwen2.5-7B',
+        'gemma-2-9b',
+        'phi-4',
+        'gemini-2.5-flash',
+        'gemini-2.5-pro',
+        'gpt-5.1',
+    ]
+
+    def get_model_order_key(model_name):
+        """Return the index of the model in the desired order."""
+        model_name_lower = model_name.lower()
+        for i, pattern in enumerate(model_order):
+            if pattern.lower() in model_name_lower:
+                return i
+        return len(model_order)
+
+    split_to_llm_values = {
+        'fewshot': defaultdict(list),
+        'zeroshot': defaultdict(list)
+    }
+
+    for row in valid_rows:
+        modality = row['interaction_modality'].lower()
+        split = 'zeroshot' if 'zeroshot' in modality else 'fewshot'
+        split_to_llm_values[split][row['llm_id']].append(row['accuracy'])
+
+    for split in ['fewshot', 'zeroshot']:
+        llm_groups = split_to_llm_values[split]
+        if not llm_groups:
+            continue
+
+        # Sort by the desired model order
+        llm_labels = sorted(llm_groups.keys(), key=get_model_order_key)
+        llm_values = [llm_groups[label] for label in llm_labels]
+
+        fig, ax = plt.subplots(figsize=(max(9, len(llm_labels) * 0.9), 6))
+        ax.boxplot(llm_values, patch_artist=True)
+        ax.set_xlabel('Language model', fontsize=14)
+        ax.set_ylabel('Accuracy', fontsize=14)
+        ax.set_ylim(0.0, 1.05)
+        ax.set_xticks(range(1, len(llm_labels) + 1))
+        ax.set_xticklabels(llm_labels, rotation=45, ha='right')
+        ax.grid(axis='y', alpha=0.3)
+        fig.tight_layout()
+
+        plot_path = evaluation_dir / f"accuracy_boxplot_{split}_{timestamp}.pdf"
+        fig.savefig(plot_path)
+        plt.close(fig)
+        generated_plots.append(plot_path)
+
+    return generated_plots
+
+
 def main():
     """Main function to parse all results files and generate CSV."""
     # Define paths
@@ -118,7 +199,8 @@ def main():
         all_data.append(data)
     
     # Generate CSV
-    output_file = evaluation_dir / f"evaluation_summary_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    output_file = evaluation_dir / f"evaluation_summary_{timestamp}.csv"
     
     fieldnames = [
         'llm_id',
@@ -137,6 +219,12 @@ def main():
     
     print(f"\nCSV file generated: {output_file}")
     print(f"Total records: {len(all_data)}")
+
+    generated_plots = plot_accuracy_distributions(all_data, evaluation_dir, timestamp)
+    if generated_plots:
+        print("\nGenerated accuracy distribution plots:")
+        for plot_path in generated_plots:
+            print(f"- {plot_path}")
     
     # Print summary
     if all_data:

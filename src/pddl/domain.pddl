@@ -31,19 +31,19 @@
 
     (:action simulate_time_with_activity
         :parameters (?x - input ?s - activity ?y - process ?z - output)
-        :precondition (and (deadlock_free ?y) (has_pieces ?x) (target_activity ?s) (digital_twin ?y))
+        :precondition (and (has_pieces ?x) (target_activity ?s) (digital_twin ?y))
         :effect (and (has_time ?z) (produced_from ?x ?z) (simulation_done))
         )
 
     (:action simulate_pieces_with_activity
         :parameters (?x - input ?s - activity ?y - process ?z - output)
-        :precondition (and (deadlock_free ?y) (has_time ?x)  (target_activity ?s) (digital_twin ?y))
+        :precondition (and (has_time ?x)  (target_activity ?s) (digital_twin ?y))
         :effect (and (has_pieces ?z) (produced_from ?z ?x) (simulation_done))
     )
 
     (:action simulate_next_activity
         :parameters (?x - activity  ?z - activity ?y - process)
-        :precondition (and (deadlock_free ?y) (digital_twin ?y))
+        :precondition (and (digital_twin ?y))
         :effect (and (next_activity ?x ?z))
     )
     

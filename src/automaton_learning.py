@@ -215,6 +215,9 @@ class AutomatonLearner:
                 shutil.copy(latest_file, output_path)
                 logger.info(f"UPPAAL model copied to: {output_path}")
                 
+                # Copy learned SHA file to data/automaton/ if it exists
+                self._copy_learned_sha_file()
+                
                 logger.info("SKG extraction completed successfully!")
                 return True
                 
@@ -260,6 +263,38 @@ class AutomatonLearner:
             
         except Exception as e:
             logger.error(f"Error copying default SKG: {e}", exc_info=True)
+            return False
+    
+    def _copy_learned_sha_file(self):
+        """
+        Copy the learned SHA file from LSHA resources to data/automaton/.
+        This is called automatically after learning completes.
+        
+        Returns:
+            bool: True if successful or file not found (optional), False on error
+        """
+        try:
+            # Source: LSHA learned SHA resources
+            lsha_learned_sha = self.lsha_path / "resources" / "learned_sha" / "LEGO_FACTORY_XES_1.txt"
+            
+            if not lsha_learned_sha.exists():
+                logger.warning(f"Learned SHA file not found at {lsha_learned_sha}. "
+                              "This may be generated in a later LSHA version.")
+                return False
+            
+            # Destination: data/automaton/
+            base_dir = Path(__file__).parent.parent
+            dest_dir = base_dir / "data" / "automaton"
+            os.makedirs(dest_dir, exist_ok=True)
+            
+            dest_file = dest_dir / "LEGO_FACTORY_XES_1.txt"
+            shutil.copy(lsha_learned_sha, dest_file)
+            logger.info(f"Learned SHA file copied to: {dest_file}")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error copying learned SHA file: {e}", exc_info=True)
             return False
     
     def learn_automaton(self, xes_path, output_name="learned_skg.xml", window_minutes=5):

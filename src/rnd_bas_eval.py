@@ -3,11 +3,94 @@ import json
 import numpy as np
 import pandas as pd
 from typing import Dict
+from argparse import ArgumentParser
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import pm4py
 
+try:
+    from langchain_google_genai import ChatGoogleGenerativeAI
+except ImportError:
+    ChatGoogleGenerativeAI = None
+
+try:
+    from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace, HuggingFacePipeline
+except ImportError:
+    HuggingFaceEndpoint = None
+    ChatHuggingFace = None
+    HuggingFacePipeline = None
+
+try:
+    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
+    from torch import bfloat16
+    LOCAL_MODEL_SUPPORT = True
+except ImportError:
+    LOCAL_MODEL_SUPPORT = False
+
 load_dotenv()
+
+HF_TOKEN = os.getenv('HF_TOKEN')
+
+MODEL_CONFIGS = {
+    'llama-3.2-1b': {
+        'model_id': 'meta-llama/Llama-3.2-1B-Instruct',
+        'model_provider': 'huggingface',
+    },
+    'qwen2.5-7b': {
+        'model_id': 'Qwen/Qwen2.5-7B-Instruct',
+        'model_provider': 'huggingface',
+        'is_chat_model': False,
+    },
+    'phi-4': {
+        'model_id': 'microsoft/phi-4',
+        'model_provider': 'huggingface',
+        'is_chat_model': False,
+    },
+    'ministral-8b': {
+        'model_id': 'mistralai/Ministral-8B-Instruct-2410',
+        'model_provider': 'huggingface',
+        'is_chat_model': False,
+    },
+    'llama-3.1-8b': {
+        'model_id': 'meta-llama/Llama-3.1-8B-Instruct',
+        'model_provider': 'huggingface',
+    },
+    'gemini-2.5-flash': {
+        'model_id': 'gemini-2.5-flash',
+        'model_provider': 'google_genai',
+    },
+    'gemini-2.5-pro': {
+        'model_id': 'gemini-2.5-pro',
+        'model_provider': 'google_genai',
+    },
+}
+
+DEFAULT_LLM_MODELS = [
+    'llama-3.2-1b',
+    'qwen2.5-7b',
+    'phi-4',
+    'ministral-8b',
+    'llama-3.1-8b',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
+]
+
+
+def parse_arguments():
+    parser = ArgumentParser(description="Run random and LLM-only baselines.")
+    parser.add_argument(
+        '--llm_models',
+        type=str,
+        default=','.join(DEFAULT_LLM_MODELS),
+        help='Comma-separated model aliases. Supported: ' + ', '.join(MODEL_CONFIGS.keys())
+    )
+    parser.add_argument(
+        '--num_random_runs',
+        type=int,
+        default=10,
+        help='Number of runs for random baseline.'
+    )
+    return parser.parse_args()
 
 
 def parse_boolean(value) -> bool:
@@ -73,20 +156,129 @@ class RandomBaseline:
 
 class LLMOnlyBaseline:
     
-    def __init__(self, model_id='gemini-2.5-flash', api_key: str = None):
-        if api_key is None:
-            api_key = os.getenv('GOOGLE_API_KEY')
-        if api_key:
-            os.environ['GOOGLE_API_KEY'] = api_key
+    def __init__(self, model_id='gemini-2.5-flash', model_provider='google_genai', api_key: str = None, is_chat_model: bool = True):
+        self.model_id = model_id
+        self.model_provider = model_provider
+        self.is_chat_model = is_chat_model
+
+        if self.model_provider == 'google_genai':
+            if api_key is None:
+                api_key = os.getenv('GOOGLE_API_KEY')
+            if api_key:
+                os.environ['GOOGLE_API_KEY'] = api_key
+        elif self.model_provider == 'huggingface' and HF_TOKEN:
+            os.environ['HUGGINGFACEHUB_API_TOKEN'] = HF_TOKEN
         
-        self.model = init_chat_model(
-            model_id,
-            model_provider='google_genai',
-            temperature=0.1,
-            max_tokens=2048
-        )
+        self.model = self._initialize_model(model_id, model_provider, is_chat_model=is_chat_model)
         self.system_prompt = self._load_system_prompt()
         self.domain_description = self._load_domain_description()
+
+    def _initialize_model(self, model_id: str, model_provider: str, is_chat_model: bool = True):
+        """Create the chat model with provider-specific fallbacks for server environments."""
+        if model_provider == 'google_genai':
+            if ChatGoogleGenerativeAI is None:
+                raise RuntimeError(
+                    "Missing dependency for Google models: install `langchain-google-genai`."
+                )
+            return ChatGoogleGenerativeAI(
+                model=model_id,
+                temperature=0.1,
+                max_tokens=2048,
+            )
+
+        if model_provider == 'huggingface':
+            if not HF_TOKEN:
+                raise RuntimeError("HF_TOKEN is required for Hugging Face models in this script.")
+
+            # Prefer the same local loading strategy used in pipeline.py.
+            if LOCAL_MODEL_SUPPORT and HuggingFacePipeline is not None:
+                return self._initialize_local_hf_model(model_id)
+
+            # Fallback path for API-only environments.
+            # Some HF models are text-generation only (not chat-completions).
+            if not is_chat_model:
+                if HuggingFaceEndpoint is None:
+                    raise RuntimeError(
+                        "Missing dependency for Hugging Face models: install `langchain-huggingface`."
+                    )
+                return HuggingFaceEndpoint(
+                    repo_id=model_id,
+                    huggingfacehub_api_token=HF_TOKEN,
+                    task='text-generation',
+                    max_new_tokens=2048,
+                    temperature=0.1,
+                )
+
+            # First try generic init_chat_model for compatibility with newer LangChain setups.
+            try:
+                return init_chat_model(
+                    model_id,
+                    model_provider=model_provider,
+                    temperature=0.1,
+                    max_tokens=2048,
+                )
+            except Exception as init_err:
+                # Fallback for environments where init_chat_model(huggingface) raises from_model_id.
+                if HuggingFaceEndpoint is None or ChatHuggingFace is None:
+                    raise RuntimeError(
+                        "Missing dependency for Hugging Face models: install `langchain-huggingface`."
+                    ) from init_err
+
+                endpoint = HuggingFaceEndpoint(
+                    repo_id=model_id,
+                    huggingfacehub_api_token=HF_TOKEN,
+                    task='text-generation',
+                    max_new_tokens=2048,
+                    temperature=0.1,
+                )
+                return ChatHuggingFace(llm=endpoint)
+
+        # Keep support for any additional provider we may add later.
+        return init_chat_model(
+            model_id,
+            model_provider=model_provider,
+            temperature=0.1,
+            max_tokens=2048,
+        )
+
+    def _initialize_local_hf_model(self, model_id: str):
+        """Initialize local Hugging Face model similarly to pipeline.py."""
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type='nf4',
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=bfloat16,
+        )
+
+        model_config = AutoConfig.from_pretrained(model_id, token=HF_TOKEN)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            trust_remote_code=True,
+            config=model_config,
+            quantization_config=bnb_config,
+            device_map='auto',
+            token=HF_TOKEN,
+        )
+        model.eval()
+
+        tokenizer = AutoTokenizer.from_pretrained(model_id, token=HF_TOKEN)
+
+        pipe_params = {
+            'model': model,
+            'tokenizer': tokenizer,
+            'return_full_text': False,
+            'task': 'text-generation',
+            'do_sample': True,
+            'temperature': 0.1,
+            'max_new_tokens': 256,
+            'repetition_penalty': 1.1,
+        }
+
+        if tokenizer.eos_token_id is not None:
+            pipe_params['pad_token_id'] = tokenizer.eos_token_id
+
+        gen_pipe = pipeline(**pipe_params)
+        return HuggingFacePipeline(pipeline=gen_pipe)
     
     def _load_system_prompt(self) -> str:
         prompts_path = os.path.join(os.path.dirname(__file__), 'prompts.json')
@@ -139,7 +331,10 @@ class LLMOnlyBaseline:
         
         try:
             response = self.model.invoke(prompt)
-            answer_text = response.content.strip()
+            if hasattr(response, 'content'):
+                answer_text = response.content.strip()
+            else:
+                answer_text = str(response).strip()
             
             if task_type == 'verification':
                 parsed_answer = parse_boolean(answer_text)
@@ -203,7 +398,9 @@ class LLMOnlyBaseline:
         }
 
 
-def run_evaluation(dataset_path: str, num_random_runs: int = 10):
+def run_evaluation(dataset_path: str, llm_models=None, num_random_runs: int = 10):
+    if llm_models is None:
+        llm_models = DEFAULT_LLM_MODELS
     
     print("="*80)
     print("BASELINE EVALUATION")
@@ -232,15 +429,32 @@ def run_evaluation(dataset_path: str, num_random_runs: int = 10):
     print(f"  Accuracy: {random_avg_accuracy:.2f}% ± {random_std_accuracy:.2f}%")
     
     print("\n" + "-"*80)
-    print("2. LLM-ONLY BASELINE (gemini-2.5-flash)")
+    print("2. LLM-ONLY BASELINE (multiple models)")
     print("-"*80)
-    
-    llm_baseline = LLMOnlyBaseline()
-    llm_results = llm_baseline.evaluate(dataset_path)
-    
-    print(f"\nLLM-Only Baseline Results:")
-    print(f"  MAPE: {llm_results['mape']:.2f}%")
-    print(f"  Accuracy: {llm_results['accuracy']:.2f}%")
+
+    llm_results_by_model = {}
+    failed_models = {}
+
+    for model_alias in llm_models:
+        model_key = model_alias.strip().lower()
+        model_cfg = MODEL_CONFIGS.get(model_key)
+        if model_cfg is None:
+            failed_models[model_alias] = 'Unsupported model alias'
+            print(f"\nSkipping {model_alias}: unsupported model alias")
+            continue
+
+        print(f"\nEvaluating model: {model_alias} ({model_cfg['model_id']}, provider={model_cfg['model_provider']})")
+        try:
+            llm_baseline = LLMOnlyBaseline(
+                model_id=model_cfg['model_id'],
+                model_provider=model_cfg['model_provider'],
+                is_chat_model=model_cfg.get('is_chat_model', True)
+            )
+            llm_results = llm_baseline.evaluate(dataset_path)
+            llm_results_by_model[model_alias] = llm_results
+        except Exception as e:
+            failed_models[model_alias] = str(e)
+            print(f"Failed {model_alias}: {e}")
     
     print("\n" + "="*80)
     print("SUMMARY")
@@ -248,7 +462,12 @@ def run_evaluation(dataset_path: str, num_random_runs: int = 10):
     print(f"\n{'Baseline':<25} {'MAPE (%)':<20} {'Accuracy (%)':<20}")
     print("-"*80)
     print(f"{'Random':<25} {random_avg_mape:>8.2f} ± {random_std_mape:<7.2f} {random_avg_accuracy:>8.2f} ± {random_std_accuracy:<7.2f}")
-    print(f"{'LLM-Only (gemini-2.5-flash)':<25} {llm_results['mape']:>8.2f} {'':>9} {llm_results['accuracy']:>8.2f}")
+    for model_alias in llm_models:
+        if model_alias in llm_results_by_model:
+            result = llm_results_by_model[model_alias]
+            print(f"{('LLM-Only (' + model_alias + ')'):<25} {result['mape']:>8.2f} {'':>9} {result['accuracy']:>8.2f}")
+        elif model_alias in failed_models:
+            print(f"{('LLM-Only (' + model_alias + ')'):<25} {'FAILED':>8} {'':>9} {'FAILED':>8}")
     print("="*80)
     
     results_summary = {
@@ -258,10 +477,8 @@ def run_evaluation(dataset_path: str, num_random_runs: int = 10):
             'accuracy_mean': random_avg_accuracy,
             'accuracy_std': random_std_accuracy
         },
-        'llm_only_baseline': {
-            'mape': llm_results['mape'],
-            'accuracy': llm_results['accuracy']
-        }
+        'llm_only_baseline': llm_results_by_model,
+        'failed_models': failed_models,
     }
     
     output_path = os.path.join(os.path.dirname(dataset_path), 'evaluation_results.json')
@@ -274,6 +491,7 @@ def run_evaluation(dataset_path: str, num_random_runs: int = 10):
 
 
 if __name__ == "__main__":
+    args = parse_arguments()
     dataset_path = os.path.join(os.path.dirname(__file__), '..', 'tests', 'test_sets', 'answers-dataset.csv')
     
     if not os.path.exists(dataset_path):
@@ -281,4 +499,5 @@ if __name__ == "__main__":
         print("Please generate the dataset first using generate_answers_dataset()")
         exit(1)
     
-    run_evaluation(dataset_path, num_random_runs=10)
+    selected_models = [m.strip() for m in args.llm_models.split(',') if m.strip()]
+    run_evaluation(dataset_path, llm_models=selected_models, num_random_runs=args.num_random_runs)

@@ -36,6 +36,7 @@ class FactorySimulator:
             }
 
         self.start_activity = None
+        self._arrivals_started = False
         all_activities = set(self.config["activities"].keys())
         activities_with_predecessors = set()
 
@@ -50,6 +51,63 @@ class FactorySimulator:
             print(f"Start activity identified: {self.start_activity}")
         else:
             print("Warning: No start activity found!")
+
+    def _ensure_arrival_generator_started(self):
+        if not self._arrivals_started:
+            self.env.process(self.arrival_generator())
+            self._arrivals_started = True
+
+    def capture_snapshot(self):
+        return {
+            "env_time": float(self.env.now),
+            "total_pieces_produced": int(self.stats["total_pieces_produced"]),
+            "total_waiting_time_len": len(self.stats["total_waiting_time"]),
+            "total_processing_time_len": len(self.stats["total_processing_time"]),
+            "total_transfer_time_len": len(self.stats["total_transfer_time"]),
+            "waiting_times_len": {
+                station: len(values) for station, values in self.stats["waiting_times"].items()
+            },
+            "processing_times_len": {
+                station: len(values) for station, values in self.stats["processing_times"].items()
+            }
+        }
+
+    def run_for(self, duration):
+        duration = max(0, float(duration))
+        self._ensure_arrival_generator_started()
+        if duration == 0:
+            return
+        self.env.run(until=self.env.now + duration)
+
+    @staticmethod
+    def _mean(values):
+        return float(np.mean(values)) if values else 0.0
+
+    def get_statistics_since(self, snapshot, execution_time):
+        waiting_times = {}
+        processing_times = {}
+
+        for station, values in self.stats["waiting_times"].items():
+            start_idx = snapshot["waiting_times_len"].get(station, 0)
+            waiting_times[station] = self._mean(values[start_idx:])
+
+        for station, values in self.stats["processing_times"].items():
+            start_idx = snapshot["processing_times_len"].get(station, 0)
+            processing_times[station] = self._mean(values[start_idx:])
+
+        total_waiting = self.stats["total_waiting_time"][snapshot["total_waiting_time_len"]:]
+        total_processing = self.stats["total_processing_time"][snapshot["total_processing_time_len"]:]
+        total_transfer = self.stats["total_transfer_time"][snapshot["total_transfer_time_len"]:]
+
+        return {
+            "total_pieces_produced": int(self.stats["total_pieces_produced"] - snapshot["total_pieces_produced"]),
+            "mean_waiting_times": waiting_times,
+            "mean_processing_times": processing_times,
+            "total_mean_waiting_time": self._mean(total_waiting),
+            "total_mean_processing_time": self._mean(total_processing),
+            "total_mean_transfer_time": self._mean(total_transfer),
+            "total_execution_time": float(execution_time)
+        }
 
     def is_pass_activity(self, activity_name):
         return isinstance(activity_name, str) and activity_name.endswith("_pass")
@@ -209,7 +267,7 @@ class FactorySimulator:
 
     def run(self):
         """Run the simulation for the specified simulation time."""
-        self.env.process(self.arrival_generator())
+        self._ensure_arrival_generator_started()
         if self.simulation_time is not None:
             # Run for a fixed time if provided
             self.env.run(until=self.simulation_time)
@@ -251,7 +309,10 @@ class FactorySimulator:
 
     def compute_batch_production_time(self, target_pieces):
         # Computes the time needed to produce a specified number of pieces incrementally.
-        self.env.process(self.arrival_generator())
-        while self.stats["total_pieces_produced"] < target_pieces:
+        self._ensure_arrival_generator_started()
+        initial_count = self.stats["total_pieces_produced"]
+        target_total = initial_count + int(target_pieces)
+        while self.stats["total_pieces_produced"] < target_total:
             self.env.run(until=self.env.now + 1)
-        self.simulation_time = self.env.now
+        self.simulation_time = float(self.env.now)
+        return self.simulation_time

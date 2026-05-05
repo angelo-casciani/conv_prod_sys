@@ -20,8 +20,12 @@ def run_planner(problem):
     process = subprocess.run(cmd, capture_output=True, text=True)
 
     if process.returncode != 0:
-        print(process.stdout)
-        raise RuntimeError(f"Planner failed with error {process.stderr}")
+        stdout_text = (process.stdout or "").strip()
+        stderr_text = (process.stderr or "").strip()
+        details = "\n".join([part for part in [stdout_text, stderr_text] if part])
+        if not details:
+            details = f"Planner returned non-zero exit code {process.returncode} with no stdout/stderr."
+        raise RuntimeError(f"Planner failed (exit code {process.returncode}). Details: {details}")
 
     output = process.stdout    
     plan = extract_plan(output)
