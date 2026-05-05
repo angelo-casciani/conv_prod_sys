@@ -8,6 +8,25 @@ from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import pm4py
 
+try:
+    from langchain_google_genai import ChatGoogleGenerativeAI
+except ImportError:
+    ChatGoogleGenerativeAI = None
+
+try:
+    from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace, HuggingFacePipeline
+except ImportError:
+    HuggingFaceEndpoint = None
+    ChatHuggingFace = None
+    HuggingFacePipeline = None
+
+try:
+    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
+    from torch import bfloat16
+    LOCAL_MODEL_SUPPORT = True
+except ImportError:
+    LOCAL_MODEL_SUPPORT = False
+
 load_dotenv()
 
 HF_TOKEN = os.getenv('HF_TOKEN')
@@ -20,9 +39,20 @@ MODEL_CONFIGS = {
     'qwen2.5-7b': {
         'model_id': 'Qwen/Qwen2.5-7B-Instruct',
         'model_provider': 'huggingface',
+        'is_chat_model': False,
     },
     'phi-4': {
         'model_id': 'microsoft/phi-4',
+        'model_provider': 'huggingface',
+        'is_chat_model': False,
+    },
+    'ministral-8b': {
+        'model_id': 'mistralai/Ministral-8B-Instruct-2410',
+        'model_provider': 'huggingface',
+        'is_chat_model': False,
+    },
+    'llama-3.1-8b': {
+        'model_id': 'meta-llama/Llama-3.1-8B-Instruct',
         'model_provider': 'huggingface',
     },
     'gemini-2.5-flash': {
@@ -39,6 +69,8 @@ DEFAULT_LLM_MODELS = [
     'llama-3.2-1b',
     'qwen2.5-7b',
     'phi-4',
+    'ministral-8b',
+    'llama-3.1-8b',
     'gemini-2.5-flash',
     'gemini-2.5-pro',
 ]
@@ -124,9 +156,10 @@ class RandomBaseline:
 
 class LLMOnlyBaseline:
     
-    def __init__(self, model_id='gemini-2.5-flash', model_provider='google_genai', api_key: str = None):
+    def __init__(self, model_id='gemini-2.5-flash', model_provider='google_genai', api_key: str = None, is_chat_model: bool = True):
         self.model_id = model_id
         self.model_provider = model_provider
+        self.is_chat_model = is_chat_model
 
         if self.model_provider == 'google_genai':
             if api_key is None:
@@ -136,14 +169,116 @@ class LLMOnlyBaseline:
         elif self.model_provider == 'huggingface' and HF_TOKEN:
             os.environ['HUGGINGFACEHUB_API_TOKEN'] = HF_TOKEN
         
-        self.model = init_chat_model(
+        self.model = self._initialize_model(model_id, model_provider, is_chat_model=is_chat_model)
+        self.system_prompt = self._load_system_prompt()
+        self.domain_description = self._load_domain_description()
+
+    def _initialize_model(self, model_id: str, model_provider: str, is_chat_model: bool = True):
+        """Create the chat model with provider-specific fallbacks for server environments."""
+        if model_provider == 'google_genai':
+            if ChatGoogleGenerativeAI is None:
+                raise RuntimeError(
+                    "Missing dependency for Google models: install `langchain-google-genai`."
+                )
+            return ChatGoogleGenerativeAI(
+                model=model_id,
+                temperature=0.1,
+                max_tokens=2048,
+            )
+
+        if model_provider == 'huggingface':
+            if not HF_TOKEN:
+                raise RuntimeError("HF_TOKEN is required for Hugging Face models in this script.")
+
+            # Prefer the same local loading strategy used in pipeline.py.
+            if LOCAL_MODEL_SUPPORT and HuggingFacePipeline is not None:
+                return self._initialize_local_hf_model(model_id)
+
+            # Fallback path for API-only environments.
+            # Some HF models are text-generation only (not chat-completions).
+            if not is_chat_model:
+                if HuggingFaceEndpoint is None:
+                    raise RuntimeError(
+                        "Missing dependency for Hugging Face models: install `langchain-huggingface`."
+                    )
+                return HuggingFaceEndpoint(
+                    repo_id=model_id,
+                    huggingfacehub_api_token=HF_TOKEN,
+                    task='text-generation',
+                    max_new_tokens=2048,
+                    temperature=0.1,
+                )
+
+            # First try generic init_chat_model for compatibility with newer LangChain setups.
+            try:
+                return init_chat_model(
+                    model_id,
+                    model_provider=model_provider,
+                    temperature=0.1,
+                    max_tokens=2048,
+                )
+            except Exception as init_err:
+                # Fallback for environments where init_chat_model(huggingface) raises from_model_id.
+                if HuggingFaceEndpoint is None or ChatHuggingFace is None:
+                    raise RuntimeError(
+                        "Missing dependency for Hugging Face models: install `langchain-huggingface`."
+                    ) from init_err
+
+                endpoint = HuggingFaceEndpoint(
+                    repo_id=model_id,
+                    huggingfacehub_api_token=HF_TOKEN,
+                    task='text-generation',
+                    max_new_tokens=2048,
+                    temperature=0.1,
+                )
+                return ChatHuggingFace(llm=endpoint)
+
+        # Keep support for any additional provider we may add later.
+        return init_chat_model(
             model_id,
             model_provider=model_provider,
             temperature=0.1,
-            max_tokens=2048
+            max_tokens=2048,
         )
-        self.system_prompt = self._load_system_prompt()
-        self.domain_description = self._load_domain_description()
+
+    def _initialize_local_hf_model(self, model_id: str):
+        """Initialize local Hugging Face model similarly to pipeline.py."""
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type='nf4',
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=bfloat16,
+        )
+
+        model_config = AutoConfig.from_pretrained(model_id, token=HF_TOKEN)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            trust_remote_code=True,
+            config=model_config,
+            quantization_config=bnb_config,
+            device_map='auto',
+            token=HF_TOKEN,
+        )
+        model.eval()
+
+        tokenizer = AutoTokenizer.from_pretrained(model_id, token=HF_TOKEN)
+
+        pipe_params = {
+            'model': model,
+            'tokenizer': tokenizer,
+            'return_full_text': False,
+            'task': 'text-generation',
+            'do_sample': True,
+            'temperature': 0.1,
+            'max_new_tokens': 256,
+            'repetition_penalty': 1.1,
+        }
+
+        if tokenizer.eos_token_id is not None:
+            pipe_params['pad_token_id'] = tokenizer.eos_token_id
+
+        gen_pipe = pipeline(**pipe_params)
+        return HuggingFacePipeline(pipeline=gen_pipe)
     
     def _load_system_prompt(self) -> str:
         prompts_path = os.path.join(os.path.dirname(__file__), 'prompts.json')
@@ -196,7 +331,10 @@ class LLMOnlyBaseline:
         
         try:
             response = self.model.invoke(prompt)
-            answer_text = response.content.strip()
+            if hasattr(response, 'content'):
+                answer_text = response.content.strip()
+            else:
+                answer_text = str(response).strip()
             
             if task_type == 'verification':
                 parsed_answer = parse_boolean(answer_text)
@@ -309,7 +447,8 @@ def run_evaluation(dataset_path: str, llm_models=None, num_random_runs: int = 10
         try:
             llm_baseline = LLMOnlyBaseline(
                 model_id=model_cfg['model_id'],
-                model_provider=model_cfg['model_provider']
+                model_provider=model_cfg['model_provider'],
+                is_chat_model=model_cfg.get('is_chat_model', True)
             )
             llm_results = llm_baseline.evaluate(dataset_path)
             llm_results_by_model[model_alias] = llm_results
