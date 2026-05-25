@@ -131,44 +131,19 @@ class AutomatonLearner:
             shutil.copy(xes_path, lsha_xes_path)
             logger.info(f"XES file copied to LSHA resources: {lsha_xes_path}")
             
-            # Find conda executable
-            conda_paths = [
-                Path.home() / "miniconda3" / "bin" / "conda",
-                Path.home() / "anaconda3" / "bin" / "conda",
-                Path("/opt/conda/bin/conda"),
-            ]
-            
-            conda_exe = None
-            for path in conda_paths:
-                if path.exists():
-                    conda_exe = str(path)
-                    break
-            
-            if not conda_exe:
-                # Try to find conda in PATH
-                result = subprocess.run(["which", "conda"], capture_output=True, text=True)
-                if result.returncode == 0:
-                    conda_exe = result.stdout.strip()
-            
-            if not conda_exe:
-                logger.error("Could not find conda installation. Please ensure conda is installed.")
-                return False
-            
-            logger.info(f"Using conda: {conda_exe}")
-            
-            # Run LSHA using conda environment
+            # Run LSHA using current python environment
             original_dir = os.getcwd()
             try:
                 os.chdir(self.lsha_path)
                 logger.info("Changed to LSHA directory for execution")
                 
                 logger.info("Learning in progress... This may take several minutes.")
-                logger.info("Running LSHA's learn_and_convert_to_upp.py script via conda...")
+                logger.info("Running LSHA's learn_and_convert_to_upp.py script...")
                 logger.info("-" * 60)
                 
-                # Run LSHA's built-in learning script with conda
+                # Run LSHA's built-in learning script with current python executable
                 result = subprocess.run(
-                    [conda_exe, "run", "-n", "lsha", "python", "learn_and_convert_to_upp.py"],
+                    [sys.executable, "learn_and_convert_to_upp.py"],
                     capture_output=True,
                     text=True,
                     timeout=600  # 10 minute timeout
@@ -183,7 +158,7 @@ class AutomatonLearner:
                 
                 if result.stderr:
                     for line in result.stderr.splitlines():
-                        if line.strip() and "conda.cli" not in line:  # Skip conda warnings
+                        if line.strip():
                             logger.warning(f"LSHA: {line}")
                 
                 if result.returncode != 0:

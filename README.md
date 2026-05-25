@@ -1,6 +1,6 @@
-# A Conversational Framework for Faithful Multi-Perspective Analysis of Production Processes
+# Neuro-Symbolic Conversational AI for Reliable Production Process Intelligence
 
-Source code, datasets, and instructions for the paper "*A Conversational Framework for Faithful Multi-Perspective Analysis of Production Processes*".
+Source code, datasets, and instructions for the paper "*Neuro-Symbolic Conversational AI for Reliable Production Process Intelligence*".
 
 ## About
 
@@ -158,11 +158,18 @@ For most users, the Docker workflow above is enough. You do not need to create a
 
 ### Local Python environments
 
-Use local Python environments only if you want to run the CLI, evaluations, or development workflows outside Docker.
+Use local Python environments if you want to run the CLI, evaluations, or development workflows outside Docker. Note that the Web GUI is only supported via the Docker flow.
 
-**Requires Python 3.11 or higher.**
+**Requires Python 3.11 or higher and system dependencies.**
 
-Main environment:
+First, ensure you have the required system dependencies installed for Graphviz:
+
+```bash
+sudo apt-get update
+sudo apt-get install graphviz graphviz-dev xdg-utils
+```
+
+Then create and activate your environment:
 
 ```bash
 python3 -m venv .venv
@@ -170,7 +177,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-LSHA uses a separate conda environment because of dependency conflicts. The recommended setup is still:
+Finally, set up the submodules and Docker components:
 
 ```bash
 ./setup_submodules.sh
@@ -192,7 +199,8 @@ This is optional. It is not required for the Dockerized chatbot launch.
 
 Start the conversational framework and interact with it through the command line:
 
-``` bash
+```bash
+source .venv/bin/activate
 python src/main.py
 ```
 
@@ -223,6 +231,8 @@ A comprehensive list of commands can be found in `src/cmd4tests.sh`.
 ### Web GUI
 
 The recommended way to use the chatbot is the Docker flow described in [Quick Start: Docker Chatbot](#quick-start-docker-chatbot).
+
+Once started, the Web GUI will be accessible in your browser at: `http://127.0.0.1:7860/`
 
 ## LLMs Requirements
 
