@@ -396,7 +396,7 @@ class LLMPipeline:
                 f" The estimated time needed to produce {int(target_pieces)} pieces is {needed_time:.1f} seconds."
             )
             answer_lower = answer.lower()
-            if "estimated time needed" not in answer_lower and "would take" not in answer_lower and "time needed" not in answer_lower:
+            if "estimated time" not in answer_lower and "would take" not in answer_lower and "time needed" not in answer_lower:
                 answer = f"{answer}{deadline_sentence}"
         return prompt, answer
 
