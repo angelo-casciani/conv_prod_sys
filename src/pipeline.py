@@ -68,23 +68,7 @@ def explicit_deadlock_free(qjson, plan):
 
 
 class LLMPipeline:
-    MODELS = {
-        'api': {
-            'openai': ['gpt-4o-mini', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4.1', 'gpt-4o', 'gpt-5', 'gpt-5.1', 'gpt-5-mini', 'gpt-5-nano'],
-            'google_genai': ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-3-pro-preview'],
-            'deepseek': ['deepseek-chat', 'deepseek-reasoner'],
-        },
-        'local': {
-            'metaai': ['meta-llama/Meta-Llama-3-8B-Instruct', 'meta-llama/Llama-3.1-8B-Instruct',
-                       'meta-llama/Llama-3.2-1B-Instruct', 'meta-llama/Llama-3.2-3B-Instruct', 'meta-llama/Llama-4-Scout-17B-16E-Instruct'],
-            'mistral': ['mistralai/Mistral-7B-Instruct-v0.2','mistralai/Mistral-7B-Instruct-v0.3',
-                        'mistralai/Mistral-Nemo-Instruct-2407', 'mistralai/Ministral-8B-Instruct-2410'],
-            'qwen': ['Qwen/Qwen2.5-7B-Instruct', 'Qwen/Qwen3-30B-A3B-Instruct-2507'],
-            'google_genai': ['google/gemma-2-9b-it'],
-            'microsoft': ['microsoft/phi-4', 'microsoft/Phi-4-mini-instruct'],
-            'deepseek': ['deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B'],
-        }
-    }
+
     TERMINATOR_TOKENS = {
         'metaai': "<|eot_id|>",
         'mistral': "[/INST]",
@@ -246,10 +230,26 @@ class LLMPipeline:
 
     def _get_model_family_type(self, model_id):
         model_id_lower = model_id.lower()
-        for model_type, families in LLMPipeline.MODELS.items():
-            for family, models_in_family in families.items():
-                if any(m.lower() == model_id_lower for m in models_in_family): 
-                    return family, model_type
+        
+        # 1. Is it a HuggingFace (local) model or an API model?
+        model_type = 'local' if '/' in model_id_lower else 'api'
+        
+        # 2. Determine the architecture/family based on name keywords
+        if 'gemini' in model_id_lower or 'gemma' in model_id_lower:
+            return 'google_genai', model_type
+        elif 'gpt-' in model_id_lower or 'o1-' in model_id_lower or 'o3-' in model_id_lower:
+            return 'openai', model_type
+        elif 'llama' in model_id_lower:
+            return 'metaai', model_type
+        elif 'mistral' in model_id_lower or 'ministral' in model_id_lower:
+            return 'mistral', model_type
+        elif 'qwen' in model_id_lower:
+            return 'qwen', model_type
+        elif 'phi' in model_id_lower:
+            return 'microsoft', model_type
+        elif 'deepseek' in model_id_lower:
+            return 'deepseek', model_type
+            
         return None, None
 
 

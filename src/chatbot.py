@@ -115,9 +115,9 @@ def stop_containers():
 
 def parse_arguments():
     parser = ArgumentParser(description="Run LLM Generation.")
-    parser.add_argument('--llm_id_gateway', type=str, default='gemini-2.5-pro', help='LLM model identifier for Gateway')
-    parser.add_argument('--llm_id_simulation', type=str, default='gemini-2.5-pro', help='LLM model identifier for Simulation')
-    parser.add_argument('--llm_id_verification', type=str, default='gemini-2.5-pro', help='LLM model identifier for Verification')
+    parser.add_argument('--llm_id_gateway', type=str, default='gemini-3.1-flash-lite', help='LLM model identifier for Gateway')
+    parser.add_argument('--llm_id_simulation', type=str, default='gemini-3.1-flash-lite', help='LLM model identifier for Simulation')
+    parser.add_argument('--llm_id_verification', type=str, default='gemini-3.1-flash-lite', help='LLM model identifier for Verification')
     parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=32768)
     parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, live')
     parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
