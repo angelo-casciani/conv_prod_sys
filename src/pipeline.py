@@ -9,7 +9,7 @@ from contextlib import redirect_stdout
 from langchain.chat_models import init_chat_model
 from langchain_core.prompts import PromptTemplate
 
-try: # (Optional) imports for local LLMs (not needed for API-only)
+try: # Imports for local LLMs (not needed for API models)
     from langchain_huggingface import HuggingFacePipeline
     from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
     from torch import bfloat16
@@ -272,6 +272,47 @@ class LLMPipeline:
             answer = ""
 
         return prompt, answer
+
+    def _coerce_text_response(self, value):
+        if value is None:
+            return ""
+
+        if isinstance(value, str):
+            return value
+
+        if isinstance(value, list):
+            chunks = []
+            for item in value:
+                chunk = self._coerce_text_response(item)
+                if chunk:
+                    chunks.append(chunk)
+            return "\n".join(chunks).strip()
+
+        if isinstance(value, dict):
+            for key in ("text", "output_text", "content", "response"):
+                if key in value:
+                    nested = self._coerce_text_response(value.get(key))
+                    if nested:
+                        return nested
+            try:
+                return json.dumps(value, ensure_ascii=False)
+            except TypeError:
+                return str(value)
+
+        text_attr = getattr(value, "text", None)
+        if isinstance(text_attr, str) and text_attr:
+            return text_attr
+
+        content_attr = getattr(value, "content", None)
+        if content_attr is not None and content_attr is not value:
+            return self._coerce_text_response(content_attr)
+
+        return str(value)
+
+    def _extract_answer_text(self, complete_answer):
+        if hasattr(complete_answer, "content"):
+            return self._coerce_text_response(complete_answer.content)
+        return self._coerce_text_response(complete_answer)
     
 
     def _initialize_chain(self, model_id, model_family, model_type):
@@ -387,7 +428,7 @@ class LLMPipeline:
         if self.model_type_gateway == 'local':
             prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
         else:
-            answer = complete_answer.content
+            answer = self._extract_answer_text(complete_answer)
 
         can_meet_deadline = sim_results.get('can_meet_deadline')
         if can_meet_deadline is False and needed_time is not None and target_pieces is not None:
@@ -438,7 +479,7 @@ class LLMPipeline:
             if self.model_type_gateway == 'local':
                 raw_answer = complete_answer
             else:
-                raw_answer = complete_answer.content
+                raw_answer = self._extract_answer_text(complete_answer)
 
             parsed = self._extract_simulation_request_from_answer(raw_answer)
             if not isinstance(parsed, dict):
@@ -499,7 +540,7 @@ class LLMPipeline:
         if self.model_type_gateway == 'local':
             prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
         else:
-            answer = complete_answer.content
+            answer = self._extract_answer_text(complete_answer)
         return prompt, answer
 
     def _format_results_for_llm(self, results, follow_up_results=None, session_state=None):
@@ -572,7 +613,7 @@ class LLMPipeline:
                         "system_message": sys_mess}
         
         complete_answer = self.chain_simulation.invoke(invoke_payload)
-        answer = complete_answer.content
+        answer = self._extract_answer_text(complete_answer)
         
         follow_up_results = factory_interface.interface_with_llm(answer)
         
@@ -592,7 +633,7 @@ class LLMPipeline:
         if self.model_type_simulation == 'local':
             answer = complete_answer
         else:
-            answer = complete_answer.content
+            answer = self._extract_answer_text(complete_answer)
 
         answer_text = answer if isinstance(answer, str) else str(answer)
 
@@ -790,7 +831,7 @@ class LLMPipeline:
         if self.model_type_verification == 'local':
             answer = complete_answer
         else:
-            answer = complete_answer.content
+            answer = self._extract_answer_text(complete_answer)
 
         if 'evaluation' not in modality:
             parsed_payload = self._parse_verification_payload(answer)
@@ -813,7 +854,7 @@ class LLMPipeline:
             if self.model_type_gateway == 'local':
                 prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
             else:
-                answer = complete_answer.content
+                answer = self._extract_answer_text(complete_answer)
         return prompt, answer
     
     def _produce_answer_failure(self, question, sim_time, modality=''):
@@ -830,7 +871,7 @@ class LLMPipeline:
         if self.model_type_gateway == 'local':
             answer = complete_answer
         else:
-            answer = complete_answer.content
+            answer = self._extract_answer_text(complete_answer)
 
         cleaned_answer = clean_json_block(answer)
         
@@ -872,7 +913,7 @@ class LLMPipeline:
             prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
             #print("Risposta LLM:" + answer)
         else:
-            answer = complete_answer.content
+            answer = self._extract_answer_text(complete_answer)
             
         answer = clean_json_block(answer)
         if answer is None:
@@ -924,7 +965,7 @@ class LLMPipeline:
                 if self.model_type_gateway == 'local':
                     prompt, nl_output = self._parse_llm_answer(complete_answer_results, self.model_family_gateway)
                 else:
-                    nl_output = complete_answer_results.content
+                    nl_output = self._extract_answer_text(complete_answer_results)
             elif action == "filter_by_time_range":
                 log = self.process_mining_module.load_log()
                 start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 
@@ -946,7 +987,7 @@ class LLMPipeline:
         if self.model_type_gateway == 'local':
             prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
         else:
-            answer = complete_answer.content
+            answer = self._extract_answer_text(complete_answer)
 
         return prompt, answer
 
@@ -969,7 +1010,7 @@ class LLMPipeline:
         if self.model_type_gateway == 'local':
             answer_gateway = complete_answer
         else:
-            answer_gateway = complete_answer.content
+            answer_gateway = self._extract_answer_text(complete_answer)
         
         if "evaluation" in modality:
             return prompt_gateway, answer_gateway
@@ -1160,20 +1201,23 @@ class LLMPipeline:
         print(f'{answer}\n')
         print('--------------------------------------------------')
 
-        self.request_type = answer
+        routing_answer = self._coerce_text_response(answer)
+        routing_answer_lower = routing_answer.lower()
 
-        if 'uppaal_verification' in answer.lower():
+        self.request_type = routing_answer
+
+        if 'uppaal_verification' in routing_answer_lower:
             complete_prompt, answer = self._produce_answer_verification(question, 'live')
-        elif 'factory_simulation' in answer.lower():
+        elif 'factory_simulation' in routing_answer_lower:
             complete_prompt, answer = self._produce_answer_simulation(question, 'live', session_state=state)
-        elif 'factory_info' in answer.lower():
+        elif 'factory_info' in routing_answer_lower:
             complete_prompt, answer = self._produce_answer_gateway(question, 'factory_info', info_run.get('Interaction Modality', ''))
             answer = clean_json_block(answer)
             parsed_json = json.loads(answer)
             answer = parsed_json["response"]
-        elif 'process_mining' in answer.lower():
+        elif 'process_mining' in routing_answer_lower:
             complete_prompt, answer = self._produce_answer_process_mining(question, 'live')
-        elif 'hybrid' in answer.lower():
+        elif 'hybrid' in routing_answer_lower:
             complete_prompt, answer = self._produce_answer_hybrid(question, 'live', session_state=state)
         else:
             complete_prompt, answer = self._produce_answer_gateway(question, 'negative_response')
