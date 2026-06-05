@@ -7,6 +7,10 @@ Source code, datasets, and instructions for the paper "*Neuro-Symbolic Conversat
 Advances in Artificial Intelligence (AI) and the growing availability of production data are driving a profound digital transformation in manufacturing, enhancing traceability, monitoring, and analysis across all stages of a production process. Although production process intelligence (PPI) tools support operators in deriving insight-driven decisions from production systems, existing solutions remain fragmented and operate in silos. This forces operators to use multiple interfaces for multi-perspective analysis. Since most tools require specialized expertise and offer limited interoperability, decision-making still relies on manual data handling and output aggregation, increasing errors and inconsistencies.
 In this paper, we tackle this issue by presenting a neuro-symbolic conversational AI framework interposing a natural-language interface between users and PPI tools. Our framework: (i) interprets complex natural-language requests, (ii) translates them into machine-readable problems orchestrated across PPI tools, and (iii) generates actionable insights to analyze and optimize process performance. The novelty lies in combining Conversational AI, particularly Large Language Models (LLMs) to handle natural-language ambiguity, with the reasoning capabilities of PPI tools to ensure transparent and reliable decision-making. Building on a reference architecture, we develop a proof-of-concept system integrating LLMs, temporal logics, automated planning, process mining, and simulation, validating it in a lab-scale manufacturing case study.
 
+### Interaction Guide
+
+An interaction guide is also provided in [interaction_guide.pdf](interaction_guide.pdf).
+
 ## Quick Start: Docker Chatbot
 
 Use this path if you just want to launch the chatbot as a Dockerized web app.
@@ -74,7 +78,7 @@ sudo docker compose up --build
 
 The Figure shows the components of the framework and how they interact.
 
-The framework is designed to provide grounded and interpretable answers to natural language requests concerning a production process, i.e., the representation of the activities performed within a production system. It achieves this through the integration of a *Conversational Layer* and a *Reasoning Layer*. The former tackles the formulation of the problem to be fed to the Reasoning Layer and the interpretation of the results in response to the user. The latter exploits either a digital twin simulating the production process or a formal verifier reasoning on its automaton or process mining module exracting data directly from an event log. Therefore, the approach assumes the availability of an event log allowing the extraction of the simulation parameters to build the digital twin and the automaton modeling the production process. The first one is obtained through an *Extractor* that mines the needed information to build the production system's digital twin, while the second one is provided by a domain expert. Both are not LLM-generated to ensure their correctness.
+The framework is designed to provide faithful answers to natural-language requests concerning a production process, i.e., the representation of the activities performed within a production system. It achieves this through the integration of a *Conversational Layer*, a *Reasoning Layer*, and a *Data Layer*. The Conversational Layer tackles the formulation of the problem to be fed to the Reasoning Layer and the interpretation of the results in response to the user. The Reasoning Layer exploits a simulation module working on a digital twin of the production process, a formal verifier reasoning over its automaton, and a process mining component exracting data directly from an event log. The approach assumes the availability of an event log in input, enabling the Data Layer to extract the digital twin and the automaton of the production process via, respectively, a *Digital Twin Extractor* and an *Automata Learning* module.
 
 As illustrated in the Figure, the Conversational Layer includes a set of LLMs: the *Gateway LLM*, which routes the user’s questions, and the *Encoder LLMs* for *Production Simulation*, *Predictive Maintenance*, *Verification* and *Process Mining*, which translate these requests into machine-readable representations compatible with the corresponding reasoners' syntax.
 
@@ -187,10 +191,6 @@ Finally, set up the submodules and Docker components:
 ### Server deployment
 
 For a remote-server deployment, see [server/README.md](server/README.md).
-
-### Interaction Guide
-
-An interaction guide is also provided in [interaction_guide.pdf](interaction_guide.pdf).
 
 ## Supported Interfaces
 
