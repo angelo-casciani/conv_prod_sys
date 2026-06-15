@@ -14,22 +14,12 @@ except ImportError:
     ChatGoogleGenerativeAI = None
 
 try:
-    from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace, HuggingFacePipeline
-except ImportError:
-    HuggingFaceEndpoint = None
-    ChatHuggingFace = None
-    HuggingFacePipeline = None
-
-try:
-    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
-    from torch import bfloat16
+    from langchain_ollama import ChatOllama
     LOCAL_MODEL_SUPPORT = True
 except ImportError:
     LOCAL_MODEL_SUPPORT = False
 
 load_dotenv()
-
-HF_TOKEN = os.getenv('HF_TOKEN')
 
 MODEL_CONFIGS = {
     'llama-3.2-1b': {
@@ -166,8 +156,6 @@ class LLMOnlyBaseline:
                 api_key = os.getenv('GOOGLE_API_KEY')
             if api_key:
                 os.environ['GOOGLE_API_KEY'] = api_key
-        elif self.model_provider == 'huggingface' and HF_TOKEN:
-            os.environ['HUGGINGFACEHUB_API_TOKEN'] = HF_TOKEN
         
         self.model = self._initialize_model(model_id, model_provider, is_chat_model=is_chat_model)
         self.system_prompt = self._load_system_prompt()
@@ -187,51 +175,14 @@ class LLMOnlyBaseline:
             )
 
         if model_provider == 'huggingface':
-            if not HF_TOKEN:
-                raise RuntimeError("HF_TOKEN is required for Hugging Face models in this script.")
-
-            # Prefer the same local loading strategy used in pipeline.py.
-            if LOCAL_MODEL_SUPPORT and HuggingFacePipeline is not None:
-                return self._initialize_local_hf_model(model_id)
-
-            # Fallback path for API-only environments.
-            # Some HF models are text-generation only (not chat-completions).
-            if not is_chat_model:
-                if HuggingFaceEndpoint is None:
-                    raise RuntimeError(
-                        "Missing dependency for Hugging Face models: install `langchain-huggingface`."
-                    )
-                return HuggingFaceEndpoint(
-                    repo_id=model_id,
-                    huggingfacehub_api_token=HF_TOKEN,
-                    task='text-generation',
-                    max_new_tokens=2048,
-                    temperature=0.1,
+            if not LOCAL_MODEL_SUPPORT:
+                raise RuntimeError(
+                    "Missing dependency for local models: install `langchain-ollama`."
                 )
-
-            # First try generic init_chat_model for compatibility with newer LangChain setups.
-            try:
-                return init_chat_model(
-                    model_id,
-                    model_provider=model_provider,
-                    temperature=0.1,
-                    max_tokens=2048,
-                )
-            except Exception as init_err:
-                # Fallback for environments where init_chat_model(huggingface) raises from_model_id.
-                if HuggingFaceEndpoint is None or ChatHuggingFace is None:
-                    raise RuntimeError(
-                        "Missing dependency for Hugging Face models: install `langchain-huggingface`."
-                    ) from init_err
-
-                endpoint = HuggingFaceEndpoint(
-                    repo_id=model_id,
-                    huggingfacehub_api_token=HF_TOKEN,
-                    task='text-generation',
-                    max_new_tokens=2048,
-                    temperature=0.1,
-                )
-                return ChatHuggingFace(llm=endpoint)
+            return ChatOllama(
+                model=model_id,
+                temperature=0.1,
+            )
 
         # Keep support for any additional provider we may add later.
         return init_chat_model(
@@ -240,45 +191,6 @@ class LLMOnlyBaseline:
             temperature=0.1,
             max_tokens=2048,
         )
-
-    def _initialize_local_hf_model(self, model_id: str):
-        """Initialize local Hugging Face model similarly to pipeline.py."""
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type='nf4',
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=bfloat16,
-        )
-
-        model_config = AutoConfig.from_pretrained(model_id, token=HF_TOKEN)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            trust_remote_code=True,
-            config=model_config,
-            quantization_config=bnb_config,
-            device_map='auto',
-            token=HF_TOKEN,
-        )
-        model.eval()
-
-        tokenizer = AutoTokenizer.from_pretrained(model_id, token=HF_TOKEN)
-
-        pipe_params = {
-            'model': model,
-            'tokenizer': tokenizer,
-            'return_full_text': False,
-            'task': 'text-generation',
-            'do_sample': True,
-            'temperature': 0.1,
-            'max_new_tokens': 256,
-            'repetition_penalty': 1.1,
-        }
-
-        if tokenizer.eos_token_id is not None:
-            pipe_params['pad_token_id'] = tokenizer.eos_token_id
-
-        gen_pipe = pipeline(**pipe_params)
-        return HuggingFacePipeline(pipeline=gen_pipe)
     
     def _load_system_prompt(self) -> str:
         prompts_path = os.path.join(os.path.dirname(__file__), 'prompts.json')

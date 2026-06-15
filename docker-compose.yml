@@ -11,7 +11,7 @@ services:
   chatbot:
     build:
       context: .
-      dockerfile: server/Dockerfile.chatbot
+      dockerfile: Dockerfile
     container_name: lego-chatbot
     ports:
       - "7860:7860"

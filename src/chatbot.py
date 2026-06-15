@@ -15,14 +15,7 @@ import uuid
 import threading
 from docker_manager import setup_docker_lifecycle, stop_docker_containers
 
-try:
-    from torch import cuda
-    DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
-except ImportError:
-    DEVICE = 'cpu' # CPU for API-only
-
 load_dotenv()
-HF_AUTH = os.getenv('HF_TOKEN')
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -151,7 +144,7 @@ class GradioHandler:
                 ensure_skg = args.ensure_skg
                 self.initialization_message = "Initializing system and digital twins..."
                 logger.info("Starting chatbot initialization")
-                self.chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens, extracted_model, extracted_model_failure)
+                self.chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, max_new_tokens, extracted_model, extracted_model_failure)
                 if ensure_skg and hasattr(self.chain, "_ensure_skg_exists"):
                     logger.info("Ensuring SKG automaton exists...")
                     self.chain._ensure_skg_exists()

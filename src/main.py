@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 from dotenv import load_dotenv
-from torch import cuda
 import warnings
 import sys
 import time
@@ -12,9 +11,7 @@ from utility import *
 from docker_manager import setup_docker_lifecycle, stop_docker_containers
 
 
-DEVICE = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 load_dotenv()
-HF_AUTH = os.getenv('HF_TOKEN')
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -50,9 +47,9 @@ def stop_containers():
 
 def parse_arguments():
     parser = ArgumentParser(description="Run LLM Generation.")
-    parser.add_argument('--llm_id_gateway', type=str, default='gemini-2.5-flash', help='LLM model identifier for Gateway')
-    parser.add_argument('--llm_id_simulation', type=str, default='gemini-2.5-flash', help='LLM model identifier for Simulation')
-    parser.add_argument('--llm_id_verification', type=str, default='gemini-2.5-flash', help='LLM model identifier for Verification')
+    parser.add_argument('--llm_id_gateway', type=str, default='gemma4:latest', help='LLM model identifier for Gateway')
+    parser.add_argument('--llm_id_simulation', type=str, default='gemma4:latest', help='LLM model identifier for Simulation')
+    parser.add_argument('--llm_id_verification', type=str, default='gemma4:latest', help='LLM model identifier for Verification')
     parser.add_argument('--max_new_tokens', type=int, help='Maximum number of tokens to generate', default=32768)
     parser.add_argument('--modality', type=str, default='live', help='Modality to use between: evaluation-simulation, evaluation-verification, evaluation-routing, evaluation-factory_info, evaluation-process_mining, evaluation-hybrid, evaluation-qualitative-hybrid, evaluation-simulation-zeroshot, evaluation-verification-zeroshot, evaluation-routing-zeroshot, evaluation-factory_info-zeroshot, evaluation-process_mining-zeroshot, evaluation-hybrid-zeroshot, live')
     parser.add_argument('--extracted_model', type=bool, default=False, help='True if already exists the file digital_twin.json. Default False')
@@ -72,7 +69,7 @@ def main():
     max_new_tokens = args.max_new_tokens
     extracted_model = args.extracted_model
     extracted_model_failure = args.extracted_model_failure
-    chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, HF_AUTH, max_new_tokens, extracted_model, extracted_model_failure)
+    chain = LLMPipeline(model_id_gateway, model_id_simulation, model_id_verification, max_new_tokens, extracted_model, extracted_model_failure)
 
     run_data = {
         'LLM ID Gateway': model_id_gateway,

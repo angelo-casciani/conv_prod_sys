@@ -8,11 +8,7 @@ import argparse
 import numpy as np
 from threading import Lock
 
-try: # (Optional) torch import (not needed for API-only mode)
-    import torch
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
+
 
 
 _log_file_lock = Lock()
@@ -22,12 +18,7 @@ def seed_everything(seed=10):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
-    if TORCH_AVAILABLE:
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.deterministic = True
+
 
 
 def get_repo_root():

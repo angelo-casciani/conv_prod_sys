@@ -10,9 +10,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.prompts import PromptTemplate
 
 try: # Imports for local LLMs (not needed for API models)
-    from langchain_huggingface import HuggingFacePipeline
-    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig, AutoConfig
-    from torch import bfloat16
+    from langchain_ollama import ChatOllama
     LOCAL_MODEL_SUPPORT = True
 except ImportError:
     LOCAL_MODEL_SUPPORT = False
@@ -91,14 +89,13 @@ class LLMPipeline:
         'deepseek': '<｜Assistant｜><think>'
     }
 
-    def __init__(self, model_id_gateway, model_id_simulation, model_id_verification, hf_token, max_new_tokens, extracted_model, extracted_model_failure):
+    def __init__(self, model_id_gateway, model_id_simulation, model_id_verification, max_new_tokens, extracted_model, extracted_model_failure):
         self.model_id_gateway = model_id_gateway
         self.model_id_simulation = model_id_simulation
         self.model_id_verification = model_id_verification
         self.model_family_gateway, self.model_type_gateway = self._get_model_family_type(self.model_id_gateway)
         self.model_family_simulation, self.model_type_simulation = self._get_model_family_type(model_id_simulation)
         self.model_family_verification, self.model_type_verification = self._get_model_family_type(model_id_verification)
-        self.hf_token = hf_token
         self.max_new_tokens = max_new_tokens
         self.path_prompts = os.path.join(os.path.dirname(__file__), 'prompts.json')
         self.pddl_domain = os.path.join(os.path.dirname(__file__), 'pddl', 'domain.pddl')
@@ -231,14 +228,18 @@ class LLMPipeline:
     def _get_model_family_type(self, model_id):
         model_id_lower = model_id.lower()
         
-        # 1. Is it a HuggingFace (local) model or an API model?
-        model_type = 'local' if '/' in model_id_lower else 'api'
-        
-        # 2. Determine the architecture/family based on name keywords
-        if 'gemini' in model_id_lower or 'gemma' in model_id_lower:
+        # 1. Check if it's a known API model
+        if model_id_lower.startswith(('gpt-', 'o1-', 'o3-')):
+            return 'openai', 'api'
+        elif model_id_lower.startswith('gemini-'):
+            return 'google_genai', 'api'
+        elif model_id_lower in ('deepseek-chat', 'deepseek-reasoner'):
+            return 'deepseek', 'api'
+            
+        # 2. If not a known API model, assume it's a local Ollama model
+        model_type = 'local'
+        if 'gemma' in model_id_lower:
             return 'google_genai', model_type
-        elif 'gpt-' in model_id_lower or 'o1-' in model_id_lower or 'o3-' in model_id_lower:
-            return 'openai', model_type
         elif 'llama' in model_id_lower:
             return 'metaai', model_type
         elif 'mistral' in model_id_lower or 'ministral' in model_id_lower:
@@ -250,7 +251,7 @@ class LLMPipeline:
         elif 'deepseek' in model_id_lower:
             return 'deepseek', model_type
             
-        return None, None
+        return None, model_type
 
 
     def _generate_prompt_template(self, model_family):
@@ -258,20 +259,6 @@ class LLMPipeline:
         template = self.prompts.get(template_key, '')
 
         return PromptTemplate.from_template(template)
-
-    def _parse_llm_answer(self, complete_answer, model_family):
-        model_family_key = model_family.lower()
-        delimiter = LLMPipeline.RESPONSE_DELIMITERS.get(model_family_key, 'Answer:')
-
-        index = complete_answer.find(delimiter)
-        if index != -1:
-            prompt = complete_answer[:index + len(delimiter)]
-            answer = complete_answer[index + len(delimiter):]
-        else:
-            prompt = complete_answer
-            answer = ""
-
-        return prompt, answer
 
     def _coerce_text_response(self, value):
         if value is None:
@@ -320,11 +307,14 @@ class LLMPipeline:
         if model_type == 'local':
             if not LOCAL_MODEL_SUPPORT:
                 raise RuntimeError(
-                    "Local model support not available. Install langchain_huggingface, "
-                    "transformers, and torch to use local models."
+                    "Local model support not available. Install langchain-ollama "
+                    "to use local models."
                 )
-            generate_text = self._initialize_local_model(model_id, model_family) 
-            model = HuggingFacePipeline(pipeline=generate_text)
+            model = ChatOllama(
+                model=model_id,
+                temperature=0.1,
+                max_tokens=self.max_new_tokens
+            )
         elif model_type == 'api':
             model_family_for_provider = model_family
             model = init_chat_model(
@@ -425,10 +415,7 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_gateway.invoke(invoke_payload)
-        if self.model_type_gateway == 'local':
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
-        else:
-            answer = self._extract_answer_text(complete_answer)
+        answer = self._extract_answer_text(complete_answer)
 
         can_meet_deadline = sim_results.get('can_meet_deadline')
         if can_meet_deadline is False and needed_time is not None and target_pieces is not None:
@@ -476,10 +463,7 @@ class LLMPipeline:
 
         try:
             complete_answer = self.chain_gateway.invoke(invoke_payload)
-            if self.model_type_gateway == 'local':
-                raw_answer = complete_answer
-            else:
-                raw_answer = self._extract_answer_text(complete_answer)
+            raw_answer = self._extract_answer_text(complete_answer)
 
             parsed = self._extract_simulation_request_from_answer(raw_answer)
             if not isinstance(parsed, dict):
@@ -537,10 +521,7 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_gateway.invoke(invoke_payload)
-        if self.model_type_gateway == 'local':
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
-        else:
-            answer = self._extract_answer_text(complete_answer)
+        answer = self._extract_answer_text(complete_answer)
         return prompt, answer
 
     def _format_results_for_llm(self, results, follow_up_results=None, session_state=None):
@@ -630,10 +611,7 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_simulation.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_simulation.invoke(invoke_payload)
-        if self.model_type_simulation == 'local':
-            answer = complete_answer
-        else:
-            answer = self._extract_answer_text(complete_answer)
+        answer = self._extract_answer_text(complete_answer)
 
         answer_text = answer if isinstance(answer, str) else str(answer)
 
@@ -851,10 +829,7 @@ class LLMPipeline:
                         "system_message": sys_mess}
             prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
             complete_answer = self.chain_gateway.invoke(invoke_payload)
-            if self.model_type_gateway == 'local':
-                prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
-            else:
-                answer = self._extract_answer_text(complete_answer)
+            answer = self._extract_answer_text(complete_answer)
         return prompt, answer
     
     def _produce_answer_failure(self, question, sim_time, modality=''):
@@ -868,10 +843,7 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_failure.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_failure.invoke(invoke_payload)
-        if self.model_type_gateway == 'local':
-            answer = complete_answer
-        else:
-            answer = self._extract_answer_text(complete_answer)
+        answer = self._extract_answer_text(complete_answer)
 
         cleaned_answer = clean_json_block(answer)
         
@@ -909,11 +881,7 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt = self.chain_process_mining.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_process_mining.invoke(invoke_payload)
-        if self.model_type_gateway == 'local':
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
-            #print("Risposta LLM:" + answer)
-        else:
-            answer = self._extract_answer_text(complete_answer)
+        answer = self._extract_answer_text(complete_answer)
             
         answer = clean_json_block(answer)
         if answer is None:
@@ -962,10 +930,7 @@ class LLMPipeline:
                 }
                 prompt = self.chain_gateway.first.format_prompt(**invoke_payload_results).to_string()
                 complete_answer_results = self.chain_gateway.invoke(invoke_payload_results)
-                if self.model_type_gateway == 'local':
-                    prompt, nl_output = self._parse_llm_answer(complete_answer_results, self.model_family_gateway)
-                else:
-                    nl_output = self._extract_answer_text(complete_answer_results)
+                nl_output = self._extract_answer_text(complete_answer_results)
             elif action == "filter_by_time_range":
                 log = self.process_mining_module.load_log()
                 start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 
@@ -984,10 +949,7 @@ class LLMPipeline:
                     "system_message": sys_mess}
         prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_gateway.invoke(invoke_payload)
-        if self.model_type_gateway == 'local':
-            prompt, answer = self._parse_llm_answer(complete_answer, self.model_family_gateway)
-        else:
-            answer = self._extract_answer_text(complete_answer)
+        answer = self._extract_answer_text(complete_answer)
 
         return prompt, answer
 
@@ -1007,16 +969,17 @@ class LLMPipeline:
                         "system_message": sys_mess}
         prompt_gateway = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
         complete_answer = self.chain_gateway.invoke(invoke_payload)
-        if self.model_type_gateway == 'local':
-            answer_gateway = complete_answer
-        else:
-            answer_gateway = self._extract_answer_text(complete_answer)
+        answer_gateway = self._extract_answer_text(complete_answer)
         
         if "evaluation" in modality:
             return prompt_gateway, answer_gateway
-        answer_gateway = clean_json_block(answer_gateway)
+        cleaned_answer = clean_json_block(answer_gateway)
+        if cleaned_answer is None:
+            print(f"Failed to extract JSON from the hybrid response: {answer_gateway}")
+            return prompt_gateway, "{}"
+            
+        answer_gateway = cleaned_answer
 
-        #question_json = json.loads(answer_gateway)
         try:
             question_json = json.loads(answer_gateway)
         except json.JSONDecodeError:
@@ -1025,7 +988,7 @@ class LLMPipeline:
                 question_json = ast.literal_eval(answer_gateway)
             except Exception as e:
                 print(f"Hybrid response could not be parsed as JSON or Python dict. Got:\n{answer_gateway}")
-                raise ValueError(f"Hybrid response could not be parsed.") from e
+                return prompt_gateway, "{}"
 
 
         problem_string = question_json.get("pddl_problem", answer_gateway)
