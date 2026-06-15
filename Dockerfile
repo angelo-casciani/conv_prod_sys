@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     graphviz \
+    libgraphviz-dev \
     cmake \
     g++ \
     docker.io \

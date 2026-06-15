@@ -338,6 +338,19 @@ class LLMPipeline:
         session_state.setdefault("sim_time", None)
         return session_state
 
+    def _build_hybrid_guardrails(self):
+        return (
+            "\n\nADDITIONAL HYBRID CONSTRAINTS (MUST FOLLOW):\n"
+            "- If the query mixes verification and simulation, include BOTH goals in (:goal (and ...)).\n"
+            "- For deadlock verification, include (deadlock_free P) in goal.\n"
+            "- For \"how many pieces in T time\", include (has_time I) in init and (has_pieces O) in goal.\n"
+            "- For \"how much time for N pieces\", include (has_pieces I) in init and (has_time O) in goal.\n"
+            "- Any simulation-related goal MUST include (target_activity <activity>) in init using one valid activity object.\n"
+            "- Always declare objects I - input, P - process, O - output.\n"
+            "- Do not collapse multi-intent requests to a single goal.\n"
+        )
+
+
     def _set_pending_simulation_request(self, source, original_question, modality, base_request=None, simulation_question=None, session_state=None):
         state = self._ensure_session_state(session_state)
         state["pending_simulation_request"] = {
@@ -963,6 +976,7 @@ class LLMPipeline:
         sys_mess = self.prompts.get('system_message_hybrid', '')
         if 'zeroshot' not in modality:
             sys_mess += self.prompts.get('shots_hybrid', '')
+        sys_mess += self._build_hybrid_guardrails()
         context = self.pddl_domain + activities_context
         invoke_payload = {"question": question,
                         "context": context,
