@@ -65,12 +65,6 @@ sudo docker compose down
 sudo docker compose up --build
 ```
 
-### Runtime files
-
-- `log/`: input event logs
-- `runtime_logs/`: chatbot runtime and error logs
-- `runtime_logs/interactions/`: user interaction logs
-
 ## Architecture
 
 ![architecture](images/architecture.png)
@@ -154,7 +148,24 @@ As illustrated in the Figure, the Conversational Layer includes a set of LLMs: t
 └── README.md                # This file
 ```
 
-## Setup Notes
+## Setup
+
+## LLM Configuration
+
+This software supports both open-weight (using [Ollama](https://ollama.com/)) and proprietary language models (via API).
+
+**Local Models:**
+- Install and run [Ollama](https://github.com/ollama/ollama)
+- Pull the models you plan to use
+
+**API-based Models:**
+- Obtain API keys for your chosen provider (e.g., OpenAI, Gemini, DeepSeek)
+- Add credentials to the `.env` file
+
+**Hardware Requirements:**
+- GPU access is recommended for better performance
+- Verify your system meets the minimum GPU requirements for your selected models
+
 
 ### Docker-first usage
 
@@ -233,16 +244,6 @@ A comprehensive list of commands can be found in `src/cmd4tests.sh`.
 The recommended way to use the chatbot is the Docker flow described in [Quick Start: Docker Chatbot](#quick-start-docker-chatbot).
 
 Once started, the Web GUI will be accessible in your browser at: `http://127.0.0.1:7860/`
-
-## LLMs Requirements
-
-Please note that this software leverages the open-weights and closed-source LLMs.
-To use local models, you must have [Ollama](https://ollama.com/) installed and running on your system, and you must pull the models you intend to use.
-
-For proprietary API models, make sure to retrieve the API keys (e.g. API key for OpenAI) and set them in the `.env` file.
-
-Please note that each of the selected models have specific requirements in terms of GPU availability.
-It is recommended to have access to a GPU-enabled environment meeting at least the minimum requirements for these models to run the software effectively.
 
 ### Experimental Evaluation
 
