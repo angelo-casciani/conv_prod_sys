@@ -234,17 +234,16 @@ class GradioHandler:
                     session_state=session_state,
                     request_id=request_id,
                 ):
-                    if "I discovered the Petri net representing the process. The Petri net has been saved at" in result:
-                        match = re.search(r"saved at:\s*(\S+)", result)
-                        if match:
-                            path = match.group(1).rstrip(".")
-                            log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
-                            yield {"role": "assistant", "content": result}
-                            log_chat_interaction("assistant", f"file:{path}", session_id=session_id, request_id=request_id)
-                            yield {"role": "assistant", "content": gr.FileData(path=path, mime_type="image/png")}
-                        else:
-                            log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
-                            yield {"role": "assistant", "content": result}
+                    match = re.search(r"(?:saved\s+)?(?:at|to):?\s*(\S+)", result)
+
+                    if match:
+                        path = match.group(1).rstrip(".")
+                        result = re.sub(r"The discovered Petri net has been saved at:\s*\S+\.?", "", result).strip()
+                        result = result.replace(match.group(0), "saved.")
+                        log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
+                        log_chat_interaction("assistant", f"file:{path}", session_id=session_id, request_id=request_id)
+                        yield {"role": "assistant", "content": [result, gr.FileData(path=path, mime_type="image/png")]}
+                            
                     else:
                         log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
                         yield {"role": "assistant", "content": result}

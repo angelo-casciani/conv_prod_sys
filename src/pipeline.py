@@ -58,7 +58,7 @@ def explicit_deadlock_free(qjson, plan):
     if any("validate_deadlock" in a for a in plan) and not mentions_deadlock:
         questions.append({
             "question": "Is the system deadlock free during production?",
-            "type": "validation"
+            "type": "verification"
         })
 
     qjson["questions"] = questions
@@ -921,7 +921,7 @@ class LLMPipeline:
             elif action == 'process_discovery':
                 net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
                 # Skip view_petri_net - not available in headless/Docker environment
-                nl_output = f"I discovered the Petri net representing the process. The Petri net has been saved at: {net_path}."
+                nl_output = f"The discovered Petri net has been saved at: {net_path}."
             elif action == 'conformance_checking':
                 log = self.process_mining_module.load_log()
                 net, initial_marking, final_marking, net_path = self.process_mining_module.discovery()
@@ -1028,25 +1028,28 @@ class LLMPipeline:
         typed_questions = {
             "failure": [q["question"] for q in questions if q["type"] == "failure"],
             "simulation": [q["question"] for q in questions if q["type"] == "simulation"],
-            "validation": [q["question"] for q in questions if q["type"] == "validation"]
+            "verification": [q["question"] for q in questions if q["type"] == "verification"],
+            "process_mining": [q["question"] for q in questions if q["type"] == "process_mining"]
         }
         
         prompts = ""
         answers = ""
         if 'evaluation' not in modality:
             failure_delay = 0
-            type_counters = {"failure": 0, "simulation": 0, "validation": 0}
+            type_counters = {"failure": 0, "simulation": 0, "verification": 0, "process_mining": 0}
             last_sim_time = None 
             for i, action in enumerate(plan):
                 action_lower = action.lower()
                 if "simulate" in action_lower:
                     qtype = "simulation"
                 elif "validate" in action_lower:
-                    qtype = "validation"
+                    qtype = "verification"
                 elif "maintenance" in action_lower:
                     qtype = "failure"
                 elif "extract_digital_twin" in action_lower:
                     continue
+                elif any(word in action_lower for word in ["discovery", "conformance", "performance", "filter"]):
+                    qtype = "process_mining"
                 else:
                     print(f"Unknown plan action '{action}', skipping.")
                     continue
@@ -1083,7 +1086,7 @@ class LLMPipeline:
                     except (json.JSONDecodeError, TypeError) as e:
                         print(f"Warning: Failed to parse failure delay from answer. Using 0. Reason: {e}")
 
-                elif qtype == "validation":
+                elif qtype == "verification":
                     prompt, answer = self._produce_answer_verification(q_text, modality)
                     if "deadlock" in q_text.lower():
                         is_deadlock_free = any(phrase in answer.lower() for phrase in [
@@ -1093,11 +1096,14 @@ class LLMPipeline:
                         ])
                         
                         if not is_deadlock_free:
-                            print(f"Deadlock detected in validation step {i+1}. Continuing with remaining requested analyses.")
+                            print(f"Deadlock detected in verification step {i+1}. Continuing with remaining requested analyses.")
                             answers += (
-                                "\nWarning: A deadlock may exist based on validation results. "
+                                "\nWarning: A deadlock may exist based on verification results. "
                                 "Continuing with the remaining requested analyses as requested.\n"
                             )
+
+                elif qtype == "process_mining":
+                    prompt, answer = self._produce_answer_process_mining(q_text, modality)
 
                 prompts += f"\n{i+1}. Prompt {qtype}: \n{prompt}\n"
                 answers += f"{i+1}. Answer {qtype}: \n{answer}\n\n"
@@ -1107,6 +1113,12 @@ class LLMPipeline:
                 
             #print(answers)
         prompt, answer = self._produce_rewritten_answer(answers) 
+        
+        petri_matches = re.findall(r"I discovered the Petri net representing the process\. The Petri net has been saved at: \S+", answers)
+        for match in petri_matches:
+            if match not in answer:
+                answer += f"\n\n{match}"
+                
         return prompts, answer
     
     def _generate_response(self, question, curr_datetime, info_run, chatbot=False, session_state=None):
