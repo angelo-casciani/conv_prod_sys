@@ -27,6 +27,11 @@
         (simulation_done)
         ;;Process Mining
         (digital_twin ?x - process)
+        (discovered_model ?x - process)
+        (conformance_checked ?x - process)
+        (performance_analyzed ?x - process)
+        (log_filtered ?x - process)
+        (process_mining_done)
     )
 
     (:action simulate_time_with_activity
@@ -44,7 +49,7 @@
     (:action simulate_next_activity
         :parameters (?x - activity  ?z - activity ?y - process)
         :precondition (and (digital_twin ?y))
-        :effect (and (next_activity ?x ?z))
+        :effect (and (next_activity ?x ?z) (simulation_done))
     )
     
     (:action validate_deadlock
@@ -106,5 +111,29 @@
         :parameters (?x - process)
         :precondition ()
         :effect (and (digital_twin ?x))
-    )   
+    )
+
+    (:action process_discovery
+        :parameters (?x - process)
+        :precondition (and (digital_twin ?x))
+        :effect (and (discovered_model ?x) (process_mining_done))
+    )
+
+    (:action conformance_checking
+        :parameters (?x - process)
+        :precondition (and (digital_twin ?x))
+        :effect (and (conformance_checked ?x) (process_mining_done))
+    )
+
+    (:action performance_analysis
+        :parameters (?x - process)
+        :precondition (and (digital_twin ?x))
+        :effect (and (performance_analyzed ?x) (process_mining_done))
+    )
+
+    (:action filter_log
+        :parameters (?x - process)
+        :precondition (and (digital_twin ?x))
+        :effect (and (log_filtered ?x) (process_mining_done))
+    )
 )

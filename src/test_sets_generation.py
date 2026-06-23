@@ -428,7 +428,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is the system deadlock free during production?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -446,7 +446,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is state {state} reachable?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -464,7 +464,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Will the process reach state {state}?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -478,11 +478,11 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is state {state} eventually reached?",
-            "type": "validation"
+            "type": "verification"
         },
         {
             "question": "Is the process free of deadlocks?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -514,7 +514,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is state {state} reachable during production?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -532,7 +532,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is state {state} reachable during production?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -546,7 +546,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Do all activities complete without deadlock?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -574,7 +574,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is state {state} reached at least once?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -616,11 +616,11 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is state {state} ever reached?",
-            "type": "validation"
+            "type": "verification"
         },
         {
             "question": "Is the process deadlock free?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -652,7 +652,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is state {state} reachable during production?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -666,7 +666,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Are there any deadlocks in the process?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -684,7 +684,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Is state {state} reachable?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -698,11 +698,11 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Does the system avoid deadlocks?",
-            "type": "validation"
+            "type": "verification"
         },
         {
             "question": "Is state {state} eventually reached?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 }),
@@ -730,7 +730,7 @@ hybrid_questions = hybrid_questions = [
         },
         {
             "question": "Are all reachable states deadlock free?",
-            "type": "validation"
+            "type": "verification"
         }
     ]
 })
