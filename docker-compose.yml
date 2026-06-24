@@ -7,7 +7,6 @@
 version: "3.3"
 
 services:
-  # Chatbot UI/API
   chatbot:
     build:
       context: .
@@ -34,10 +33,11 @@ services:
       - chatbot_network
     restart: unless-stopped
 
-  # UPPAAL Verification Engine
-  # Build: cd src/uppaal && docker build --build-arg KEY=$UPPAAL_LICENSE_KEY --tag uppaal-engine -f res/Dockerfile .
+  # Build the Uppaal engine from the local Dockerfile
   uppaal:
-    image: uppaal-engine:latest
+    build:
+      context: .                     # project root (contains src/uppaal/)
+      dockerfile: Dockerfile.uppaal
     container_name: uppaal-engine
     ports:
       - "2350:2350"
@@ -51,7 +51,6 @@ services:
     networks:
       - chatbot_network
 
-  # Digital Twin Extractor Service
   extractor:
     build:
       context: ./src/DTLogExtSim/Extractor
