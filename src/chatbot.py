@@ -234,16 +234,12 @@ class GradioHandler:
                     session_state=session_state,
                     request_id=request_id,
                 ):
-                    match = re.search(r"(?:saved\s+)?(?:at|to):?\s*(\S+)", result)
-
+                    match = re.search(r"saved at[:\s]*([\S]+)", result)
                     if match:
                         path = match.group(1).rstrip(".")
-                        result = re.sub(r"The discovered Petri net has been saved at:\s*\S+\.?", "", result).strip()
-                        result = result.replace(match.group(0), "saved.")
-                        log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
-                        log_chat_interaction("assistant", f"file:{path}", session_id=session_id, request_id=request_id)
-                        yield {"role": "assistant", "content": [result, gr.FileData(path=path, mime_type="image/png")]}
-                            
+                        cleaned_result = re.sub(r"The discovered Petri net has been saved at:\s*\S+\.?", "", result).strip()
+                        log_chat_interaction("assistant", cleaned_result, session_id=session_id, request_id=request_id)
+                        yield {"role": "assistant", "content": [cleaned_result, gr.FileData(path=path, mime_type="image/png")]}
                     else:
                         log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
                         yield {"role": "assistant", "content": result}
