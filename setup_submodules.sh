@@ -180,17 +180,6 @@ EOF
                 echo "UPPAAL already installed at src/uppaal"
             fi
             
-            # Build UPPAAL Docker image if not exists
-            if $DOCKER_CMD images | grep -q uppaal-engine; then
-                echo "UPPAAL Docker image already exists"
-            else
-                echo "Building UPPAAL Docker image..."
-                cd src/uppaal
-                $DOCKER_CMD build --build-arg KEY=$UPPAAL_LICENSE_KEY --tag uppaal-engine -f res/Dockerfile .
-                cd ../..
-                echo "UPPAAL Docker image built successfully"
-            fi
-            
             # Start/restart using docker-compose
             if [ -f "docker-compose.yml" ]; then
                 echo "Starting containers using docker-compose..."

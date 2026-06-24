@@ -1,32 +1,34 @@
 FROM ubuntu:22.04
 
-RUN useradd -ms /bin/bash uppaal
-RUN apt-get -qq update && apt-get -qq upgrade -y
-
-# Install required packages
-RUN apt-get -qq install -y wget unzip
+RUN useradd -ms /bin/bash uppaal \
+    && apt-get -qq update && apt-get -qq upgrade -y \
+    && apt-get -qq install -y wget unzip
 
 USER uppaal
 ENV USER=uppaal
 WORKDIR /home/uppaal
 
-# Copy UPPAAL from the build context
-COPY --chown=uppaal:uppaal . uppaal
+# ---- Copy Uppaal binaries (bin, lib, res, etc.) ----
+COPY --chown=uppaal:uppaal src/uppaal/ /home/uppaal/uppaal/
 
+# Add the binary directory to PATH
 ENV PATH="/home/uppaal/uppaal/bin:$PATH"
 
-# Setup license key at runtime
+# Ensure the provided scripts are executable
+RUN chmod -R +x /home/uppaal/uppaal/bin
+
+# License key (provided at runtime)
 ARG KEY=""
 ARG LEASE="1"
 ENV UPPAAL_LICENSE_KEY=${KEY}
 ENV UPPAAL_LEASE=${LEASE}
 
-# Create directory for models
+# Directory where the user will mount models
 RUN mkdir -p /home/uppaal/models
 
 EXPOSE 2350
 
-# Setup license and start server
+# Run license verification (if key supplied) and start the Uppaal socket server
 CMD if [ -n "$UPPAAL_LICENSE_KEY" ]; then \
         verifyta.sh --key $UPPAAL_LICENSE_KEY --lease $UPPAAL_LEASE || true; \
     fi && \

@@ -234,7 +234,7 @@ class GradioHandler:
                     session_state=session_state,
                     request_id=request_id,
                 ):
-                    match = re.search(r"saved at[:\s]*([\S]+)", result)
+                    match = re.search(r"saved at[:\s]*([\S]+)", result, flags=re.IGNORECASE)
                     if match:
                         path = match.group(1).rstrip(".")
                         cleaned_result = re.sub(r"The discovered Petri net has been saved at:\s*\S+\.?", "", result).strip()
