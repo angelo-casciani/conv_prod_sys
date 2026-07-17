@@ -182,3 +182,5 @@ server/.env.server
 # UPPAAL (download separately - see README)
 src/uppaal/
 server/.env.server
+
+vscode/

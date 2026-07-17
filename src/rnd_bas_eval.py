@@ -21,29 +21,29 @@ except ImportError:
 
 load_dotenv()
 
+# 'model_id' for 'ollama' entries must match a model tag already pulled/created
+# locally (`ollama pull <tag>` or `ollama create <tag> -f Modelfile`), consistent
+# with the tags used across the rest of the pipeline (see cmd4tests.sh).
 MODEL_CONFIGS = {
     'llama-3.2-1b': {
         'model_id': 'meta-llama/Llama-3.2-1B-Instruct',
-        'model_provider': 'huggingface',
+        'model_provider': 'ollama',
     },
     'qwen2.5-7b': {
         'model_id': 'Qwen/Qwen2.5-7B-Instruct',
-        'model_provider': 'huggingface',
-        'is_chat_model': False,
+        'model_provider': 'ollama',
     },
     'phi-4': {
         'model_id': 'microsoft/phi-4',
-        'model_provider': 'huggingface',
-        'is_chat_model': False,
+        'model_provider': 'ollama',
     },
     'ministral-8b': {
         'model_id': 'mistralai/Ministral-8B-Instruct-2410',
-        'model_provider': 'huggingface',
-        'is_chat_model': False,
+        'model_provider': 'ollama',
     },
     'llama-3.1-8b': {
         'model_id': 'meta-llama/Llama-3.1-8B-Instruct',
-        'model_provider': 'huggingface',
+        'model_provider': 'ollama',
     },
     'gemini-2.5-flash': {
         'model_id': 'gemini-2.5-flash',
@@ -146,22 +146,21 @@ class RandomBaseline:
 
 class LLMOnlyBaseline:
     
-    def __init__(self, model_id='gemini-2.5-flash', model_provider='google_genai', api_key: str = None, is_chat_model: bool = True):
+    def __init__(self, model_id='gemini-2.5-flash', model_provider='google_genai', api_key: str = None):
         self.model_id = model_id
         self.model_provider = model_provider
-        self.is_chat_model = is_chat_model
 
         if self.model_provider == 'google_genai':
             if api_key is None:
                 api_key = os.getenv('GOOGLE_API_KEY')
             if api_key:
                 os.environ['GOOGLE_API_KEY'] = api_key
-        
-        self.model = self._initialize_model(model_id, model_provider, is_chat_model=is_chat_model)
+
+        self.model = self._initialize_model(model_id, model_provider)
         self.system_prompt = self._load_system_prompt()
         self.domain_description = self._load_domain_description()
 
-    def _initialize_model(self, model_id: str, model_provider: str, is_chat_model: bool = True):
+    def _initialize_model(self, model_id: str, model_provider: str):
         """Create the chat model with provider-specific fallbacks for server environments."""
         if model_provider == 'google_genai':
             if ChatGoogleGenerativeAI is None:
@@ -174,14 +173,15 @@ class LLMOnlyBaseline:
                 max_tokens=2048,
             )
 
-        if model_provider == 'huggingface':
+        if model_provider == 'ollama':
             if not LOCAL_MODEL_SUPPORT:
                 raise RuntimeError(
-                    "Missing dependency for local models: install `langchain-ollama`."
+                    "Missing dependency for Ollama models: install `langchain-ollama`."
                 )
             return ChatOllama(
                 model=model_id,
                 temperature=0.1,
+                max_tokens=2048,
             )
 
         # Keep support for any additional provider we may add later.
@@ -360,7 +360,6 @@ def run_evaluation(dataset_path: str, llm_models=None, num_random_runs: int = 10
             llm_baseline = LLMOnlyBaseline(
                 model_id=model_cfg['model_id'],
                 model_provider=model_cfg['model_provider'],
-                is_chat_model=model_cfg.get('is_chat_model', True)
             )
             llm_results = llm_baseline.evaluate(dataset_path)
             llm_results_by_model[model_alias] = llm_results
