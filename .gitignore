@@ -183,4 +183,4 @@ server/.env.server
 src/uppaal/
 server/.env.server
 
-vscode/
+.vscode/
