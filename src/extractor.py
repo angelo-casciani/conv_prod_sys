@@ -232,7 +232,7 @@ class Extractor:
         
         return transfer_times
     
-    def create_model(self, activities, inter_arrival_time, branch_prob, transfer_times, id_to_label, label_to_id):
+    def create_model(self, activities, inter_arrival_time, branch_prob, transfer_times, id_to_label):
         model = {}
 
         model["inter_arrival_time"] = inter_arrival_time
@@ -424,7 +424,7 @@ class Extractor:
         bpmn_model = bpmn_importer.apply(bpmn_path)
         net, initial_marking, final_marking = pm4py.convert.convert_to_petri_net(bpmn_model)
 
-        label_to_id, id_to_label = self.extract_label_to_id_mapping(bpmn_model)
+        _, id_to_label = self.extract_label_to_id_mapping(bpmn_model)
         activities = self.extract_parameters(params_path)
         inter_arrival_time = self.extract_inter_arrival(inter_arrival_path)
         branch_prob = self.extract_branch_prob(branch_prob_path)
@@ -444,7 +444,7 @@ class Extractor:
             print("Warning: No transfer times file found. Defaulting to zero transfer times.")
             transfer_times = {}
             
-        model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times, id_to_label, label_to_id)
+        model = self.create_model(activities, inter_arrival_time, branch_prob, transfer_times, id_to_label)
 
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))        
         if failure:

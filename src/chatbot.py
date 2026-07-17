@@ -3,7 +3,7 @@ from pipeline import LLMPipeline
 from argparse import ArgumentParser
 from dotenv import load_dotenv
 import warnings
-from utility import *
+from utility import get_runtime_log_dir, get_interaction_log_dir
 import os
 import re
 import sys

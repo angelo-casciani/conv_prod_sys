@@ -18,7 +18,10 @@ except ImportError:
 import simulation_interface as factory_interface
 from oracle import AnswerVerificationOracle
 import uppaal_interface
-from utility import log_to_file, retrieve_factory, load_csv_questions, retrieve_factory_with_failure, load_txt_questions
+from utility import (
+    log_to_file, retrieve_factory, load_csv_questions, retrieve_factory_with_failure, load_txt_questions,
+    extract_markdown_json_block, extract_outer_braces, extract_loose_json
+)
 import pddl_interface
 import tempfile
 import failure_maintenance
@@ -28,26 +31,19 @@ from automaton_learning import AutomatonLearner
 
 
 def clean_json_block(text: str) -> str:
-    match_md = re.search(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", text, re.DOTALL)
-    if match_md:
-        return match_md.group(1).strip()
-    
-    start_brace = text.find('{')
-    end_brace = text.rfind('}')
-    
-    if start_brace != -1 and end_brace != -1 and end_brace > start_brace:
-        json_candidate = text[start_brace:end_brace+1]
+    markdown_block = extract_markdown_json_block(text)
+    if markdown_block is not None:
+        return markdown_block.strip()
+
+    json_candidate = extract_outer_braces(text)
+    if json_candidate is not None:
         try:
             json.loads(json_candidate)
             return json_candidate
         except json.JSONDecodeError:
             pass
 
-    match_simple = re.search(r'(\{.*?\})', text, re.DOTALL)
-    if match_simple:
-        return match_simple.group(0)
-
-    return None
+    return extract_loose_json(text)
 
 
 def explicit_deadlock_free(qjson, plan):
@@ -237,7 +233,13 @@ class LLMPipeline:
         if hasattr(complete_answer, "content"):
             return self._coerce_text_response(complete_answer.content)
         return self._coerce_text_response(complete_answer)
-    
+
+    def _invoke_chain(self, chain, question, context, system_message, build_prompt=True, extract_text=True):
+        invoke_payload = {"question": question, "context": context, "system_message": system_message}
+        prompt = chain.first.format_prompt(**invoke_payload).to_string() if build_prompt else None
+        complete_answer = chain.invoke(invoke_payload)
+        answer = self._extract_answer_text(complete_answer) if extract_text else complete_answer
+        return prompt, answer
 
     def _initialize_chain(self, model_id, model_family, model_type):
         prompt_template_structure = self._generate_prompt_template(model_family)
@@ -360,12 +362,7 @@ class LLMPipeline:
             Do not include unrelated KPIs or stations.
             """
         context = f"The labels for the activities are: {activity_names}\nResults from the simulation: {combined_results}.\nNote: If there are both original and follow-up analyses, provide a complete answer using both."
-        invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-        prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
-        complete_answer = self.chain_gateway.invoke(invoke_payload)
-        answer = self._extract_answer_text(complete_answer)
+        prompt, answer = self._invoke_chain(self.chain_gateway, question, context, sys_mess)
 
         can_meet_deadline = sim_results.get('can_meet_deadline')
         if can_meet_deadline is False and needed_time is not None and target_pieces is not None:
@@ -405,15 +402,14 @@ class LLMPipeline:
             f"Still missing fields: {json.dumps(missing_fields or [])}\n"
             f"User follow-up message: {user_text}"
         )
-        invoke_payload = {
-            "question": "Extract only the parameters explicitly present in the user follow-up message.",
-            "context": extraction_context,
-            "system_message": extraction_system_message,
-        }
-
         try:
-            complete_answer = self.chain_gateway.invoke(invoke_payload)
-            raw_answer = self._extract_answer_text(complete_answer)
+            _, raw_answer = self._invoke_chain(
+                self.chain_gateway,
+                "Extract only the parameters explicitly present in the user follow-up message.",
+                extraction_context,
+                extraction_system_message,
+                build_prompt=False,
+            )
 
             parsed = self._extract_simulation_request_from_answer(raw_answer)
             if not isinstance(parsed, dict):
@@ -466,12 +462,7 @@ class LLMPipeline:
             context['activities_all'] = factory_model.get('activities', {})
             context['activities'] = filtered_activities
             context['stations'] = stations
-        invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-        prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
-        complete_answer = self.chain_gateway.invoke(invoke_payload)
-        answer = self._extract_answer_text(complete_answer)
+        prompt, answer = self._invoke_chain(self.chain_gateway, question, context, sys_mess)
         return prompt, answer
 
     def _format_results_for_llm(self, results, follow_up_results=None, session_state=None):
@@ -539,13 +530,8 @@ class LLMPipeline:
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
         context = self.prompts.get('context_simulation', '').replace('LABELS', activity_names)
         
-        invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-        
-        complete_answer = self.chain_simulation.invoke(invoke_payload)
-        answer = self._extract_answer_text(complete_answer)
-        
+        _, answer = self._invoke_chain(self.chain_simulation, question, context, sys_mess, build_prompt=False)
+
         follow_up_results = factory_interface.interface_with_llm(answer)
         
         return follow_up_results
@@ -556,12 +542,7 @@ class LLMPipeline:
         activity_names = ', '.join([activity for activity in factory_data['activities']])
         sys_mess = self.prompts.get('system_message_simulation', '') + self.prompts.get('shots_simulation', '')
         context = self.prompts.get('context_simulation', '').replace('LABELS', activity_names)
-        invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-        prompt = self.chain_simulation.first.format_prompt(**invoke_payload).to_string()
-        complete_answer = self.chain_simulation.invoke(invoke_payload)
-        answer = self._extract_answer_text(complete_answer)
+        prompt, answer = self._invoke_chain(self.chain_simulation, question, context, sys_mess)
 
         answer_text = answer if isinstance(answer, str) else str(answer)
 
@@ -751,15 +732,10 @@ class LLMPipeline:
             sys_mess += self.prompts.get('shots_verification', '')
         context = self._build_verification_context()
 
-        invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-        prompt = self.chain_verification.first.format_prompt(**invoke_payload).to_string()
-        complete_answer = self.chain_verification.invoke(invoke_payload)
-        if self.model_type_verification == 'local':
-            answer = complete_answer
-        else:
-            answer = self._extract_answer_text(complete_answer)
+        prompt, answer = self._invoke_chain(
+            self.chain_verification, question, context, sys_mess,
+            extract_text=(self.model_type_verification != 'local')
+        )
 
         if 'evaluation' not in modality:
             parsed_payload = self._parse_verification_payload(answer)
@@ -774,12 +750,7 @@ class LLMPipeline:
             results = uppaal_interface.interface_with_llm(answer_for_uppaal)
             sys_mess = self.prompts.get('system_message_results_ver', '')
             context = f'Results from Uppaal: {results}'
-            invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-            prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
-            complete_answer = self.chain_gateway.invoke(invoke_payload)
-            answer = self._extract_answer_text(complete_answer)
+            prompt, answer = self._invoke_chain(self.chain_gateway, question, context, sys_mess)
         return prompt, answer
     
     def _produce_answer_failure(self, question, sim_time, modality=''):
@@ -788,12 +759,7 @@ class LLMPipeline:
         if 'zeroshot' not in modality:
             sys_mess += self.prompts.get('shots_failure', '')
         context = factory_model_with_failure
-        invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-        prompt = self.chain_failure.first.format_prompt(**invoke_payload).to_string()
-        complete_answer = self.chain_failure.invoke(invoke_payload)
-        answer = self._extract_answer_text(complete_answer)
+        prompt, answer = self._invoke_chain(self.chain_failure, question, context, sys_mess)
 
         cleaned_answer = clean_json_block(answer)
         
@@ -826,17 +792,13 @@ class LLMPipeline:
         if 'zeroshot' not in modality:
             sys_mess += self.prompts.get('shots_process_mining', '')
         context = ''
-        invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-        prompt = self.chain_process_mining.first.format_prompt(**invoke_payload).to_string()
-        complete_answer = self.chain_process_mining.invoke(invoke_payload)
-        answer = self._extract_answer_text(complete_answer)
-            
+        prompt, answer = self._invoke_chain(self.chain_process_mining, question, context, sys_mess)
+        raw_answer = answer
+
         answer = clean_json_block(answer)
         if answer is None:
             print(f"ERROR: clean_json_block returned None for process_mining answer")
-            print(f"Original answer: {complete_answer.content if hasattr(complete_answer, 'content') else complete_answer}")
+            print(f"Original answer: {raw_answer}")
             if 'evaluation' in modality:
                 return prompt, '{"task": "invalid_no_json_found"}'
             else:
@@ -873,14 +835,7 @@ class LLMPipeline:
                 raw_result_text = result['interpretation'] if isinstance(result, dict) and 'interpretation' in result else f"I computed the {metric} metric. Result: {result}"
                 sys_mess_results = self.prompts.get('system_message_results_pmm', '')
                 context_results = f"Process mining computed result: {result}. Raw interpretation: {raw_result_text}"
-                invoke_payload_results = {
-                    "question": question,
-                    "context": context_results,
-                    "system_message": sys_mess_results
-                }
-                prompt = self.chain_gateway.first.format_prompt(**invoke_payload_results).to_string()
-                complete_answer_results = self.chain_gateway.invoke(invoke_payload_results)
-                nl_output = self._extract_answer_text(complete_answer_results)
+                prompt, nl_output = self._invoke_chain(self.chain_gateway, question, context_results, sys_mess_results)
             elif action == "filter_by_time_range":
                 log = self.process_mining_module.load_log()
                 start_date, end_date = parsed_json.get("start_date"), parsed_json.get("end_date") 
@@ -894,12 +849,7 @@ class LLMPipeline:
     def _produce_rewritten_answer(self, answers):
         sys_mess = self.prompts.get('system_message_rewrite_answer', '')
         question = "Rewrite the following answers in a clean way, without any extra information."
-        invoke_payload = {"question": question,
-                    "context": answers,
-                    "system_message": sys_mess}
-        prompt = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
-        complete_answer = self.chain_gateway.invoke(invoke_payload)
-        answer = self._extract_answer_text(complete_answer)
+        prompt, answer = self._invoke_chain(self.chain_gateway, question, answers, sys_mess)
 
         return prompt, answer
 
@@ -915,12 +865,7 @@ class LLMPipeline:
             sys_mess += self.prompts.get('shots_hybrid', '')
         sys_mess += self._build_hybrid_guardrails()
         context = self.pddl_domain + activities_context
-        invoke_payload = {"question": question,
-                        "context": context,
-                        "system_message": sys_mess}
-        prompt_gateway = self.chain_gateway.first.format_prompt(**invoke_payload).to_string()
-        complete_answer = self.chain_gateway.invoke(invoke_payload)
-        answer_gateway = self._extract_answer_text(complete_answer)
+        prompt_gateway, answer_gateway = self._invoke_chain(self.chain_gateway, question, context, sys_mess)
         
         if "evaluation" in modality:
             return prompt_gateway, answer_gateway
@@ -937,7 +882,7 @@ class LLMPipeline:
             print("Failed to parse hybrid answer as JSON, trying ast.literal_eval...")
             try:
                 question_json = ast.literal_eval(answer_gateway)
-            except Exception as e:
+            except Exception:
                 print(f"Hybrid response could not be parsed as JSON or Python dict. Got:\n{answer_gateway}")
                 return prompt_gateway, "{}"
 

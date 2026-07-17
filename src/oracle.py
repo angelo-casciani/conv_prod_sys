@@ -2,7 +2,7 @@ import datetime
 import os
 import time
 from sklearn.metrics import (precision_score, recall_score, f1_score, accuracy_score)
-from utility import load_csv_questions
+from utility import load_csv_questions, extract_markdown_json_block, extract_balanced_json_objects, extract_loose_json
 import json
 import re
 
@@ -177,64 +177,17 @@ class AnswerVerificationOracle:
         
         # Extract only the actual response part
         actual_response = model_answer[response_start:] if response_start > 0 else model_answer
-        
-        match = re.search(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", actual_response, re.DOTALL)
-        if match:
+
+        json_part = extract_markdown_json_block(actual_response)
+        if json_part is not None:
             print("Found JSON block in Markdown format.")
-            json_part = match.group(1)
             try:
                 return json.loads(json_part)
             except json.JSONDecodeError:
                 print(f"Warning: Found a Markdown block that looked like JSON but failed to parse: {json_part}")
-        
-        def extract_json_objects(text):
-            json_objects = []
-            i = 0
-            while i < len(text):
-                if text[i] == '{':
-                    # Found start of potential JSON
-                    brace_count = 0
-                    start = i
-                    in_string = False
-                    escape = False
-                    
-                    for j in range(i, len(text)):
-                        char = text[j]
-                        
-                        # Handle string escaping
-                        if escape:
-                            escape = False
-                            continue
-                        if char == '\\':
-                            escape = True
-                            continue
-                        
-                        # Toggle string state
-                        if char == '"':
-                            in_string = not in_string
-                            continue
-                        
-                        # Only count braces outside strings
-                        if not in_string:
-                            if char == '{':
-                                brace_count += 1
-                            elif char == '}':
-                                brace_count -= 1
-                                if brace_count == 0:
-                                    # Found complete JSON object
-                                    json_str = text[start:j+1]
-                                    if '"task"' in json_str:  # Only consider objects with 'task' field
-                                        json_objects.append(json_str)
-                                    i = j
-                                    break
-                    i += 1
-                else:
-                    i += 1
-            
-            return json_objects
-        
-        json_candidates = extract_json_objects(actual_response)
-        
+
+        json_candidates = extract_balanced_json_objects(actual_response, required_substring='"task"')
+
         if json_candidates:
             print(f"Found {len(json_candidates)} potential JSON objects with 'task' field")
             for i, json_part in enumerate(reversed(json_candidates)):
@@ -245,17 +198,16 @@ class AnswerVerificationOracle:
                 except json.JSONDecodeError as e:
                     print(f"Failed to parse JSON #{len(json_candidates)-i}: {e}")
                     continue
-        
+
         # Fallback: try any JSON-like structure
-        match = re.search(r'(\{.*?\})', actual_response, re.DOTALL)
-        if match:
+        json_part = extract_loose_json(actual_response)
+        if json_part is not None:
             print("Found a raw JSON-like string in the answer.")
-            json_part = match.group(0)
             try:
                 return json.loads(json_part)
             except json.JSONDecodeError:
                 print(f"Warning: Found a raw JSON-like string that failed to parse: {json_part[:100]}...")
-        
+
         return None
     
     def _reconstruct_json_from_csv(self, damaged_json_str):

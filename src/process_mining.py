@@ -117,7 +117,6 @@ class ProcessMiningModule:
 
     def get_process_variants(self, log, k=5):
         variants = pm4py.stats.get_variants(log)
-        total_cases = sum(variants.values())
 
         #print(f"\nTOP {k} VARIANTS:")
         top_variants = sorted(variants.items(), key=lambda x: x[1], reverse=True)[:k]

@@ -3,7 +3,6 @@ import sys
 import signal
 import atexit
 import time
-import os
 import shutil
 import requests
 

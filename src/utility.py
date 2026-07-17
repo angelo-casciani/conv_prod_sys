@@ -76,11 +76,78 @@ def log_to_file(conversation, curr_datetime, info_run):
             file.write(conversation)
 
 
+_MARKDOWN_JSON_BLOCK_RE = re.compile(r"```(?:json)?\s*(\{.*?\}|\[.*?\])\s*```", re.DOTALL)
+_LOOSE_JSON_RE = re.compile(r'(\{.*?\})', re.DOTALL)
+
+
+def extract_markdown_json_block(text):
+    """Return the raw text captured inside a ```json ... ``` fenced block, or None."""
+    match = _MARKDOWN_JSON_BLOCK_RE.search(text)
+    return match.group(1) if match else None
+
+
+def extract_outer_braces(text):
+    """Return the substring spanning the first '{' to the last '}' in text, or None."""
+    start = text.find('{')
+    end = text.rfind('}')
+    if start != -1 and end != -1 and end > start:
+        return text[start:end + 1]
+    return None
+
+
+def extract_loose_json(text):
+    """Return the first non-greedy '{...}' match, or None."""
+    match = _LOOSE_JSON_RE.search(text)
+    return match.group(0) if match else None
+
+
+def extract_balanced_json_objects(text, required_substring=None):
+    """Return all top-level, brace-balanced '{...}' substrings in text (string-aware),
+    optionally keeping only those containing required_substring."""
+    json_objects = []
+    i = 0
+    while i < len(text):
+        if text[i] == '{':
+            brace_count = 0
+            start = i
+            in_string = False
+            escape = False
+
+            for j in range(i, len(text)):
+                char = text[j]
+
+                if escape:
+                    escape = False
+                    continue
+                if char == '\\':
+                    escape = True
+                    continue
+
+                if char == '"':
+                    in_string = not in_string
+                    continue
+
+                if not in_string:
+                    if char == '{':
+                        brace_count += 1
+                    elif char == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            json_str = text[start:j + 1]
+                            if required_substring is None or required_substring in json_str:
+                                json_objects.append(json_str)
+                            i = j
+                            break
+            i += 1
+        else:
+            i += 1
+
+    return json_objects
+
+
 def extract_json(llm_answer):
-    json_match = re.search(r'\{.*\}', llm_answer, re.DOTALL)
-    json_str = ''
-    if json_match:
-        json_str = json_match.group(0)
+    json_str = extract_outer_braces(llm_answer) or ''
+    if json_str:
         try:
             return json.loads(json_str)
         except json.JSONDecodeError:

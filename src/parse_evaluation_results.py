@@ -4,7 +4,6 @@ Script to parse evaluation results from tests/evaluation folder and generate a C
 Reads all results_*.txt files and extracts metrics into a CSV file.
 """
 
-import os
 import re
 import csv
 from pathlib import Path
