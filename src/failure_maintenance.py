@@ -61,10 +61,10 @@ class FailureMaintenanceModule:
             'estimated_maintenance_delay': round(estimated_delay, 2),
         }
 
-    def generate_comprehensive_report(self) -> Dict[str, Any]:
+    def generate_comprehensive_report(self, model, time_horizon: float = 1000) -> Dict[str, Any]:
         report = {'activities': {}}
-        for sid in self.failure_interface.model['activities']:
-            report['activities'][sid] = self.predict_activity_failures(sid)
+        for sid in model['activities']:
+            report['activities'][sid] = self.predict_activity_failures(model, sid, time_horizon)
         return report
     
     def _timestamp(self) -> str:

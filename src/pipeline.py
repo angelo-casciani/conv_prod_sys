@@ -67,13 +67,6 @@ def explicit_deadlock_free(qjson, plan):
 
 class LLMPipeline:
 
-    TERMINATOR_TOKENS = {
-        'metaai': "<|eot_id|>",
-        'mistral': "[/INST]",
-        'qwen': "<|im_end|>",
-        'microsoft': "<|im_sep|>",
-        'deepseek': "｜end▁of▁sentence｜"
-    }
     TEMPLATE_MAPPING = {
         'metaai': 'template-llama_instruct',
         'mistral': 'template-mistral',
@@ -167,62 +160,6 @@ class LLMPipeline:
             output_name=output_name,
             window_minutes=5
         )
-
-
-    def _initialize_local_model(self, model_id, model_family):
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type='nf4',
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=bfloat16
-        )
-        model_config = AutoConfig.from_pretrained(
-            model_id,
-            token=self.hf_token
-        )
-        model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            trust_remote_code=True,
-            config=model_config,
-            quantization_config=bnb_config,
-            device_map='auto',
-            token=self.hf_token
-        )
-        model.eval()
-
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_id,
-            token=self.hf_token
-        )
-
-        pipeline_params = {
-            "model": model,
-            "tokenizer": tokenizer,
-            "return_full_text": True,
-            "task": "text-generation",
-            "do_sample": True, 
-            "temperature": 0.1,
-            "max_new_tokens": self.max_new_tokens,
-            "repetition_penalty": 1.1
-        }
-    
-        model_family_key = model_family.lower()
-        if model_family_key in LLMPipeline.TERMINATOR_TOKENS:
-            custom_terminator = tokenizer.convert_tokens_to_ids(LLMPipeline.TERMINATOR_TOKENS[model_family_key])
-            
-            # Handle models where eos_token_id is None
-            if tokenizer.eos_token_id is not None:
-                terminators = [tokenizer.eos_token_id, custom_terminator]
-                pipeline_params["pad_token_id"] = tokenizer.eos_token_id
-            else:
-                # For models without eos_token_id, use custom terminator
-                terminators = [custom_terminator]
-                pipeline_params["pad_token_id"] = custom_terminator
-                
-            pipeline_params["eos_token_id"] = terminators
-
-        generate_text = pipeline(**pipeline_params)
-        return generate_text
 
 
     def _get_model_family_type(self, model_id):

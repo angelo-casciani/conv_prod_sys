@@ -12,13 +12,13 @@ class Extractor:
     def __init__(self, url="http://127.0.0.1:6662/", data = None):
         self.url = url
         if data is not None:
+            self.data = data
+        else:
             self.data = {
                     "simthreshold": "0.9",
                     "eta": "0.01",
                     "eps": "0.001"
                     }
-        else:
-            self.data = data
         
         # Initialize automaton learner for SKG extraction
         try:
