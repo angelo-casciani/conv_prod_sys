@@ -201,6 +201,13 @@ class GradioHandler:
                 "sim_time": None,
             }
     
+    def _pending_bubble(self, text):
+        return {
+            "role": "assistant",
+            "content": "",
+            "metadata": {"title": text, "status": "pending"},
+        }
+
     def process_message(self, message, history, request: gr.Request = None):
         session_id = self._resolve_session_id(request)
         request_id = uuid.uuid4().hex
@@ -225,8 +232,12 @@ class GradioHandler:
                     message[:100],
                 )
                 log_chat_interaction("user", message, session_id=session_id, request_id=request_id)
-                yield {"role": "assistant", "content": f"Processing: {message}"}
+                yield self._pending_bubble(f"Processing: {message}")
 
+                # Buffer one result at a time so we only know a message is the
+                # final answer once the generator has no more items to give us;
+                # everything before that is shown as a pending/spinner bubble.
+                pending_result = None
                 for result in self.chain.live_prompting(
                     query=message,
                     info_run=info_run,
@@ -234,15 +245,21 @@ class GradioHandler:
                     session_state=session_state,
                     request_id=request_id,
                 ):
-                    match = re.search(r"saved at[:\s]*([\S]+)", result, flags=re.IGNORECASE)
+                    if pending_result is not None:
+                        log_chat_interaction("assistant", pending_result, session_id=session_id, request_id=request_id)
+                        yield self._pending_bubble(pending_result)
+                    pending_result = result
+
+                if pending_result is not None:
+                    match = re.search(r"saved at[:\s]*([\S]+)", pending_result, flags=re.IGNORECASE)
                     if match:
                         path = match.group(1).rstrip(".")
-                        cleaned_result = re.sub(r"The discovered Petri net has been saved at:\s*\S+\.?", "", result).strip()
+                        cleaned_result = re.sub(r"The discovered Petri net has been saved at:\s*\S+\.?", "", pending_result).strip()
                         log_chat_interaction("assistant", cleaned_result, session_id=session_id, request_id=request_id)
                         yield {"role": "assistant", "content": [cleaned_result, gr.FileData(path=path, mime_type="image/png")]}
                     else:
-                        log_chat_interaction("assistant", result, session_id=session_id, request_id=request_id)
-                        yield {"role": "assistant", "content": result}
+                        log_chat_interaction("assistant", pending_result, session_id=session_id, request_id=request_id)
+                        yield {"role": "assistant", "content": pending_result}
 
             logger.info("Message processed successfully")
             
